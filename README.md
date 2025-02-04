@@ -53,7 +53,7 @@ project-root/
 
 ## Requisitos Previos
 
-- **Docker** ([Instalar](https://docs.docker.com/desktop/install/))
+- **Docker** ([Instalar](https://docs.docker.com/desktop))
 - **Node.js v18+** (Recomendado: Usar [nvm](https://github.com/nvm-sh/nvm) o [nvm-windows](https://github.com/coreybutler/nvm-windows))
 - **Git**
 - (Windows) Habilitar WSL2 para mejor rendimiento con Docker ([Guía](https://learn.microsoft.com/es-es/windows/wsl/install))
