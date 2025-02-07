@@ -99,9 +99,9 @@ Recibir Nuevo Pedido → Confirmar → Actualizar Estado → Generar Reporte
 ---
 
 ## 7. Tech Stack:
-Frontend: React Native, Expo, Expo Router
-Backend: Next.js, MySQL, Stripe, Prisma
-UI Framework: React Native Paper (Sugerencia, solo en prototipo)
+- **Frontend**: React Native, Expo, Expo Router
+- **Backend**: Next.js, MySQL, Stripe, Prisma
+- **UI Framework**: React Native Paper (Sugerencia, solo en prototipo)
 
 ---
 
