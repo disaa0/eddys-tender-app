@@ -136,7 +136,6 @@ npx expo start
    ```bash
    cd frontend && npm start
    ```
-2. **Sincronizar con la API del backend** actualizando `frontend/services/api.js`.
 
 ### Base de Datos
 - Siempre **crear nuevas migraciones** después de cambios en el esquema:
@@ -164,7 +163,7 @@ npx expo start
 
 ## Notas
 
-- **Formateo de código**: Usa Prettier/ESLint (configuración en `.vscode/`) (Extensiones de VSCode).
+- **Formateo de código**: Usa Prettier (configuración en `.vscode/`) (VSCode Marketplace).
 - **Documentación**: Actualizar `docs/` con cambios arquitectónicos.
 - **Copias de seguridad**: La base de datos se persiste en el volumen de Docker `mysql_data`.
 
