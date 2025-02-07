@@ -15,7 +15,7 @@ Aaplicación full-stack construida con **ExpressJS** (backend), **React Native/E
 - **Gestión del proyecto**: Jira
 - **Diseño**: Figma
 - **Testing**: Manual + (por definir)
-- **Documentación**: Markdown, Swagger (por definir)
+- **Documentación**: Markdown, (Documentación de API por definir)
 
 ---
 
@@ -63,12 +63,14 @@ project-root/
 ## Guía de Configuración
 
 ### 1. Clonar el Repositorio
+
 ```bash
 git clone https://github.com/disaa0/eddys-tender-app
 cd eddys-tender-app
 ```
 
 ### 2. Configurar Variables de Entorno
+
 - Copia `.env.example` a `.env` en la carpeta `backend/`:
   ```bash
   cp backend/.env.example backend/.env
@@ -79,6 +81,7 @@ cd eddys-tender-app
   ```
 
 ### 3. Iniciar Contenedores de Docker
+
 ```bash
 # Construir e iniciar todos los servicios (backend + MySQL)
 docker-compose up --build
@@ -88,56 +91,71 @@ docker-compose up -d
 ```
 
 ### 4. Ejecutar Migraciones de la Base de Datos
+
 ```bash
 # Ejecutar migraciones de Prisma dentro del contenedor del backend
 docker-compose exec backend npx prisma migrate dev
 ```
 
 ### 5. Configuración del Frontend (Expo)
+
 ```bash
 cd frontend
 npm install
 npx expo start
 ```
+
 - Escanea el código QR con la app **Expo Go** (móvil) o usa un emulador.
 
 ---
 
 ## Comandos Comunes
 
-| Comando | Descripción |
-|---------|-------------|
-| `docker-compose up --build` | Reconstruir e iniciar todos los contenedores |
-| `docker-compose down` | Detener y eliminar contenedores |
-| `docker-compose logs -f backend` | Ver logs del backend |
-| `docker-compose exec backend npm run test` | Ejecutar pruebas del backend |
-| `docker-compose exec mysql mysql -u user -p` | Acceder a la consola de MySQL |
-| `npx prisma studio` | Abrir Prisma Studio (ejecutar dentro del contenedor del backend) |
+| Comando                                      | Descripción                                                      |
+| -------------------------------------------- | ---------------------------------------------------------------- |
+| `docker-compose up --build`                  | Reconstruir e iniciar todos los contenedores                     |
+| `docker-compose down`                        | Detener y eliminar contenedores                                  |
+| `docker-compose logs -f backend`             | Ver logs del backend                                             |
+| `docker-compose exec backend npm run test`   | Ejecutar pruebas del backend                                     |
+| `docker-compose exec mysql mysql -u user -p` | Acceder a la consola de MySQL                                    |
+| `npx prisma studio`                          | Abrir Prisma Studio (ejecutar dentro del contenedor del backend) |
 
 ---
 
 ## Flujo de Trabajo
 
-### Backend
-1. **Crear una rama para una nueva funcionalidad**:
+1. **Revisar** `./docs/` para consultar Roadmap y responsabilidades.
+
+2.
+
+3. **Crear una rama para una nueva funcionalidad**:
+
    ```bash
    git checkout -b feature/sistema-de-autenticacion
    ```
-2. **Realizar cambios** en el código del backend en `backend/src/`.
-3. **Probar localmente** con recarga automática (Docker reiniciará automáticamente).
+
 4. **Guardar cambios**:
    ```bash
    git add .
    git commit -m "feat: añadir middleware de autenticación"
    ```
 
+### Backend
+
+- **Realizar cambios** en el código del backend en `backend/src/`.
+- **Probar localmente** con recarga automática (Docker reiniciará automáticamente).
+
 ### Frontend
-1. **Iniciar el servidor de desarrollo de Expo**:
-   ```bash
-   cd frontend && npm start
-   ```
+
+- **Iniciar el servidor de desarrollo de Expo**:
+  ```bash
+  cd frontend && npx expo start
+  ```
+- **Probar localmente** con recarga automática (Mediante Expo Go).
+- Consultar `frontend/docs/`
 
 ### Base de Datos
+
 - Siempre **crear nuevas migraciones** después de cambios en el esquema:
   ```bash
   docker-compose exec backend npx prisma migrate dev --name añadir_tabla_usuarios
@@ -151,21 +169,20 @@ npx expo start
 
 ## Solución de Problemas Comunes
 
-| Problema | Solución |
-|----------|----------|
-| **Conflictos de puertos** | Detener procesos locales de MySQL/Node.js que usen los puertos `3000` o `3306` |
-| **MySQL no está listo** | Añadir un [script de espera](https://docs.docker.com/compose/startup-order/) al Dockerfile del backend |
-| **Permisos de archivos (Linux)** | Ejecutar `sudo chown -R $USER:$USER .` en la raíz del proyecto |
-| **Variables de entorno no cargadas** | Asegurarse de que `.env` exista en `backend/` y coincida con `docker-compose.yml` |
-| **Error al construir con Docker** | Limpiar la caché de Docker: `docker-compose build --no-cache` |
+| Problema                             | Solución                                                                                               |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| **Conflictos de puertos**            | Detener procesos locales de MySQL/Node.js que usen los puertos `3000` o `3306`                         |
+| **MySQL no está listo**              | Añadir un [script de espera](https://docs.docker.com/compose/startup-order/) al Dockerfile del backend |
+| **Permisos de archivos (Linux)**     | Ejecutar `sudo chown -R $USER:$USER .` en la raíz del proyecto                                         |
+| **Variables de entorno no cargadas** | Asegurarse de que `.env` exista en `backend/` y coincida con `docker-compose.yml`                      |
+| **Error al construir con Docker**    | Limpiar la caché de Docker: `docker-compose build --no-cache`                                          |
 
 ---
 
 ## Notas
 
-- **Formateo de código**: Usa Prettier (configuración en `.vscode/`) (VSCode Marketplace).
+- **Formateo de código**: Usa Prettier (VSCode Marketplace).
 - **Documentación**: Actualizar `docs/` con cambios arquitectónicos.
 - **Copias de seguridad**: La base de datos se persiste en el volumen de Docker `mysql_data`.
-
 
 ---

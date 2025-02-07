@@ -6,7 +6,7 @@
 - Backend
   - Dev 3
   - Dev 4
-- Database, Integration & Lead
+- Database, Integration & Tech Lead
   - Dev 5: @disaa0
 
 ---
@@ -36,8 +36,14 @@
 
    - Colaborar en el diseño de pantallas de inicio de sesión y registro.
    - Implementar lógica de navegación entre pantallas.
+   - Animaciones de transición en pantalla de inicio.
 
-2. **Gestionar Menú - Administrador (12.02 - 18.02)**:
+2. **Perfil - Usuario (10.02 - 11.02)**:
+
+   - Implementar modales de confirmación para "Borrar cuenta" y "Editar contraseña".
+   - Diseñar animaciones para transiciones en el perfil.
+
+3. **Gestionar Menú - Administrador (12.02 - 18.02)**:
    - Implementar filtros por nombre y precio en el dashboard.
    - Asegurar responsividad en todas las pantallas.
 
@@ -71,6 +77,8 @@
 2. **Perfil - Usuario (10.02 - 11.02)**:
 
    - Verificar tokens JWT en rutas protegidas.
+   - Revisar flujos de autenticación en edición de perfil.
+   - Añadir rate-limiting para evitar ataques de fuerza bruta en cambios de contraseña.
 
 3. **Gestionar Menú - Administrador (12.02 - 18.02)**:
    - Middleware para restringir acceso a roles de administrador.
@@ -78,16 +86,24 @@
 
 ---
 
-### **Dev 5 (Base de Datos - MySQL/Prisma, Lead)**
+### **Dev 5 (Base de Datos - MySQL/Prisma, Tech Lead)**
 
 1. **Inicio App - Usuario (06.02 - 09.02)**:
 
    - Crear esquema de `Usuario` (nombre, correo, teléfono, contraseña cifrada).
    - Configurar migraciones iniciales con Prisma.
+   - Configuración / Inicialización de repositorio.
    - Asistir a equipos de desarrollo.
 
-2. **Gestionar Menú - Administrador (12.02 - 18.02)**:
+2. **Perfil - Usuario (10.02 - 11.02)**:
+
+   - Optimizar consultas de actualización de perfil (ej. índices en campos como correo).
+   - Datos mock de Usuarios.
+   - Asistir a equipos de desarrollo.
+
+3. **Gestionar Menú - Administrador (12.02 - 18.02)**:
    - Crear esquema de `Producto` (nombre, precio, categoría, estado activo).
+   - Datos mock de Productos.
    - Configurar migraciones para relaciones (ej. categorías).
    - Asistir a equipos de desarrollo.
 
@@ -95,13 +111,13 @@
 
 ### **Resumen de Asignación por Dev**
 
-| **Dev** | **Tareas Clave**                                                               |
-| ------- | ------------------------------------------------------------------------------ |
-| Dev 1   | Pantallas de login, registro, perfil y dashboard. Formularios de productos.    |
-| Dev 2   | Navegación, filtros de productos, responsividad.                               |
-| Dev 3   | Endpoints de autenticación, perfil y gestión de productos. Lógica de filtrado. |
-| Dev 4   | Seguridad (JWT, middlewares, cifrado).                                         |
-| Dev 5   | Diseño de esquemas de base de datos y migraciones.                             |
+| **Dev** | **Tareas Clave**                                                                      |
+| ------- | ------------------------------------------------------------------------------------- |
+| Dev 1   | Pantallas de login, registro, perfil y dashboard. Formularios de productos.           |
+| Dev 2   | Navegación, filtros de productos, responsividad, animaciones, UI de confirmación.     |
+| Dev 3   | Endpoints de autenticación, perfil y gestión de productos. Lógica de filtrado.        |
+| Dev 4   | Seguridad (JWT, middlewares, cifrado).                                                |
+| Dev 5   | Diseño de esquemas de base de datos, migraciones, control de repositorio, asistencia. |
 
 ---
 
@@ -115,12 +131,12 @@
 
 ### **Entregables por Dev**
 
-| **Dev** | **Entregables**                                                         |
-| ------- | ----------------------------------------------------------------------- |
-| Dev 1   | Pantallas de login, registro, perfil y dashboard funcionales.           |
-| Dev 2   | Navegación fluida y filtros de productos implementados.                 |
-| Dev 3   | Endpoints de autenticación, perfil y productos listos para integración. |
-| Dev 4   | Middlewares de seguridad y tokens JWT funcionando.                      |
-| Dev 5   | Esquemas de base de datos y migraciones configuradas.                   |
+| **Dev** | **Entregables**                                                                                     |
+| ------- | --------------------------------------------------------------------------------------------------- |
+| Dev 1   | Pantallas de login, registro, perfil y dashboard funcionales.                                       |
+| Dev 2   | Navegación fluida, animaciones y filtros de productos implementados.                                |
+| Dev 3   | Endpoints de autenticación, perfil y productos listos para integración, breve documentación de API. |
+| Dev 4   | Middlewares de seguridad y tokens JWT funcionando.                                                  |
+| Dev 5   | Repositorio de codigo, esquemas de base de datos y migraciones configuradas.                        |
 
 ---

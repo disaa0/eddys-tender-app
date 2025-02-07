@@ -101,4 +101,4 @@ La estructura actual de assets es temporal:
 4. Implementar autenticación real
 5. Optimizar assets y recursos
 
-Para más detalles técnicos, consultar `./INFO.md`
+Para más detalles técnicos, consultar `../docs/INFO.md`

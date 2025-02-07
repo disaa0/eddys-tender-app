@@ -1,14 +1,14 @@
 # Sprint 1. 06.02 - 18-02
 
 Tiempo: 12 Días
-Devs: ?
+Devs: 5?
 
 Actores
 - Usuario
   - Cliente
   - Administrador
 
-# Epics
+# Epics & Features
 
 1. Inicio App - Usuario. 06.02 - 09.02
 
