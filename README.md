@@ -165,6 +165,16 @@ npx expo start
   docker-compose exec backend npx prisma studio
   ```
 
+### Para la base de datos local sin docker
+- Usar el siguiente comando para **generar la db**:
+    ``` bash
+    npm run prisma:generate
+    ```
+- Usar el siguiente comando para **inspeccionar los datos**:
+    ``` bash
+    npm run prisma:studio
+    ```
+
 ---
 
 ## Solución de Problemas Comunes
