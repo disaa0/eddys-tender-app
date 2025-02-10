@@ -170,6 +170,10 @@ npx expo start
     ``` bash
     npm run prisma:generate
     ```
+- Usar el siguiente comando para **generar los datos por defecto**:
+    ``` bash
+    npm run prisma:seed
+    ```
 - Usar el siguiente comando para **inspeccionar los datos**:
     ``` bash
     npm run prisma:studio
