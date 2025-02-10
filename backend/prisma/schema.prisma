@@ -15,10 +15,246 @@ datasource db {
 
 // Modelo de Usuario (Ejemplo)
 model User {
-  id        Int      @id @default(autoincrement())  // ID único
-  email     String   @unique                       // Email único
-  name      String?                                // Nombre (opcional)
-  password  String                                 // Contraseña
-  createdAt DateTime @default(now())               // Fecha de creación
-  updatedAt DateTime @updatedAt                    // Fecha de actualización
+  idUser      Int      @id @default(autoincrement())  // ID único
+  idUserType  Int      @map("idUserType")  // ID del tipo de usuario
+  email       String
+  username    String
+  password    String
+  status      Boolean
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  // Relaciones
+  userType    UserType @relation(fields: [idUserType], references: [idUserType])
+  userInformation UserInformation?
+  products    Product[]
+  carts       Cart[]
+  personalizations Personalization[]
+  productPersonalizations ProductPersonalization[]
+
+  // Nombre de la tabla
+  @@map("user")
+}
+
+model UserType {
+  idUserType  Int @id @default(autoincrement())
+  type        String
+
+  // Relaciones
+  users       User[]
+
+  // Nombre de la tabla
+  @@map("userType")
+}
+
+model UserInformation{
+  idUserInformation  Int @id @default(autoincrement())
+  idUser             Int @unique
+  name               String
+  lastName           String
+  secondLastName     String?
+  phone              String @db.VarChar(10)
+  user               User @relation(fields: [idUser], references: [idUser])
+  updatedAt          DateTime? @updatedAt
+
+  // Relaciones
+  locations          Location[]
+
+  // Nombre de la tabla
+  @@map("userInformation")
+}
+
+model Location{
+  idLocation Int @id @default(autoincrement())
+  idUserInformation Int
+  street     String @db.VarChar(100)
+  houseNumber String @db.VarChar(10)
+  postalCode String @db.VarChar(5)
+  neighborhood String @db.VarChar(50)
+  status    Boolean
+
+  // Relaciones
+  userInformation UserInformation @relation(fields: [idUserInformation], references: [idUserInformation])
+
+  // Nombre de la tabla
+  @@map("location")
+}
+
+model Product{
+  idProduct Int @id @default(autoincrement())
+  idProductType Int
+  idUserAdded Int
+  name      String
+  description String @db.Text
+  price     Float
+  status   Boolean
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  productType ProductType @relation(fields: [idProductType], references: [idProductType])
+  userAdded User @relation(fields: [idUserAdded], references: [idUser])
+  itemsCart ItemCart[]
+  productPersonalizations ProductPersonalization[]
+
+  // Nombre de la tabla
+  @@map("product")
+}
+
+model ProductType{
+  idProductType Int @id @default(autoincrement())
+  type          String
+
+  // Relaciones
+  products      Product[]
+
+  // Nombre de la tabla
+  @@map("productType")
+}
+
+model Cart{
+  idCart Int @id @default(autoincrement())
+  idUser Int
+  status Boolean
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  user User @relation(fields: [idUser], references: [idUser])
+  itemsCart ItemCart[]
+  orders Order[]
+
+  // Nombre de la tabla
+  @@map("cart")
+}
+
+model ItemCart{
+  idItemCart Int @id @default(autoincrement())
+  idCart Int
+  idProduct Int
+  amount Int
+  status Boolean
+
+  // Relaciones
+  cart Cart @relation(fields: [idCart], references: [idCart])
+  product Product @relation(fields: [idProduct], references: [idProduct])
+  userProductPersonalize UserProductPersonalize[]
+
+  // Nombre de la tabla
+  @@map("itemCart")
+}
+
+model Personalization{
+  idPersonalization Int @id @default(autoincrement())
+  idUserAdded Int
+  name String
+  status Boolean
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  userAdded User @relation(fields: [idUserAdded], references: [idUser])
+  productPersonalizations ProductPersonalization[]
+
+  // Nombre de la tabla
+  @@map("personalization")
+}
+
+model ProductPersonalization{
+  idProductPersonalization Int @id @default(autoincrement())
+  idUserAdded Int
+  idProduct Int
+  idPersonalization Int
+  status Boolean
+
+  // Relaciones
+  userAdded User @relation(fields: [idUserAdded], references: [idUser])
+  product Product @relation(fields: [idProduct], references: [idProduct])
+  personalization Personalization @relation(fields: [idPersonalization], references: [idPersonalization])
+  userProductPersonalize UserProductPersonalize[]
+
+  // Nombre de la tabla
+  @@map("productPersonalization")
+}
+
+model UserProductPersonalize{
+  idUserProductPersonalize Int @id @default(autoincrement())
+  idItemCart Int
+  idProductPersonalization Int
+  status Boolean
+
+  // Relaciones
+  itemCart ItemCart @relation(fields: [idItemCart], references: [idItemCart])
+  productPersonalization ProductPersonalization @relation(fields: [idProductPersonalization], references: [idProductPersonalization])
+
+  // Nombre de la tabla
+  @@map("userProductPersonalize")
+}
+
+model ShipmentType{
+  idShipmentType Int @id @default(autoincrement())
+  type String
+
+  // Relaciones
+  orders Order[]
+
+  // Nombre de la tabla
+  @@map("shipmentType")
+}
+
+model PaymentType{
+  idPaymentType Int @id @default(autoincrement())
+  type String
+
+  // Relaciones
+  orders Order[]
+
+  // Nombre de la tabla
+  @@map("paymentType")
+}
+
+model OrderStatus{
+  idOrderStatus Int @id @default(autoincrement())
+  status String
+
+  // Relaciones
+  orders Order[]
+
+  // Nombre de la tabla
+  @@map("orderStatus")
+}
+
+model Order{
+  idOrder Int @id @default(autoincrement())
+  idCart Int
+  idPaymentType Int
+  idShipmentType Int
+  idOrderStatus Int
+  createdAt DateTime @default(now())
+  deliveryAt DateTime?
+  totalPrice Float
+  paid Boolean
+  paidAt DateTime?
+
+  // Relaciones
+  cart Cart @relation(fields: [idCart], references: [idCart])
+  paymentType PaymentType @relation(fields: [idPaymentType], references: [idPaymentType])
+  shipmentType ShipmentType @relation(fields: [idShipmentType], references: [idShipmentType])
+  orderStatus OrderStatus @relation(fields: [idOrderStatus], references: [idOrderStatus])
+  notifications Notification[]
+
+  // Nombre de la tabla
+  @@map("order")
+}
+
+model Notification{
+  idNotification Int @id @default(autoincrement())
+  idOrder Int
+  title String
+  message String @db.Text
+  status Boolean
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  order Order @relation(fields: [idOrder], references: [idOrder])
+
+  // Nombre de la tabla
+  @@map("notification")
 }
