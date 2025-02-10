@@ -22,7 +22,7 @@ model User {
   password    String
   status      Boolean
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime? @updatedAt
 
   // Relaciones
   userType    UserType @relation(fields: [idUserType], references: [idUserType])
@@ -55,7 +55,7 @@ model UserInformation{
   secondLastName     String?
   phone              String @db.VarChar(10)
   user               User @relation(fields: [idUser], references: [idUser])
-  updatedAt          DateTime @updatedAt
+  updatedAt          DateTime? @updatedAt
 
   // Relaciones
   locations          Location[]
@@ -71,6 +71,7 @@ model Location{
   houseNumber String @db.VarChar(10)
   postalCode String @db.VarChar(5)
   neighborhood String @db.VarChar(50)
+  status    Boolean
 
   // Relaciones
   userInformation UserInformation @relation(fields: [idUserInformation], references: [idUserInformation])
@@ -229,6 +230,8 @@ model Order{
   createdAt DateTime @default(now())
   deliveryAt DateTime?
   totalPrice Float
+  paid Boolean
+  paidAt DateTime?
 
   // Relaciones
   cart Cart @relation(fields: [idCart], references: [idCart])
