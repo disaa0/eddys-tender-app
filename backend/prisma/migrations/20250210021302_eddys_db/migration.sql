@@ -7,7 +7,7 @@ CREATE TABLE `user` (
     `password` VARCHAR(191) NOT NULL,
     `status` BOOLEAN NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+    `updatedAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`idUser`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -28,7 +28,7 @@ CREATE TABLE `userInformation` (
     `lastName` VARCHAR(191) NOT NULL,
     `secondLastName` VARCHAR(191) NULL,
     `phone` VARCHAR(10) NOT NULL,
-    `updatedAt` DATETIME(3) NOT NULL,
+    `updatedAt` DATETIME(3) NULL,
 
     UNIQUE INDEX `userInformation_idUser_key`(`idUser`),
     PRIMARY KEY (`idUserInformation`)
@@ -42,6 +42,7 @@ CREATE TABLE `location` (
     `houseNumber` VARCHAR(10) NOT NULL,
     `postalCode` VARCHAR(5) NOT NULL,
     `neighborhood` VARCHAR(50) NOT NULL,
+    `status` BOOLEAN NOT NULL,
 
     PRIMARY KEY (`idLocation`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -155,6 +156,8 @@ CREATE TABLE `order` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `deliveryAt` DATETIME(3) NULL,
     `totalPrice` DOUBLE NOT NULL,
+    `paid` BOOLEAN NOT NULL,
+    `paidAt` DATETIME(3) NULL,
 
     PRIMARY KEY (`idOrder`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
