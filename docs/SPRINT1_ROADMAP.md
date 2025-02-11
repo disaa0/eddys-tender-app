@@ -7,7 +7,7 @@
   - Dev 3
   - Dev 4
 - Database, Integration & Tech Lead
-  - Dev 5: @disaa0
+  - Dev 5
 
 ---
 
@@ -86,7 +86,7 @@
 
 ---
 
-### **Dev 5 (Base de Datos - MySQL/Prisma, Tech Lead)**
+### **Dev 5 (Base de Datos -MySQL Prisma)**
 
 1. **Inicio App - Usuario (06.02 - 09.02)**:
 
