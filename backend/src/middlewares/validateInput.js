@@ -14,7 +14,12 @@ const registerSchema = z.object({
         .length(10, { message: 'El número de teléfono debe tener exactamente 10 dígitos' })
         .regex(/^\d{10}$/, { message: 'El número de teléfono debe contener solo números' }),
     name: z.string().min(1, { message: "Nombre no puede estar vacío" }),
-    lastName: z.string().min(1, { message: "Apellido paterno no puede estar vacío" })
+    lastName: z.string().min(1, { message: "Apellido paterno no puede estar vacío" }),
+    idUserType: z.union([
+        z.literal(1),
+        z.literal(2),
+        z.undefined(), // Permite que sea opcional
+    ]).optional()
 });
 
 // Middleware de validación
