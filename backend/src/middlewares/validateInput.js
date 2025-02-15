@@ -6,10 +6,10 @@ const registerSchema = z.object({
     email: z.string().email({ message: "Correo no válido" }),
     password: z.string()
         .min(6, { message: "Contraseña debe tener al menos 6 caracteres" })
-        .regex(/^(?=.*[A-Z])/, { message: "Contraseña debe tener al menos 1 mayúscula" })
-        .regex(/^(?=.*[a-z])/, { message: "Contraseña debe tener al menos 1 minúscula" })
-        .regex(/^(?=.*\d)/, { message: "Contraseña debe tener al menos 1 número" })
-        .regex(/^(?=.*[@$!%*?&])/, { message: "Contraseña debe tener al menos 1 carácter especial (@$!%*?&)" }),
+        .regex(/[A-Z]/, { message: "Contraseña debe tener al menos 1 mayúscula" })
+        .regex(/[a-z]/, { message: "Contraseña debe tener al menos 1 minúscula" })
+        .regex(/\d/, { message: "Contraseña debe tener al menos 1 número" })
+        .regex(/[@$!%*?&]/, { message: "Contraseña debe tener al menos 1 carácter especial (@$!%*?&)" }),
     phone: z.string()
         .length(10, { message: 'El número de teléfono debe tener exactamente 10 dígitos' })
         .regex(/^\d{10}$/, { message: 'El número de teléfono debe contener solo números' }),
