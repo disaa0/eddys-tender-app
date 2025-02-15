@@ -15,6 +15,15 @@ async function registerUser(email, password, username, name, lastName, secondLas
             throw new Error('Email ya existente');
         }
 
+        const existingUsername = await tx.user.findUnique({
+            where: {
+                username: username,
+            },
+        });
+        if (existingUsername) {
+            throw new Error('Nombre de usuario ya existente');
+        }
+
         const user = await tx.user.create({
             data: {
                 email: email,
@@ -42,12 +51,18 @@ async function registerUser(email, password, username, name, lastName, secondLas
     });
 }
 
-async function loginUser(email, password) {
-    const user = await prisma.user.findUnique({
+async function loginUser(email, username, password) {
+    const whereCondition = {};
+
+    if (email) whereCondition.email = email;
+    if (username) whereCondition.username = username;
+
+    const user = await prisma.user.findFirst({
         where: {
-            email: email,
-        },
+            OR: Object.keys(whereCondition).map((key) => ({ [key]: whereCondition[key] }))
+        }
     });
+
     if (!user) {
         throw new Error('Usuario no encontrado');
     }
