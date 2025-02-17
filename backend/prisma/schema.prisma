@@ -130,7 +130,8 @@ model ItemCart{
   idItemCart Int @id @default(autoincrement())
   idCart Int
   idProduct Int
-  amount Int
+  quantity Int
+  individualPrice Int
   status Boolean
 
   // Relaciones
