@@ -32,6 +32,7 @@ export default function AppLayout() {
             },
             headerTintColor: theme.colors.text,
             tabBarShowLabel: false,
+            animation: 'fade',
           }}
         >
           <Tabs.Screen
