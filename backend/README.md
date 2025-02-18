@@ -112,6 +112,104 @@ docker-compose exec backend npx prisma migrate dev --name <nombre>
 docker-compose exec backend npx prisma migrate status
 ```
 
+## Datos de Prueba (Seed)
+
+### Datos Iniciales
+El sistema genera automáticamente:
+
+1. **Tipos de Usuario**:
+   - Administrador (id: 1)
+   - Cliente (id: 2)
+
+2. **Usuario Administrador**:
+   ```json
+   {
+     "email": "admin@admin.com",
+     "username": "admin",
+     "password": "admin",
+     "name": "ADMINISTRADOR",
+     "lastName": "ADMINISTRADOR",
+     "phone": "6622757172"
+   }
+   ```
+
+3. **Catálogos Base**:
+   - Tipos de Producto (Comida, Bebidas, Extras, Postres)
+   - Estados de Orden (Pendiente, Procesando, etc.)
+   - Tipos de Envío (Domicilio, Recoger)
+   - Tipos de Pago (Efectivo, Tarjeta)
+
+### Ejecutar Seed en Docker
+
+1. **Primera vez** (al construir contenedores):
+   ```bash
+   docker-compose up --build
+   # El seed se ejecuta automáticamente
+   ```
+
+2. **Regenerar datos** (borrar y recrear):
+   ```bash
+   # Detener contenedores
+   docker-compose down
+
+   # Eliminar volumen de base de datos
+   docker volume rm eddys-tender-app_mysql_data
+
+   # Reconstruir
+   docker-compose up --build
+   ```
+
+3. **Ejecutar seed manualmente**:
+   ```bash
+   # Con contenedores corriendo
+   docker-compose exec backend npm run prisma:reset
+   # O específicamente el seed
+   docker-compose exec backend npm run prisma:seed
+   ```
+
+### Verificar Datos
+
+1. **Usando Prisma Studio**:
+   ```bash
+   docker-compose exec backend npm run prisma:studio
+   # Acceder en http://localhost:5555
+   ```
+
+2. **Usando MySQL**:
+   ```bash
+   docker-compose exec mysql mysql -u user -p
+   # Password: user_password
+   
+   USE eddys-tender-db;
+   SELECT * FROM userType;
+   SELECT * FROM user;
+   ```
+
+### Consideraciones
+
+1. **Orden de Ejecución**:
+   - Primero se crean los catálogos (userType, productType, etc.)
+   - Luego el usuario administrador
+   - Finalmente la información asociada (userInformation, location)
+
+2. **Ambiente de Desarrollo**:
+   - El seed solo se ejecuta en desarrollo
+   - En producción, usar migración manual de datos
+
+3. **Datos Sensibles**:
+   - Las contraseñas en seed son para desarrollo
+   - Cambiar credenciales en producción
+   - No incluir datos sensibles en el seed
+
+4. **Troubleshooting**:
+   ```bash
+   # Ver logs de seed
+   docker-compose logs backend | grep "prisma"
+   
+   # Reiniciar proceso
+   docker-compose exec backend npm run prisma:reset -- --force
+   ```
+
 ## Consideraciones Importantes
 
 ### Mayúsculas y Minúsculas en MySQL

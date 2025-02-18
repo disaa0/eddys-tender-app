@@ -92,6 +92,60 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 403: Token inválido
 
+### 1.4 Eliminar Perfil
+
+**DELETE /api/auth/profile**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Cuenta desactivada exitosamente"
+}
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 403: Token inválido
+
+### 1.5 Actualizar Contraseña
+
+**PUT /api/auth/password**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Cuerpo de la Petición:**
+```json
+{
+    "oldPassword": "ContraseñaActual123!",
+    "newPassword": "NuevaContraseña123!"
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Contraseña actualizada exitosamente"
+}
+```
+
+**Errores Posibles:**
+- 400: Contraseña actual incorrecta
+- 400: Nueva contraseña no cumple requisitos
+- 401: Token no proporcionado
+- 403: Token inválido
+
+**Nota de Desarrollo:**
+- En ambiente de desarrollo, las contraseñas se almacenan sin encriptar para facilitar testing
+- En producción, se utilizará bcrypt + AES-256 para el manejo seguro de contraseñas
+
 ## 2. VALIDACIONES
 
 ### 2.1 Reglas de Validación

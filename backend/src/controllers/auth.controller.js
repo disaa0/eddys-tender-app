@@ -23,7 +23,30 @@ async function login(req, res) {
     }
 }
 
+async function deleteProfile(req, res) {
+    try {
+        const userId = req.user.userId;
+        const result = await authService.deleteUserProfile(userId);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+async function updatePassword(req, res) {
+    try {
+        const userId = req.user.userId;
+        const { oldPassword, newPassword } = req.body;
+        const result = await authService.updatePassword(userId, oldPassword, newPassword);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
 module.exports = {
     register,
     login,
+    deleteProfile,
+    updatePassword
 };

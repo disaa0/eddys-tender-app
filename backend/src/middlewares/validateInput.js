@@ -47,4 +47,25 @@ const validateRegister = (req, res, next) => {
     next();
 };
 
-module.exports = { validateRegister };
+const passwordUpdateSchema = z.object({
+    oldPassword: z.string().min(1, { message: "Contraseña actual requerida" }),
+    newPassword: z.string()
+        .min(6, { message: "Nueva contraseña debe tener al menos 6 caracteres" })
+        .regex(/[A-Z]/, { message: "Nueva contraseña debe tener al menos 1 mayúscula" })
+        .regex(/[a-z]/, { message: "Nueva contraseña debe tener al menos 1 minúscula" })
+        .regex(/\d/, { message: "Nueva contraseña debe tener al menos 1 número" })
+        .regex(/[@$!%*?&]/, { message: "Nueva contraseña debe tener al menos 1 carácter especial (@$!%*?&)" })
+});
+
+const validatePasswordUpdate = (req, res, next) => {
+    const result = passwordUpdateSchema.safeParse(req.body);
+    if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+    }
+    next();
+};
+
+module.exports = {
+    validateRegister,
+    validatePasswordUpdate
+};
