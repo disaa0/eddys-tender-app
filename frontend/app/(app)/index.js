@@ -6,6 +6,7 @@ import { theme } from '../theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import ProductCard from '../components/ProductCard';
 import CategoryChips from '../components/CategoryChips';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
 
@@ -18,21 +19,21 @@ const PRODUCT_IMAGES = {
 };
 
 const PRODUCTS = [
-  { 
-    id: 1, 
-    name: 'Tenders', 
-    price: 165, 
-    category: 'Combos', 
+  {
+    id: 1,
+    name: 'Tenders',
+    price: 165,
+    category: 'Combos',
     imageKey: 'tenders',
-    description: 'Deliciosas tiras de pollo empanizadas'
+    description: 'Deliciosas tiras de pollo empanizadas',
   },
-  { 
-    id: 2, 
-    name: 'Burger', 
-    price: 165, 
-    category: 'Combos', 
+  {
+    id: 2,
+    name: 'Burger',
+    price: 165,
+    category: 'Combos',
     imageKey: 'burger',
-    description: 'Hamburguesa clásica con queso'
+    description: 'Hamburguesa clásica con queso',
   },
   {
     id: 3,
@@ -40,7 +41,7 @@ const PRODUCTS = [
     price: 40,
     category: 'Bebidas',
     imageKey: 'limonada',
-    description: 'Limonada natural'
+    description: 'Limonada natural',
   },
   {
     id: 4,
@@ -48,8 +49,8 @@ const PRODUCTS = [
     description: '250 gr',
     price: 30,
     category: 'Complementos',
-    imageKey: 'papas'
-  }
+    imageKey: 'papas',
+  },
 ];
 
 export default function Index() {
@@ -60,7 +61,7 @@ export default function Index() {
   const renderProduct = ({ item }) => {
     const imageSource = PRODUCT_IMAGES[item.imageKey];
     return (
-      <ProductCard 
+      <ProductCard
         product={{ ...item, imageSource }}
         onPress={() => router.push(`/product/${item.id}`)}
         onAddToCart={() => {
@@ -72,41 +73,52 @@ export default function Index() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>EDDY'S</Text>
-        <MaterialIcons name="person" size={24} color={theme.colors.primary} />
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>EDDY'S</Text>
+          <MaterialIcons name="person" size={24} color={theme.colors.primary} />
+        </View>
 
-      <View style={styles.searchContainer}>
-        <MaterialIcons name="search" size={24} color="#666" style={styles.searchIcon} />
-        <Searchbar
-          placeholder="Buscar"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          style={styles.searchbar}
-          inputStyle={styles.searchInput}
-          icon={() => null}
+        <View style={styles.searchContainer}>
+          <MaterialIcons
+            name="search"
+            size={24}
+            color="#666"
+            style={styles.searchIcon}
+          />
+          <Searchbar
+            placeholder="Buscar"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={styles.searchbar}
+            inputStyle={styles.searchInput}
+            icon={() => null}
+          />
+        </View>
+
+        <CategoryChips
+          categories={CATEGORIES}
+          selectedCategory={selectedCategory}
+          onSelect={setSelectedCategory}
+        />
+
+        <FlatList
+          data={PRODUCTS}
+          numColumns={2}
+          renderItem={renderProduct}
+          contentContainerStyle={styles.productList}
         />
       </View>
-
-      <CategoryChips
-        categories={CATEGORIES}
-        selectedCategory={selectedCategory}
-        onSelect={setSelectedCategory}
-      />
-
-      <FlatList
-        data={PRODUCTS}
-        numColumns={2}
-        renderItem={renderProduct}
-        contentContainerStyle={styles.productList}
-      />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff', // Asegura que el notch no muestre un color incorrecto
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -144,4 +156,4 @@ const styles = StyleSheet.create({
   productList: {
     padding: 16,
   },
-}); 
+});

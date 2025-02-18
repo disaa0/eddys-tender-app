@@ -37,41 +37,44 @@ export default function Profile() {
         <List.Item
           title="Correo"
           description={userInfo.email}
-          left={props => <List.Icon {...props} icon="email" />}
+          left={(props) => <List.Icon {...props} icon="email" />}
         />
         <Divider />
         <List.Item
           title="Teléfono"
           description={userInfo.phone}
-          left={props => <List.Icon {...props} icon="phone" />}
+          left={(props) => <List.Icon {...props} icon="phone" />}
         />
         <Divider />
         <List.Item
           title="Dirección"
           description={userInfo.address}
-          left={props => <List.Icon {...props} icon="map-marker" />}
+          left={(props) => <List.Icon {...props} icon="map-marker" />}
         />
       </Surface>
 
       <Surface style={styles.infoSection} elevation={1}>
         <List.Item
           title="Historial de Pedidos"
-          left={props => <List.Icon {...props} icon="history" />}
-          right={props => <List.Icon {...props} icon="chevron-right" />}
+          left={(props) => <List.Icon {...props} icon="history" />}
+          right={(props) => <List.Icon {...props} icon="chevron-right" />}
           onPress={() => router.push('/orders')}
         />
         <Divider />
         <List.Item
           title="Métodos de Pago"
-          left={props => <List.Icon {...props} icon="credit-card" />}
-          right={props => <List.Icon {...props} icon="chevron-right" />}
+          left={(props) => <List.Icon {...props} icon="credit-card" />}
+          right={(props) => <List.Icon {...props} icon="chevron-right" />}
           onPress={() => router.push('/profile/payment-methods')}
         />
         <Divider />
         <List.Item
           title="Cerrar Sesión"
-          left={props => <List.Icon {...props} icon="logout" color={theme.colors.error} />}
+          left={(props) => (
+            <List.Icon {...props} icon="logout" color={theme.colors.error} />
+          )}
           titleStyle={{ color: theme.colors.error }}
+          onPress={() => router.push('/login')}
         />
       </Surface>
     </ScrollView>
@@ -96,7 +99,7 @@ const styles = StyleSheet.create({
   },
   squareAvatar: {
     borderRadius: 8,
-    transform: [{scale: 1.2}],
+    transform: [{ scale: 1.2 }],
   },
   name: {
     color: theme.colors.primary,
@@ -118,4 +121,4 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     color: theme.colors.primary,
   },
-}); 
+});
