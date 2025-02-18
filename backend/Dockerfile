@@ -15,4 +15,5 @@ COPY . .
 
 # Puerto expuesto y comando de inicio
 EXPOSE 3000
+EXPOSE 5555
 CMD ["npm", "run", "dev"]

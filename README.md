@@ -1,8 +1,6 @@
 # Eddy's Tender App
 
-Aaplicación full-stack construida con **ExpressJS** (backend), **React Native/Expo** (frontend) y **MySQL** (base de datos), contenerizada con Docker para un desarrollo consistente multiplataforma.
-
----
+Aplicación full-stack construida con **ExpressJS** (backend), **React Native/Expo** (frontend) y **MySQL** (base de datos), contenerizada con Docker para un desarrollo consistente multiplataforma.
 
 ## Tecnologías y Herramientas
 
@@ -15,188 +13,96 @@ Aaplicación full-stack construida con **ExpressJS** (backend), **React Native/E
 - **Gestión del proyecto**: Jira
 - **Diseño**: Figma
 - **Testing**: Manual + (por definir)
-- **Documentación**: Markdown, (Documentación de API por definir)
-
----
+- **Documentación**: Markdown
 
 ## Estructura del Proyecto
 
 ```
 project-root/
 ├── .github/                  # Configuraciones de GitHub (workflows, plantillas)
-├── backend/
-│   ├── src/
-│   │   ├── controllers/      # Manejadores de rutas
-│   │   ├── middleware/       # Autenticación, logging
-│   │   ├── models/           # Esquema de Prisma
-│   │   ├── routes/           # Endpoints de la API
-│   │   ├── services/         # Lógica de negocio (ej: integración con Stripe)
-│   │   ├── utils/            # Helpers, loggers
-│   │   └── app.js            # Punto de entrada de Express
-│   ├── prisma/               # Migraciones y esquema de Prisma
-│   ├── Dockerfile            # Configuración de Docker para el backend
-│   ├── package.json
-│   └── .env.example
-├── frontend/
-│   ├── assets/               # Imágenes, fuentes
-│   ├── components/           # Componentes reutilizables de la UI
-│   ├── screens/              # Pantallas de la aplicación
-│   ├── services/             # Clientes de la API
-│   ├── App.js                # Punto de entrada principal
-│   └── package.json
-├── docker-compose.yml        # Configuración de múltiples contenedores
-├── docs/                     # Diagramas de arquitectura, requisitos
-└── README.md                 # Estás aquí :)
+├── backend/                  # Servidor Express + Prisma
+│   ├── docs/                # Documentación específica del backend
+│   ├── src/                 # Código fuente
+│   └── README.md            # Guía del backend
+├── frontend/                # App React Native + Expo
+│   ├── docs/                # Documentación específica del frontend
+│   ├── src/                 # Código fuente
+│   └── README.md            # Guía del frontend
+├── docker-compose.yml       # Configuración de contenedores
+└── docs/                    # Documentación general del proyecto
 ```
-
----
 
 ## Requisitos Previos
 
 - **Docker** ([Instalar](https://docs.docker.com/desktop))
-- **Node.js v18+** (Recomendado: Usar [nvm](https://github.com/nvm-sh/nvm) o [nvm-windows](https://github.com/coreybutler/nvm-windows))
+- **Node.js v18+** (Recomendado: [nvm](https://github.com/nvm-sh/nvm))
 - **Git**
-- (Windows) Habilitar WSL2 para mejor rendimiento con Docker ([Guía](https://learn.microsoft.com/es-es/windows/wsl/install))
+- (Windows) WSL2 ([Guía](https://learn.microsoft.com/es-es/windows/wsl/install))
 
----
+## Inicio Rápido
 
-## Guía de Configuración
-
-### 1. Clonar el Repositorio
-
+1. **Clonar el repositorio**:
 ```bash
 git clone https://github.com/disaa0/eddys-tender-app
 cd eddys-tender-app
 ```
 
-### 2. Configurar Variables de Entorno
-
-- Copia `.env.example` a `.env` en la carpeta `backend/`:
-  ```bash
-  cp backend/.env.example backend/.env
-  ```
-- Actualiza `backend/.env` con las credenciales de MySQL:
-  ```env
-  DATABASE_URL="mysql://user:user_password@mysql:3306/eddys-tender-db"
-  ```
-
-### 3. Iniciar Contenedores de Docker
-
+2. **Configurar variables de entorno**:
 ```bash
-# Construir e iniciar todos los servicios (backend + MySQL)
+cp backend/.env.example backend/.env
+```
+
+3. **Crear directorios necesarios**:
+```bash
+mkdir -p mysql/init mysql/conf
+```
+
+4. **Iniciar contenedores**:
+```bash
+# Primera vez o después de cambios
 docker-compose up --build
 
-# Para ejecutar en segundo plano:
+# Ejecuciones posteriores
 docker-compose up -d
 ```
 
-### 4. Ejecutar Migraciones de la Base de Datos
-
+5. **Verificar estado de los servicios**:
 ```bash
-# Ejecutar migraciones de Prisma dentro del contenedor del backend
-docker-compose exec backend npx prisma migrate dev
+docker-compose ps
 ```
 
-### 5. Configuración del Frontend (Expo)
-
+4. **Iniciar frontend**:
 ```bash
 cd frontend
 npm install
 npx expo start
 ```
 
-- Escanea el código QR con la app **Expo Go** (móvil) o usa un emulador.
-
----
+Para más detalles:
+- [Documentación del Backend](backend/README.md)
+- [Documentación del Frontend](frontend/README.md)
+- [Guía de Desarrollo](docs/DEVELOPMENT.md)
 
 ## Comandos Comunes
 
-| Comando                                      | Descripción                                                      |
-| -------------------------------------------- | ---------------------------------------------------------------- |
-| `docker-compose up --build`                  | Reconstruir e iniciar todos los contenedores                     |
-| `docker-compose down`                        | Detener y eliminar contenedores                                  |
-| `docker-compose logs -f backend`             | Ver logs del backend                                             |
-| `docker-compose exec backend npm run test`   | Ejecutar pruebas del backend                                     |
-| `docker-compose exec mysql mysql -u user -p` | Acceder a la consola de MySQL                                    |
-| `npx prisma studio`                          | Abrir Prisma Studio (ejecutar dentro del contenedor del backend) |
-
----
-
-## Flujo de Trabajo
-
-1. **Revisar** `./docs/` para consultar Roadmap y responsabilidades.
-
-2.
-
-3. **Crear una rama para una nueva funcionalidad**:
-
-   ```bash
-   git checkout -b feature/sistema-de-autenticacion
-   ```
-
-4. **Guardar cambios**:
-   ```bash
-   git add .
-   git commit -m "feat: añadir middleware de autenticación"
-   ```
-
-### Backend
-
-- **Realizar cambios** en el código del backend en `backend/src/`.
-- **Probar localmente** con recarga automática (Docker reiniciará automáticamente).
-
-### Frontend
-
-- **Iniciar el servidor de desarrollo de Expo**:
-  ```bash
-  cd frontend && npx expo start
-  ```
-- **Probar localmente** con recarga automática (Mediante Expo Go).
-- Consultar `frontend/docs/`
-
-### Base de Datos
-
-- Siempre **crear nuevas migraciones** después de cambios en el esquema:
-  ```bash
-  docker-compose exec backend npx prisma migrate dev --name añadir_tabla_usuarios
-  ```
-- Usar **Prisma Studio** para inspeccionar datos:
-  ```bash
-  docker-compose exec backend npx prisma studio
-  ```
-
-### Para la base de datos local sin docker
-- Usar el siguiente comando para **generar la db**:
-    ``` bash
-    npm run prisma:generate
-    ```
-- Usar el siguiente comando para **generar los datos por defecto**:
-    ``` bash
-    npm run prisma:seed
-    ```
-- Usar el siguiente comando para **inspeccionar los datos**:
-    ``` bash
-    npm run prisma:studio
-    ```
-
----
-
-## Solución de Problemas Comunes
-
-| Problema                             | Solución                                                                                               |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| **Conflictos de puertos**            | Detener procesos locales de MySQL/Node.js que usen los puertos `3000` o `3306`                         |
-| **MySQL no está listo**              | Añadir un [script de espera](https://docs.docker.com/compose/startup-order/) al Dockerfile del backend |
-| **Permisos de archivos (Linux)**     | Ejecutar `sudo chown -R $USER:$USER .` en la raíz del proyecto                                         |
-| **Variables de entorno no cargadas** | Asegurarse de que `.env` exista en `backend/` y coincida con `docker-compose.yml`                      |
-| **Error al construir con Docker**    | Limpiar la caché de Docker: `docker-compose build --no-cache`                                          |
-
----
+| Comando | Descripción |
+|---------|-------------|
+| `docker-compose up -d` | Iniciar contenedores |
+| `docker-compose down` | Detener contenedores |
+| `docker-compose down -v` | Detener y eliminar volúmenes |
+| `docker-compose logs -f backend` | Ver logs del backend |
+| `docker-compose logs -f mysql` | Ver logs de MySQL |
+| `npx expo start` | Iniciar frontend |
 
 ## Notas
 
-- **Formateo de código**: Usa Prettier (VSCode Marketplace).
-- **Documentación**: Actualizar `docs/` con cambios arquitectónicos.
-- **Copias de seguridad**: La base de datos se persiste en el volumen de Docker `mysql_data`.
+- **Formateo**: Usar Prettier (configurado en cada proyecto)
+- **Documentación**: Mantener actualizada la carpeta `docs/`
+- **Base de datos**: 
+  - Persistida en volumen Docker `eddys-tender-app_mysql_data`
+  - Configuración personalizable en `mysql/conf/`
+  - Scripts de inicialización en `mysql/init/`
+- **Timezone**: Configurado para América/Hermosillo
+- **Compatibilidad**: Funciona en Windows (WSL2), macOS y Linux
 
----
+Para más información, consultar la documentación específica en las carpetas `backend/docs/` y `frontend/docs/`.

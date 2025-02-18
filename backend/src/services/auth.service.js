@@ -1,4 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/jwt.config');
 //const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
@@ -77,8 +79,23 @@ async function loginUser(email, username, password) {
         throw new Error('Contraseña incorrecta');
     }
 
+    // Generate JWT token
+    const token = jwt.sign(
+        {
+            userId: user.idUser,
+            email: user.email,
+            username: user.username,
+            userType: user.idUserType
+        },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+    );
+
     const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword; // Aqui se implementara JWT para devolver un token
+    return {
+        user: userWithoutPassword,
+        token
+    };
 }
 
 module.exports = {
