@@ -44,9 +44,23 @@ async function updatePassword(req, res) {
     }
 }
 
+//updateEmail
+
+async function updateEmail(req, res) {
+    try {
+        const userId = req.user.userId;
+        const { email } = req.body;
+        const result = await authService.updateEmail(userId, email);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
 module.exports = {
     register,
     login,
     deleteProfile,
-    updatePassword
+    updatePassword,
+    updateEmail
 };

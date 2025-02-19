@@ -65,7 +65,20 @@ const validatePasswordUpdate = (req, res, next) => {
     next();
 };
 
+const validateEmailUpdate = (req, res, next) => {
+    const emailUpdateSchema = z.object({
+        email: z.string().email({ message: "Correo no válido" })
+    });
+
+    const result = emailUpdateSchema.safeParse(req.body);
+    if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+    }
+    next();
+};
+
 module.exports = {
     validateRegister,
-    validatePasswordUpdate
+    validatePasswordUpdate,
+    validateEmailUpdate
 };

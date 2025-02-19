@@ -1,6 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+//const bcrypt = require('bcrypt');
 const { encrypt, decrypt } = require('../config/crypto.config');
 const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/jwt.config');
 
@@ -196,9 +196,35 @@ async function updatePassword(userId, oldPassword, newPassword) {
     }
 }
 
+async function updateEmail(userId, email) {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { idUser: userId }
+        });
+
+        if (!user) {
+            throw new Error('Usuario no encontrado');
+        }
+
+        await prisma.user.update({
+            where: { idUser: userId },
+            data: {
+                email: email,
+                updatedAt: new Date()
+            }
+        });
+
+        return { message: 'Correo electrónico actualizado exitosamente' };
+    } catch (error) {
+        throw error;
+    }
+}
+
+
 module.exports = {
     registerUser,
     loginUser,
     deleteUserProfile,
-    updatePassword
+    updatePassword,
+    updateEmail
 };
