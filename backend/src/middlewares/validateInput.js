@@ -77,8 +77,23 @@ const validateEmailUpdate = (req, res, next) => {
     next();
 };
 
+const customizationSchema = z.object({
+    name: z.string().min(1, { message: "El nombre de la personalización es requerido" }),
+    status: z.boolean(),
+    // Agregar más campos según necesidades
+});
+
+const validateCustomization = (req, res, next) => {
+    const result = customizationSchema.safeParse(req.body);
+    if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+    }
+    next();
+};
+
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
-    validateEmailUpdate
+    validateEmailUpdate,
+    validateCustomization,
 };

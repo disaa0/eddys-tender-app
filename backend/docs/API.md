@@ -224,3 +224,134 @@ Authorization: Bearer <token>
 - El tipo de usuario por defecto es 1 (usuario normal)
 - Se recomienda usar HTTPS en producción
 - Configurar un valor seguro para JWT_SECRET en producción 
+
+## 8. ENDPOINTS DE ADMINISTRADOR
+
+### 8.1 Activar/Desactivar Producto
+
+**PATCH /api/admin/products/{id}/status**
+
+Alterna el estado de un producto entre activo e inactivo.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Producto activado exitosamente",
+    "product": {
+        "idProduct": 1,
+        "name": "Producto Ejemplo",
+        "status": true,
+        // ... otros campos del producto
+    }
+}
+```
+
+**Errores Posibles:**
+- 400: Producto no encontrado
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 8.2 Editar Personalización de Producto
+
+**PUT /api/admin/products/{id}/customization**
+
+Actualiza o crea una personalización para un producto específico.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Cuerpo de la Petición:**
+```json
+{
+    "name": "Nombre de la personalización",
+    "status": true
+}
+```
+
+**Validaciones:**
+- name: String no vacío
+- status: Boolean requerido
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Personalización actualizada exitosamente",
+    "personalization": {
+        "idPersonalization": 1,
+        "name": "Nombre de la personalización",
+        "status": true,
+        // ... otros campos
+    },
+    "productPersonalization": {
+        "idProductPersonalization": 1,
+        "idProduct": 1,
+        "idPersonalization": 1,
+        // ... otros campos
+    }
+}
+```
+
+**Errores Posibles:**
+- 400: Producto no encontrado
+- 400: Datos de personalización inválidos
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 8.3 Permisos de Administrador
+
+Para acceder a los endpoints de administrador, el usuario debe:
+
+1. Estar autenticado (token JWT válido)
+2. Tener tipo de usuario administrador (idUserType === 1)
+
+**Respuesta de Error de Permisos (403):**
+```json
+{
+    "message": "Acceso denegado. Se requieren permisos de administrador."
+}
+```
+
+### 8.4 Consideraciones Técnicas
+
+1. **Transacciones:**
+   - Las operaciones de personalización utilizan transacciones Prisma
+   - Si algo falla, se hace rollback automático
+
+2. **Validaciones:**
+   - Se valida la existencia del producto
+   - Se validan los datos de personalización
+   - Se verifica el estado del producto
+
+3. **Seguridad:**
+   - Todos los endpoints requieren autenticación
+   - Se verifica el rol de administrador
+   - Se registra el usuario que realiza los cambios
+
+4. **Respuestas:**
+   - Códigos HTTP estándar
+   - Mensajes descriptivos
+   - Datos actualizados en la respuesta
+
+5. **Auditoría:**
+   - Se registra quién realizó los cambios (idUserAdded)
+   - Se mantiene historial de estados
+   - Timestamps automáticos 
