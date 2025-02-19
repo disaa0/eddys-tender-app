@@ -91,9 +91,26 @@ const validateCustomization = (req, res, next) => {
     next();
 };
 
+//validacion de producto
+const productSchema = z.object({
+    idProductType: z.number().int().positive({ message: "El idProductType debe ser un número positivo" }),
+    name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
+    description: z.string().min(3, { message: "La descripcion no debe esta vacia" }),
+    price: z.number().positive({ message: "El precio debe ser un número positivo" }),
+    status: z.boolean()
+});
+
+const productDetailsSchema = z.object({
+    name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }).optional(),
+    description: z.string().min(3, { message: "La descripción debe tener al menos 3 caracteres" }).optional()
+}).refine(data => data.name !== undefined || data.description !== undefined, {
+    message: "Debe enviar al menos un campo: nombre o description"
+});
+
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
     validateEmailUpdate,
     validateCustomization,
+    productSchema, productDetailsSchema
 };

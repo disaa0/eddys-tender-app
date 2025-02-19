@@ -5,6 +5,7 @@ const app = express();
 const authRoutes = require('./routes/auth.routes', './routes/user.routes');
 const userRoutes = require('./routes/user.routes');
 const adminRoutes = require('./routes/admin.routes');
+const productRoutes = require('./routes/product.routes');
 
 // Configurar CORS
 app.use(cors({
@@ -28,6 +29,8 @@ app.use(limiter); // Apply rate limiting to all routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/user', userRoutes);
+app.use('/', productRoutes);
 
 // Rutas de ejemplo
 app.get("/", (req, res) => {
