@@ -18,4 +18,13 @@ function authenticateToken(req, res, next) {
     });
 }
 
-module.exports = { authenticateToken }; 
+function isAdmin(req, res, next) {
+
+    if (req.user.userType !== 1) {
+        return res.status(403).json({ message: 'Acceso denegado: Solo administradores' });
+    }
+    next();
+}
+
+
+module.exports = { authenticateToken, isAdmin }; 

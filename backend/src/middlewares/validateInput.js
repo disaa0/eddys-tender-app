@@ -77,8 +77,19 @@ const validateEmailUpdate = (req, res, next) => {
     next();
 };
 
+//validacion de producto
+const productSchema = z.object({
+    idProductType: z.number().int().positive({ message: "El idProductType debe ser un número positivo" }),
+    name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
+    description: z.string().min(3, { message: "La descripcion no debe esta vacia" }),
+    price: z.number().positive({ message: "El precio debe ser un número positivo" }),
+    status: z.boolean()
+});
+
+
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
-    validateEmailUpdate
+    validateEmailUpdate,
+    productSchema
 };

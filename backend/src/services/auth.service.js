@@ -35,7 +35,7 @@ async function registerUser(email, password, username, name, lastName, secondLas
                 password: password,
                 username: username,
                 status: true,
-                idUserType: 1,//De momento solo registra usuarios normales, una vez se implemente el sistema de roles y JWT se cambiara
+                idUserType: 1,//De momento solo registra usuarios adminstradores, una vez se implemente el sistema de roles y JWT se cambiara
             },
         });
 
