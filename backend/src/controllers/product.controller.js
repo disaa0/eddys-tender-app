@@ -1,6 +1,5 @@
-const { getProducts } = require('../services/product.service');
-const { productSchema } = require('../middlewares/validateInput');
-const { createProduct } = require('../services/product.service');
+const { getProducts, createProduct, updateProductDetails } = require('../services/product.service');
+const { productSchema, productDetailsSchema } = require('../middlewares/validateInput');
 
 async function getAllProducts(req, res) {
     try {
@@ -37,4 +36,28 @@ async function addProduct(req, res) {
     }
 }
 
-module.exports = { getAllProducts, addProduct };
+async function modifyProductDetails(req, res) {
+    try {
+        const productId = parseInt(req.params.id);
+        if (isNaN(productId)) {
+            return res.status(400).json({ message: "ID de producto inválido" });
+        }
+
+        const parsedData = productDetailsSchema.parse(req.body);
+
+        const updatedProduct = await updateProductDetails(productId, parsedData);
+
+        res.status(200).json({
+            message: "Detalles del producto actualizados correctamente",
+            product: updatedProduct
+        });
+    } catch (error) {
+        res.status(400).json({
+            message: "Error al actualizar detalles del producto",
+            error: error.errors || error.message
+        });
+    }
+}
+
+
+module.exports = { getAllProducts, addProduct, modifyProductDetails };

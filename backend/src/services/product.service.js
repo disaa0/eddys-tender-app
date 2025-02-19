@@ -35,4 +35,30 @@ async function createProduct(userId, data) {
         throw new Error(error.message);
     }
 }
-module.exports = { getProducts, createProduct };
+
+async function updateProductDetails(productId, data) {
+
+    try {
+        const existingProduct = await prisma.product.findUnique({
+            where: { idProduct: productId }
+        });
+
+        if (!existingProduct) {
+            throw new Error("Producto no encontrado");
+        }
+
+        const updatedProduct = await prisma.product.update({
+            where: { idProduct: productId },
+            data: {
+                name: data.name,
+                description: data.description
+            }
+        });
+
+        return updatedProduct;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+
+module.exports = { getProducts, createProduct, updateProductDetails };

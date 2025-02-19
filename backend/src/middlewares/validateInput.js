@@ -86,10 +86,15 @@ const productSchema = z.object({
     status: z.boolean()
 });
 
+const productDetailsSchema = z.object({
+    name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }).optional(),
+    description: z.string().min(3, { message: "La descripción debe tener al menos 3 caracteres" }).optional(),
+});
+
 
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
     validateEmailUpdate,
-    productSchema
+    productSchema, productDetailsSchema
 };
