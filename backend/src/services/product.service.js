@@ -47,13 +47,15 @@ async function updateProductDetails(productId, data) {
             throw new Error("Producto no encontrado");
         }
 
+        // Actualizar solo los campos que se envían
         const updatedProduct = await prisma.product.update({
             where: { idProduct: productId },
             data: {
-                name: data.name,
-                description: data.description
+                name: data.name !== undefined ? data.name : existingProduct.name,
+                description: data.description !== undefined ? data.description : existingProduct.description
             }
         });
+
 
         return updatedProduct;
     } catch (error) {
