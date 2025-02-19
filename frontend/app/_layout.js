@@ -1,7 +1,7 @@
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { useEffect } from 'react';
-import { useRouter, useSegments } from "expo-router";
+import { useRouter, useSegments } from 'expo-router';
 import { theme } from './theme';
 
 // Combinar nuestro tema con el tema base de Paper
@@ -18,19 +18,19 @@ const combinedTheme = {
 function useProtectedRoute() {
   const segments = useSegments();
   const router = useRouter();
-  
+
   // Simularemos un estado de autenticación por ahora
-  const isAuthenticated = true; // Esto después vendrá de un contexto o estado global
+  const isAuthenticated = false; // Esto después vendrá de un contexto o estado global
 
   useEffect(() => {
-    const inAuthGroup = segments[0] === "(auth)";
-    
+    const inAuthGroup = segments[0] === '(auth)';
+
     if (!isAuthenticated && !inAuthGroup) {
       // Redirige a login si no está autenticado y no está en el grupo auth
-      router.replace("/login");
+      router.replace('/login');
     } else if (isAuthenticated && inAuthGroup) {
       // Redirige al home si está autenticado y está en el grupo auth
-      router.replace("/(app)");
+      router.replace('/(app)');
     }
   }, [isAuthenticated, segments]);
 }
@@ -53,4 +53,4 @@ export default function RootLayout() {
       </Stack>
     </PaperProvider>
   );
-} 
+}
