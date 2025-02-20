@@ -11,27 +11,28 @@ export default function Profile() {
   const { logout } = useAuth();
   // hook personalizado para obtener la información del usuario
   // Descomentar para usar el hook personalizado
-  //
-  // const { userInfoH, loading, error } = useUserInfo(); // Usamos el hook aquí
+
+  const { userInfoH, loading, error } = useUserInfo(); // Usamos el hook aquí
 
   // Si está cargando, muestra un mensaje de loading
-  // if (loading) {
-  //   return (
-  //     <View style={styles.loadingContainer}>
-  //       <Text>Loading...</Text>
-  //     </View>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
-  // // Si hubo un error, muestra el mensaje de error
-  // if (error) {
-  //   return (
-  //     <View style={styles.loadingContainer}>
-  //       <Text>{error}</Text>
-  //     </View>
-  //   );
-  // }
+  // Si hubo un error, muestra el mensaje de error
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>{error}</Text>
+      </View>
+    );
+  }
 
+  // console.log(userInfoH);
   const userInfo = {
     name: 'Alejandro Fontes',
     email: 'alejandrofontes@gmail.com',
@@ -48,10 +49,10 @@ export default function Profile() {
           style={[styles.avatar, styles.squareAvatar]}
         />
         <Text variant="headlineSmall" style={styles.name}>
-          {userInfo.name}
+          {userInfoH.userInformation.name + ' ' + userInfoH.userInformation.lastName}
         </Text>
         <Text variant="bodyLarge" style={styles.memberSince}>
-          Miembro desde {userInfo.memberSince}
+          Miembro desde {new Date(userInfoH.createdAt).getFullYear()}
         </Text>
       </Surface>
 
@@ -61,19 +62,19 @@ export default function Profile() {
         </Text>
         <List.Item
           title="Correo"
-          description={userInfo.email}
+          description={userInfoH.email}
           left={(props) => <List.Icon {...props} icon="email" />}
         />
         <Divider />
         <List.Item
           title="Teléfono"
-          description={userInfo.phone}
+          description={userInfoH.userInformation.phone}
           left={(props) => <List.Icon {...props} icon="phone" />}
         />
         <Divider />
         <List.Item
           title="Dirección"
-          description={userInfo.address}
+          description={userInfoH.userInformation?.address || 'No especificada'}
           left={(props) => <List.Icon {...props} icon="map-marker" />}
         />
       </Surface>
