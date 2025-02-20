@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, FlatListComponent, StyleSheet } from 'react-native';
 import { Chip } from 'react-native-paper';
 import { theme } from '../theme';
 
@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
   categories: {
     paddingHorizontal: 16,
     marginBottom: 16,
+    flexGrow: 0,
   },
   chip: {
     marginRight: 8,

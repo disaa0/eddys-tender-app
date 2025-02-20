@@ -3,19 +3,18 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-function EmptyScreen() {
-  return <View />;
 
-}export default function AppLayout() {
+
+export default function AppLayout() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
         <Tabs
           screenOptions={{
-            tabBarActiveTintColor: theme.colors.primary,
-            tabBarInactiveTintColor: '#757575',
+            tabBarActiveTintColor: theme.colors.surface,
+            tabBarInactiveTintColor: '#000',
             tabBarStyle: {
-              backgroundColor: theme.colors.surface,
+              backgroundColor: theme.colors.primary,
               borderTopColor: '#E0E0E0',
               borderTopWidth: 1,
               elevation: 0,
@@ -39,12 +38,22 @@ function EmptyScreen() {
           }}
         >
           <Tabs.Screen
-            name="index"
+            name="adminDashboard"
             options={{
               title: 'Inicio',
               headerShown: false,
               tabBarIcon: ({ color, size }) => (
                 <MaterialIcons name="home" size={28} color={color} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="addProduct"
+            options={{
+              title: 'Añadir Producto',
+              headerShown: true,
+              tabBarIcon: ({ color, size }) => (
+                <MaterialIcons name="add-circle-outline" size={28} color={color} />
               ),
             }}
           />
@@ -58,25 +67,7 @@ function EmptyScreen() {
             }}
           />
           <Tabs.Screen
-            name="cart"
-            options={{
-              title: 'Carrito',
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="shopping-cart" size={28} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="favorites"
-            options={{
-              title: 'Favoritos',
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="favorite" size={28} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="support"
+            name="orders"
             options={{
               title: 'Soporte',
               tabBarIcon: ({ color, size }) => (
@@ -84,30 +75,21 @@ function EmptyScreen() {
               ),
             }}
           />
-
+         
+        
+      
           {/* Ocultar estas rutas de la barra de tabs */}
           <Tabs.Screen
-            name="adminDashboard"
+            name="chat"
             options={{
-              title:"Admin Dashboard",
-              href: null,
+              href:null,
             }}
           />
-          <Tabs.Screen
-            name="orders"
-            options={{
-              href: null,
-            }}
-          />
-          <Tabs.Screen
-            name="checkout"
-            options={{
-              href: null,
-            }}
-          />
+
           <Tabs.Screen
             name="product/[id]"
             options={{
+              headerShown: false,
               href: null,
             }}
           />

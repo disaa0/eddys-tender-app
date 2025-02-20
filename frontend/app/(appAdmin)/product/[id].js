@@ -6,7 +6,7 @@ import { useState } from 'react';
 // Datos de ejemplo - En producción vendrían de una API
 const PRODUCT = {
   id: 1,
-  name: 'Tender Box',
+  name: 'Tenders',
   price: 129,
   description: 'Deliciosas tiras de pollo empanizadas acompañadas de papas fritas y tu salsa favorita.',
   ingredients: ['Pechuga de pollo', 'Empanizado especial', 'Papas fritas', 'Salsa a elegir'],

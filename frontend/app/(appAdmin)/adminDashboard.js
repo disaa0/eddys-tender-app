@@ -7,8 +7,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 import ProductCard from '../components/ProductCard';
 import CategoryChips from '../components/CategoryChips';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { FILTERS } from '../(app)';
 
-const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
+export default function adminDashboard() {
+  const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
 
 // Importar imágenes de manera segura
 const PRODUCT_IMAGES = {
@@ -52,10 +54,9 @@ const PRODUCTS = [
     imageKey: 'papas',
   },
 ];
-
-export default function Index() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedFilter, setSelectedFilter] = useState('');
   const router = useRouter();
 
   const renderProduct = ({ item }) => {
@@ -98,13 +99,26 @@ export default function Index() {
         </View>
 
         <CategoryChips
+          categories={FILTERS}
+          selectedCategory={selectedFilter}
+          onSelect={setSelectedFilter}
+        />
+
+        <CategoryChips
           categories={CATEGORIES}
           selectedCategory={selectedCategory}
           onSelect={setSelectedCategory}
         />
 
         <FlatList
-          data={PRODUCTS}
+          data={PRODUCTS.sort((a,b) => {
+            if (selectedFilter == 'A-Z')
+              return(a.name.localeCompare(b.name))
+            else if (selectedFilter == 'Z-A')
+              return (b.name.localeCompare(a.name))
+            else if (selectedFilter == 'Más pedidos')
+              return ((a.id - b.id))
+          })}
           numColumns={2}
           renderItem={renderProduct}
           contentContainerStyle={styles.productList}

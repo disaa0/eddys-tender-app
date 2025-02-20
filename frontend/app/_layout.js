@@ -50,6 +50,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Screen name="(appAdmin)" options={{ headerShown: true, title: "Admin" }} />
       </Stack>
     </PaperProvider>
   );
