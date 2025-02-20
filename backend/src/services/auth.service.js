@@ -61,33 +61,40 @@ async function loginUser(email, username, password) {
     if (email) whereCondition.email = email;
     if (username) whereCondition.username = username;
 
-    const user = await prisma.user.findFirst({
+    // First check if user exists at all (regardless of status)
+    const userExists = await prisma.user.findFirst({
         where: {
-            OR: Object.keys(whereCondition).map((key) => ({ [key]: whereCondition[key] })),
-            status: true
+            OR: Object.keys(whereCondition).map((key) => ({ [key]: whereCondition[key] }))
         }
     });
 
-    if (!user) {
-        throw new Error('Usuario no encontrado o cuenta desactivada');
+    if (!userExists) {
+        throw new Error('Usuario no encontrado');
     }
 
-    if (password !== user.password) {
+    // Then check if user is active
+    if (!userExists.status) {
+        throw new Error('Cuenta desactivada');
+    }
+
+    // Check password
+    if (password !== userExists.password) {
         throw new Error('Contraseña incorrecta');
     }
 
+    // Generate token
     const token = jwt.sign(
         {
-            userId: user.idUser,
-            email: user.email,
-            username: user.username,
-            userType: user.idUserType
+            userId: userExists.idUser,
+            email: userExists.email,
+            username: userExists.username,
+            userType: userExists.idUserType
         },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRES_IN }
     );
 
-    const { password: _, ...userWithoutPassword } = user;
+    const { password: _, ...userWithoutPassword } = userExists;
     return {
         user: userWithoutPassword,
         token

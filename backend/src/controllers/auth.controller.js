@@ -22,10 +22,20 @@ async function login(req, res) {
         let status = 400;
         let message = error.message;
 
-        // Customize error messages
-        if (message.includes('desactivada')) {
-            status = 403;
-            message = 'Esta cuenta ha sido desactivada. Por favor contacta a soporte.';
+        // Customize error messages based on the error
+        switch (error.message) {
+            case 'Usuario no encontrado':
+                message = 'El usuario no existe';
+                break;
+            case 'Cuenta desactivada':
+                status = 403;
+                message = 'Esta cuenta ha sido desactivada. Por favor contacta a soporte.';
+                break;
+            case 'Contraseña incorrecta':
+                message = 'La contraseña es incorrecta';
+                break;
+            default:
+                message = 'Error al iniciar sesión';
         }
 
         res.status(status).json({ message });
