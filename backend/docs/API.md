@@ -389,9 +389,14 @@ Authorization: Bearer <token>
 
 ## 10. ENDPOINTS DE PRODUCTOS
 
-### 10.1 Listar Productos
+### 10.1 Listar Productos (Admin)
 
-**GET /api/products**
+**GET /admin/products**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
 
 **Parámetros de Query:**
 - page: Número de página (default: 1)
@@ -420,9 +425,14 @@ Authorization: Bearer <token>
 }
 ```
 
-### 10.2 Agregar Producto
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
 
-**POST /api/products**
+### 10.2 Agregar Producto (Admin)
+
+**POST /admin/products**
 
 **Headers Requeridos:**
 ```
@@ -449,19 +459,29 @@ Authorization: Bearer <token>
         "name": "Nuevo Producto",
         "description": "Descripción del producto",
         "price": 99.99,
-        "status": true
+        "status": true,
+        "idUserAdded": 1
     }
 }
 ```
 
-### 10.3 Modificar Detalles de Producto
+**Errores Posibles:**
+- 400: Datos de producto inválidos
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
 
-**PATCH /api/products/{id}**
+### 10.3 Modificar Detalles de Producto (Admin)
+
+**PUT /admin/products/{id}**
 
 **Headers Requeridos:**
 ```
 Authorization: Bearer <token>
 ```
+
+**Parámetros URL:**
+- id: ID del producto a modificar
 
 **Cuerpo de la Petición:**
 ```json
@@ -484,6 +504,14 @@ Authorization: Bearer <token>
     }
 }
 ```
+
+**Errores Posibles:**
+- 400: ID de producto inválido
+- 400: Datos de actualización inválidos
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 404: Producto no encontrado
+- 500: Error del servidor
 
 ## 11. VALIDACIONES DE PRODUCTOS
 
