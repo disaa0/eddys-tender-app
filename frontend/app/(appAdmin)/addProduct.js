@@ -102,6 +102,14 @@ export default function AddProduct() {
         }, 1500);
       }
 
+      setForm({
+        name: "",
+        price: "",
+        description: "",
+        idProductType: "",
+        status: true
+      });
+
     } catch (err) {
       setError(err.message || 'Error al agregar el producto');
     } finally {
