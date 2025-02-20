@@ -5,31 +5,64 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [userToken, setUserToken] = useState(null);
+    const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const loadToken = async () => {
-            const token = await AuthService.getToken();
-            setUserToken(token);
-            setIsLoading(false);
-        };
-        loadToken();
+        loadStoredAuth();
     }, []);
 
-    const login = async (userData) => {
-        const response = await AuthService.login(userData);
-        if (response.token) {
+    const loadStoredAuth = async () => {
+        try {
+            const [token, storedUser] = await Promise.all([
+                AuthService.getToken(),
+                AuthService.getUser(),
+            ]);
+
+            if (token && storedUser) {
+                setUserToken(token);
+                setUser(storedUser);
+            }
+        } catch (error) {
+            console.error('Error loading auth state:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const login = async (credentials) => {
+        try {
+            const response = await AuthService.login(credentials);
             setUserToken(response.token);
+            setUser(response.user);
+            return true;
+        } catch (error) {
+            console.error('Login error:', error);
+            throw error;
         }
     };
 
     const logout = async () => {
-        await AuthService.logout();
-        setUserToken(null);
+        try {
+            await AuthService.logout();
+            setUserToken(null);
+            setUser(null);
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
     };
 
     return (
-        <AuthContext.Provider value={{ userToken, isAuthenticated: !!userToken, login, logout, isLoading }}>
+        <AuthContext.Provider
+            value={{
+                userToken,
+                user,
+                isAuthenticated: !!userToken,
+                login,
+                logout,
+                isLoading,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

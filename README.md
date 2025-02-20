@@ -80,8 +80,7 @@ npx expo start
 
 Para más detalles:
 - [Documentación del Backend](backend/README.md)
-- [Documentación del Frontend](frontend/README.md)
-- [Guía de Desarrollo](docs/DEVELOPMENT.md)
+- [Documentación del Frontend](frontend/docs/sprint1/DEVELOPER_GUIDE.md)
 
 ## Comandos Comunes
 

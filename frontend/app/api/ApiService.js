@@ -1,67 +1,54 @@
-import AuthService from "./AuthService";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config';
 
 class ApiService {
-    constructor(baseURL) {
-        this.baseURL = baseURL;
+    constructor() {
+        this.baseURL = API_URL;
     }
 
-    // Método para obtener el token y agregarlo a los headers
-    async getAuthHeaders() {
-        const token = await AuthService.getToken(); // Obtener el token del almacenamiento
+    async getHeaders() {
+        const token = await AsyncStorage.getItem('userToken');
         return {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "", // Si el token existe, se agrega al header
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
         };
     }
 
-    async request(endpoint, method = "GET", body = null, headers = {}) {
+    async request(endpoint, method = 'GET', body = null) {
         try {
-            const authHeaders = await this.getAuthHeaders(); // Obtener los headers con el token
-
+            const headers = await this.getHeaders();
             const config = {
                 method,
-                headers: {
-                    ...authHeaders, // Agregar los headers de autenticación
-                    ...headers,
-                },
+                headers,
+                ...(body ? { body: JSON.stringify(body) } : {}),
             };
 
-            if (body) {
-                config.body = JSON.stringify(body);
-            }
-
             const response = await fetch(`${this.baseURL}${endpoint}`, config);
+            const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
+                throw new Error(data.message || 'Error en la petición');
             }
 
-            return await response.json();
+            return data;
         } catch (error) {
-            console.error("Error en la API:", error);
+            console.error('API Error:', error);
             throw error;
         }
     }
 
-    get(endpoint, headers = {}) {
-        return this.request(endpoint, "GET", null, headers);
+    // Métodos específicos para autenticación
+    async login(credentials) {
+        return this.request('/auth/login', 'POST', credentials);
     }
 
-    post(endpoint, body, headers = {}) {
-        return this.request(endpoint, "POST", body, headers);
+    async register(userData) {
+        return this.request('/auth/register', 'POST', userData);
     }
 
-    put(endpoint, body, headers = {}) {
-        return this.request(endpoint, "PUT", body, headers);
-    }
-
-    delete(endpoint, headers = {}) {
-        return this.request(endpoint, "DELETE", null, headers);
+    async getUserProfile() {
+        return this.request('/auth/profile', 'GET');
     }
 }
 
-// Crear una instancia de la API con la URL base
-// const api = new ApiService("http://10.10.128.183:3000/api"); // 🔥 Cambiar por la IP de tu servidor local para probar en tu telefono con la app de Expo Go
-const api = new ApiService("http://localhost:3000/api");
-
-export default api;
+export default new ApiService();

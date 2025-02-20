@@ -4,28 +4,46 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import { theme } from '../theme';
 import { useAuth } from '../context/AuthContext';
+import { ActivityIndicator } from 'react-native-paper';
+import { API_URL } from '../config';
 
 export default function Login() {
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
+  const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
 
   const handleLogin = async () => {
-    // Implementar lógica de login
-
-    // console.log(email)
-    // console.log(password)
-    const userData = {
-      email,
-      password,
-    };
+    setLoading(true);
+    setError('');
+    setErrors({});
 
     try {
-      login(userData);
-      // console.log(response.token);
+      if (!emailOrUsername || !password) {
+        throw new Error('Por favor ingrese sus credenciales');
+      }
+
+      const isEmail = emailOrUsername.includes('@');
+      const credentials = {
+        [isEmail ? 'email' : 'username']: emailOrUsername,
+        password,
+      };
+
+      await login(credentials);
+      // No need to handle navigation here, AuthContext will handle it
+
     } catch (error) {
+      setError(error.message);
       console.error('Error en el login:', error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const getFieldError = (fieldName) => {
+    return errors[fieldName]?._errors?.[0];
   };
 
   return (
@@ -47,36 +65,51 @@ export default function Login() {
             </Text>
           </View>
 
+          {error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : null}
+
           <TextInput
             mode="outlined"
-            label="Correo electrónico"
-            value={email}
-            onChangeText={setEmail}
-            style={styles.input}
-            keyboardType="email-address"
-            theme={{
-              colors: { primary: theme.colors.primary },
-              roundness: 10,
-            }}
+            label="Email o nombre de usuario"
+            value={emailOrUsername}
+            onChangeText={setEmailOrUsername}
+            style={[styles.input, (getFieldError('email') || getFieldError('username')) && styles.inputError]}
+            error={!!getFieldError('email') || !!getFieldError('username')}
+            autoCapitalize="none"
           />
+          {getFieldError('email') && (
+            <Text style={styles.fieldError}>{getFieldError('email')}</Text>
+          )}
+          {getFieldError('username') && (
+            <Text style={styles.fieldError}>{getFieldError('username')}</Text>
+          )}
 
           <TextInput
             mode="outlined"
             label="Contraseña"
             value={password}
             onChangeText={setPassword}
+            style={[styles.input, getFieldError('password') && styles.inputError]}
+            error={!!getFieldError('password')}
             secureTextEntry
-            style={styles.input}
-            theme={{ colors: { primary: theme.colors.primary }, roundness: 10 }}
           />
+          {getFieldError('password') && (
+            <Text style={styles.fieldError}>{getFieldError('password')}</Text>
+          )}
 
           <Button
             mode="contained"
             onPress={handleLogin}
             style={styles.button}
             buttonColor={theme.colors.primary}
+            disabled={loading}
           >
-            Iniciar Sesión
+            {loading ? (
+              <ActivityIndicator color={theme.colors.surface} />
+            ) : (
+              'Iniciar Sesión'
+            )}
           </Button>
 
           <Link href="/register" asChild>
@@ -138,5 +171,23 @@ const styles = StyleSheet.create({
   inputContent: {
     paddingHorizontal: 12, // Mejor espaciado lateral
     height: 56, // Altura estándar para mantener el label visible
+  },
+  errorText: {
+    color: theme.colors.error,
+    textAlign: 'center',
+    marginBottom: 10,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    padding: 10,
+    borderRadius: 5,
+  },
+  fieldError: {
+    color: theme.colors.error,
+    fontSize: 12,
+    marginTop: -10,
+    marginBottom: 10,
+    marginLeft: 5,
+  },
+  inputError: {
+    borderColor: theme.colors.error,
   },
 });
