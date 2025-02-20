@@ -65,7 +65,52 @@ const validatePasswordUpdate = (req, res, next) => {
     next();
 };
 
+const validateEmailUpdate = (req, res, next) => {
+    const emailUpdateSchema = z.object({
+        email: z.string().email({ message: "Correo no válido" })
+    });
+
+    const result = emailUpdateSchema.safeParse(req.body);
+    if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+    }
+    next();
+};
+
+const customizationSchema = z.object({
+    name: z.string().min(1, { message: "El nombre de la personalización es requerido" }),
+    status: z.boolean(),
+    // Agregar más campos según necesidades
+});
+
+const validateCustomization = (req, res, next) => {
+    const result = customizationSchema.safeParse(req.body);
+    if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+    }
+    next();
+};
+
+//validacion de producto
+const productSchema = z.object({
+    idProductType: z.number().int().positive({ message: "El idProductType debe ser un número positivo" }),
+    name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
+    description: z.string().min(3, { message: "La descripcion no debe esta vacia" }),
+    price: z.number().positive({ message: "El precio debe ser un número positivo" }),
+    status: z.boolean()
+});
+
+const productDetailsSchema = z.object({
+    name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }).optional(),
+    description: z.string().min(3, { message: "La descripción debe tener al menos 3 caracteres" }).optional()
+}).refine(data => data.name !== undefined || data.description !== undefined, {
+    message: "Debe enviar al menos un campo: nombre o description"
+});
+
 module.exports = {
     validateRegister,
-    validatePasswordUpdate
+    validatePasswordUpdate,
+    validateEmailUpdate,
+    validateCustomization,
+    productSchema, productDetailsSchema
 };

@@ -1,8 +1,18 @@
 const express = require("express");
+const cors = require("cors");
 const rateLimit = require('express-rate-limit');
 const app = express();
-const authRoutes = require('./routes/auth.routes');
-const cors = require('cors');
+const authRoutes = require('./routes/auth.routes', './routes/user.routes');
+const userRoutes = require('./routes/user.routes');
+const adminRoutes = require('./routes/admin.routes');
+const productRoutes = require('./routes/product.routes');
+
+// Configurar CORS
+app.use(cors({
+  origin: "http://localhost:8081", // Permitir peticiones desde el frontend
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 // Rate limiting configuration
 const limiter = rateLimit({
@@ -18,6 +28,10 @@ app.use(cors());
 
 //Rutas
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/user', userRoutes);
+app.use('/', productRoutes);
 
 // Rutas de ejemplo
 app.get("/", (req, res) => {
