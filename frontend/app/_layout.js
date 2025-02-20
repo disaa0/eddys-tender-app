@@ -1,8 +1,9 @@
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { useEffect } from 'react';
-import { useRouter, useSegments } from "expo-router";
+import { useRouter, useSegments } from 'expo-router';
 import { theme } from './theme';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Combinar nuestro tema con el tema base de Paper
 const combinedTheme = {
@@ -18,33 +19,32 @@ const combinedTheme = {
 function useProtectedRoute() {
   const segments = useSegments();
   const router = useRouter();
-  
-  // Simularemos un estado de autenticación por ahora
-  const isAuthenticated = true; // Esto después vendrá de un contexto o estado global
+  const { isAuthenticated, isLoading } = useAuth();
+  console.log(segments);
+  console.log(isAuthenticated);
 
   useEffect(() => {
-    const inAuthGroup = segments[0] === "(auth)";
-    
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
     if (!isAuthenticated && !inAuthGroup) {
-      // Redirige a login si no está autenticado y no está en el grupo auth
-      router.replace("/login");
+      router.replace('/login');
     } else if (isAuthenticated && inAuthGroup) {
-      // Redirige al home si está autenticado y está en el grupo auth
-      router.replace("/(app)");
+      router.replace('/(app)');
     }
-  }, [isAuthenticated, segments]);
+  }, [isAuthenticated, segments, isLoading]);
 }
 
-export default function RootLayout() {
-  useProtectedRoute();
+// 🔹 Nuevo componente para manejar la autenticación
+function AppContent() {
+  useProtectedRoute(); // 🔥 Ahora se ejecuta después de que AuthProvider esté disponible
 
   return (
     <PaperProvider theme={combinedTheme}>
       <Stack
         screenOptions={{
-          headerStyle: {
-            backgroundColor: theme.colors.primary,
-          },
+          headerStyle: { backgroundColor: theme.colors.primary },
           headerTintColor: '#fff',
         }}
       >
@@ -53,4 +53,13 @@ export default function RootLayout() {
       </Stack>
     </PaperProvider>
   );
-} 
+}
+
+// 🔥 Ahora AuthProvider envuelve todo correctamente
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}

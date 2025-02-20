@@ -24,6 +24,7 @@ const limiter = rateLimit({
 // Middlewares básicos
 app.use(express.json());
 app.use(limiter); // Apply rate limiting to all routes
+app.use(cors());
 
 //Rutas
 app.use('/api/auth', authRoutes);
