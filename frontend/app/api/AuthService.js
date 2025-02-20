@@ -53,6 +53,18 @@ class AuthService {
             throw error;
         }
     }
+
+    async deleteProfile() {
+        try {
+            const response = await api.deleteProfile();
+            // Clear local storage and session
+            await this.logout();
+            return response;
+        } catch (error) {
+            console.error('Delete profile error:', error);
+            throw error;
+        }
+    }
 }
 
 export default new AuthService();

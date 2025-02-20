@@ -19,7 +19,16 @@ async function login(req, res) {
             ...result
         });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        let status = 400;
+        let message = error.message;
+
+        // Customize error messages
+        if (message.includes('desactivada')) {
+            status = 403;
+            message = 'Esta cuenta ha sido desactivada. Por favor contacta a soporte.';
+        }
+
+        res.status(status).json({ message });
     }
 }
 
@@ -27,7 +36,9 @@ async function deleteProfile(req, res) {
     try {
         const userId = req.user.userId;
         const result = await authService.deleteUserProfile(userId);
-        res.status(200).json(result);
+        res.status(200).json({
+            message: 'Cuenta eliminada exitosamente'
+        });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

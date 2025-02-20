@@ -63,25 +63,19 @@ async function loginUser(email, username, password) {
 
     const user = await prisma.user.findFirst({
         where: {
-            OR: Object.keys(whereCondition).map((key) => ({ [key]: whereCondition[key] }))
+            OR: Object.keys(whereCondition).map((key) => ({ [key]: whereCondition[key] })),
+            status: true
         }
     });
 
     if (!user) {
-        throw new Error('Usuario no encontrado');
+        throw new Error('Usuario no encontrado o cuenta desactivada');
     }
-
-    // Comparar contraseñas con bcrypt
-
-    // if (!bcrypt.compareSync(password, user.password)) {
-    //     throw new Error('Contraseña incorrecta');
-    // }
 
     if (password !== user.password) {
         throw new Error('Contraseña incorrecta');
     }
 
-    // Generate JWT token
     const token = jwt.sign(
         {
             userId: user.idUser,
@@ -105,7 +99,10 @@ async function deleteUserProfile(userId) {
         // Soft delete del usuario
         const user = await tx.user.update({
             where: { idUser: userId },
-            data: { status: false }
+            data: {
+                status: false,
+                updatedAt: new Date()
+            }
         });
 
         // Soft delete de la información asociada
@@ -131,7 +128,13 @@ async function deleteUserProfile(userId) {
             data: { status: false }
         });
 
-        return { message: 'Cuenta desactivada exitosamente' };
+        // Invalidate any active sessions/tokens
+        // Note: This is handled by the auth middleware checking user status
+
+        return {
+            message: 'Cuenta desactivada exitosamente',
+            details: 'Tu cuenta y datos asociados han sido desactivados'
+        };
     });
 }
 

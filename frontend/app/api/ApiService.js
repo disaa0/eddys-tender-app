@@ -53,6 +53,10 @@ class ApiService {
     async updateEmail(email) {
         return this.request('/auth/email', 'PUT', { email });
     }
+
+    async deleteProfile() {
+        return this.request('/auth/profile', 'DELETE');
+    }
 }
 
 export default new ApiService();
