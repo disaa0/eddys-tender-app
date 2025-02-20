@@ -224,3 +224,322 @@ Authorization: Bearer <token>
 - El tipo de usuario por defecto es 1 (usuario normal)
 - Se recomienda usar HTTPS en producción
 - Configurar un valor seguro para JWT_SECRET en producción 
+
+## 8. ENDPOINTS DE ADMINISTRADOR
+
+### 8.1 Activar/Desactivar Producto
+
+**PATCH /api/admin/products/{id}/status**
+
+Alterna el estado de un producto entre activo e inactivo.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Producto activado exitosamente",
+    "product": {
+        "idProduct": 1,
+        "name": "Producto Ejemplo",
+        "status": true,
+        // ... otros campos del producto
+    }
+}
+```
+
+**Errores Posibles:**
+- 400: Producto no encontrado
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 8.2 Editar Personalización de Producto
+
+**PUT /api/admin/products/{id}/customization**
+
+Actualiza o crea una personalización para un producto específico.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Cuerpo de la Petición:**
+```json
+{
+    "name": "Nombre de la personalización",
+    "status": true
+}
+```
+
+**Validaciones:**
+- name: String no vacío
+- status: Boolean requerido
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Personalización actualizada exitosamente",
+    "personalization": {
+        "idPersonalization": 1,
+        "name": "Nombre de la personalización",
+        "status": true,
+        // ... otros campos
+    },
+    "productPersonalization": {
+        "idProductPersonalization": 1,
+        "idProduct": 1,
+        "idPersonalization": 1,
+        // ... otros campos
+    }
+}
+```
+
+**Errores Posibles:**
+- 400: Producto no encontrado
+- 400: Datos de personalización inválidos
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 8.3 Permisos de Administrador
+
+Para acceder a los endpoints de administrador, el usuario debe:
+
+1. Estar autenticado (token JWT válido)
+2. Tener tipo de usuario administrador (idUserType === 1)
+
+**Respuesta de Error de Permisos (403):**
+```json
+{
+    "message": "Acceso denegado. Se requieren permisos de administrador."
+}
+```
+
+### 8.4 Consideraciones Técnicas
+
+1. **Transacciones:**
+   - Las operaciones de personalización utilizan transacciones Prisma
+   - Si algo falla, se hace rollback automático
+
+2. **Validaciones:**
+   - Se valida la existencia del producto
+   - Se validan los datos de personalización
+   - Se verifica el estado del producto
+
+3. **Seguridad:**
+   - Todos los endpoints requieren autenticación
+   - Se verifica el rol de administrador
+   - Se registra el usuario que realiza los cambios
+
+4. **Respuestas:**
+   - Códigos HTTP estándar
+   - Mensajes descriptivos
+   - Datos actualizados en la respuesta
+
+5. **Auditoría:**
+   - Se registra quién realizó los cambios (idUserAdded)
+   - Se mantiene historial de estados
+   - Timestamps automáticos 
+
+## 9. ENDPOINTS DE USUARIO
+
+### 9.1 Actualizar Email
+
+**PUT /api/auth/email**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Cuerpo de la Petición:**
+```json
+{
+    "email": "nuevo@email.com"
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Correo electrónico actualizado exitosamente"
+}
+```
+
+**Errores Posibles:**
+- 400: Email inválido
+- 400: Email ya existe
+- 401: Token no proporcionado
+- 403: Token inválido
+
+## 10. ENDPOINTS DE PRODUCTOS
+
+### 10.1 Listar Productos (Admin)
+
+**GET /admin/products**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Query:**
+- page: Número de página (default: 1)
+- limit: Productos por página (fijo: 5)
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Productos obtenidos correctamente",
+    "data": {
+        "products": [
+            {
+                "idProduct": 1,
+                "name": "Hamburguesa Clásica",
+                "description": "Hamburguesa con carne, lechuga, tomate y queso",
+                "price": 89.99,
+                "status": true,
+                "productType": {
+                    "type": "Comida"
+                }
+            }
+        ],
+        "totalPages": 3,
+        "currentPage": 1
+    }
+}
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 10.2 Agregar Producto (Admin)
+
+**POST /admin/products**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Cuerpo de la Petición:**
+```json
+{
+    "idProductType": 1,
+    "name": "Nuevo Producto",
+    "description": "Descripción del producto",
+    "price": 99.99,
+    "status": true
+}
+```
+
+**Respuesta Exitosa (201):**
+```json
+{
+    "message": "Producto agregado exitosamente",
+    "product": {
+        "idProduct": 1,
+        "name": "Nuevo Producto",
+        "description": "Descripción del producto",
+        "price": 99.99,
+        "status": true,
+        "idUserAdded": 1
+    }
+}
+```
+
+**Errores Posibles:**
+- 400: Datos de producto inválidos
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 10.3 Modificar Detalles de Producto (Admin)
+
+**PUT /admin/products/{id}**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+- id: ID del producto a modificar
+
+**Cuerpo de la Petición:**
+```json
+{
+    "name": "Nombre Actualizado",
+    "description": "Nueva descripción"
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Detalles del producto actualizados correctamente",
+    "product": {
+        "idProduct": 1,
+        "name": "Nombre Actualizado",
+        "description": "Nueva descripción",
+        "price": 99.99,
+        "status": true
+    }
+}
+```
+
+**Errores Posibles:**
+- 400: ID de producto inválido
+- 400: Datos de actualización inválidos
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 404: Producto no encontrado
+- 500: Error del servidor
+
+## 11. VALIDACIONES DE PRODUCTOS
+
+### 11.1 Creación de Producto
+- **idProductType**: Número entero positivo
+- **name**: Mínimo 3 caracteres
+- **description**: Mínimo 3 caracteres
+- **price**: Número positivo
+- **status**: Booleano
+
+### 11.2 Actualización de Detalles
+- **name**: (Opcional) Mínimo 3 caracteres
+- **description**: (Opcional) Mínimo 3 caracteres
+- Al menos uno de los campos debe estar presente
+
+## 12. NOTAS TÉCNICAS ADICIONALES
+
+### 12.1 Paginación
+- Implementada en listado de productos
+- 5 productos por página
+- Incluye total de páginas y página actual
+
+### 12.2 Validaciones
+- Uso de Zod para validación de datos
+- Manejo de errores específicos por campo
+- Transformación automática de tipos
+
+### 12.3 Seguridad
+- Verificación de roles para endpoints administrativos
+- Validación de propiedad de recursos
+- Sanitización de datos de entrada 

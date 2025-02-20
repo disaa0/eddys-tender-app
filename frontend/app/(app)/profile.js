@@ -1,11 +1,71 @@
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Avatar, Text, List, Divider, Surface } from 'react-native-paper';
+import { Avatar, Text, List, Divider, Surface, Button, Snackbar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { theme } from '../theme';
+import { useAuth } from '../context/AuthContext';
+import { useUserInfo } from '../hooks/useUserInfo';
+import { useState } from 'react';
+import ConfirmationDialog from '../components/ConfirmationDialog';
+import AuthService from '../api/AuthService';
 
 export default function Profile() {
   const router = useRouter();
+  const { logout } = useAuth();
+  // hook personalizado para obtener la información del usuario
+  // Descomentar para usar el hook personalizado
 
+  const { userInfoH, loading, error } = useUserInfo(); // Usamos el hook aquí
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeleting(true);
+      const response = await AuthService.deleteProfile();
+
+      // Show success message briefly before logout
+      setSnackbar({
+        visible: true,
+        message: response.message || 'Cuenta eliminada exitosamente'
+      });
+
+      // Wait a moment to show the message before logging out
+      setTimeout(async () => {
+        await logout();
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setSnackbar({
+        visible: true,
+        message: error.message || 'Error al eliminar la cuenta'
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogVisible(false);
+    }
+  };
+
+  // Si está cargando, muestra un mensaje de loading
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  // Si hubo un error, muestra el mensaje de error
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>{error}</Text>
+      </View>
+    );
+  }
+
+  // console.log(userInfoH);
   const userInfo = {
     name: 'Alejandro Fontes',
     email: 'alejandrofontes@gmail.com',
@@ -13,71 +73,106 @@ export default function Profile() {
     address: 'Calle Principal 123, Colonia Centro',
     memberSince: '2024',
   };
-
   return (
-    <ScrollView style={styles.container}>
-      <Surface style={styles.header} elevation={2}>
-        <Avatar.Image
-          size={120}
-          source={require('../../assets/profile.png')}
-          style={[styles.avatar, styles.squareAvatar]}
-        />
-        <Text variant="headlineSmall" style={styles.name}>
-          {userInfo.name}
-        </Text>
-        <Text variant="bodyLarge" style={styles.memberSince}>
-          Miembro desde {userInfo.memberSince}
-        </Text>
-      </Surface>
+    <>
+      <ScrollView style={styles.container}>
+        <Surface style={styles.header} elevation={2}>
+          <Avatar.Image
+            size={120}
+            source={require('../../assets/profile.png')}
+            style={[styles.avatar, styles.squareAvatar]}
+          />
+          <Text variant="headlineSmall" style={styles.name}>
+            {userInfoH.userInformation.name + ' ' + userInfoH.userInformation.lastName}
+          </Text>
+          <Text variant="bodyLarge" style={styles.memberSince}>
+            Miembro desde {new Date(userInfoH.createdAt).getFullYear()}
+          </Text>
+        </Surface>
 
-      <Surface style={styles.infoSection} elevation={1}>
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          Información Personal
-        </Text>
-        <List.Item
-          title="Correo"
-          description={userInfo.email}
-          left={(props) => <List.Icon {...props} icon="email" />}
-        />
-        <Divider />
-        <List.Item
-          title="Teléfono"
-          description={userInfo.phone}
-          left={(props) => <List.Icon {...props} icon="phone" />}
-        />
-        <Divider />
-        <List.Item
-          title="Dirección"
-          description={userInfo.address}
-          left={(props) => <List.Icon {...props} icon="map-marker" />}
-        />
-      </Surface>
+        <Surface style={styles.infoSection} elevation={1}>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            Información Personal
+          </Text>
+          <List.Item
+            title="Correo"
+            description={userInfoH.email}
+            left={(props) => <List.Icon {...props} icon="email" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/profile/edit-email')}
+          />
+          <Divider />
+          <List.Item
+            title="Teléfono"
+            description={userInfoH.userInformation.phone}
+            left={(props) => <List.Icon {...props} icon="phone" />}
+          />
+          <Divider />
+          <List.Item
+            title="Dirección"
+            description={userInfoH.userInformation?.address || 'No especificada'}
+            left={(props) => <List.Icon {...props} icon="map-marker" />}
+          />
+        </Surface>
 
-      <Surface style={styles.infoSection} elevation={1}>
-        <List.Item
-          title="Historial de Pedidos"
-          left={(props) => <List.Icon {...props} icon="history" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
-          onPress={() => router.push('/orders')}
+        <Surface style={styles.infoSection} elevation={1}>
+          <List.Item
+            title="Historial de Pedidos"
+            left={(props) => <List.Icon {...props} icon="history" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/orders')}
+          />
+          <Divider />
+          <List.Item
+            title="Métodos de Pago"
+            left={(props) => <List.Icon {...props} icon="credit-card" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/profile/payment-methods')}
+          />
+          <Divider />
+          <List.Item
+            title="Cerrar Sesión"
+            left={(props) => (
+              <List.Icon {...props} icon="logout" color={theme.colors.error} />
+            )}
+            titleStyle={{ color: theme.colors.error }}
+            onPress={logout}
+          />
+        </Surface>
+
+        <Surface style={[styles.infoSection, styles.dangerSection]} elevation={1}>
+          <List.Item
+            title="Eliminar Cuenta"
+            description="Esta acción no se puede deshacer"
+            left={(props) => (
+              <List.Icon {...props} icon="delete" color={theme.colors.error} />
+            )}
+            onPress={() => setDeleteDialogVisible(true)}
+            disabled={isDeleting}
+            titleStyle={{ color: theme.colors.error }}
+          />
+        </Surface>
+
+        <ConfirmationDialog
+          visible={deleteDialogVisible}
+          onDismiss={() => !isDeleting && setDeleteDialogVisible(false)}
+          onConfirm={handleDeleteAccount}
+          title="Eliminar Cuenta"
+          message="¿Estás seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer y perderás todo tu historial y datos."
+          confirmButtonDisabled={isDeleting}
+          confirmButtonLoading={isDeleting}
         />
-        <Divider />
-        <List.Item
-          title="Métodos de Pago"
-          left={(props) => <List.Icon {...props} icon="credit-card" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
-          onPress={() => router.push('/profile/payment-methods')}
-        />
-        <Divider />
-        <List.Item
-          title="Cerrar Sesión"
-          left={(props) => (
-            <List.Icon {...props} icon="logout" color={theme.colors.error} />
-          )}
-          titleStyle={{ color: theme.colors.error }}
-          onPress={() => router.push('/login')}
-        />
-      </Surface>
-    </ScrollView>
+      </ScrollView>
+
+      <Snackbar
+        visible={snackbar.visible}
+        onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
+        duration={3000}
+        style={styles.snackbar}
+      >
+        {snackbar.message}
+      </Snackbar>
+    </>
   );
 }
 
@@ -120,5 +215,19 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 8,
     color: theme.colors.primary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  snackbar: {
+    position: 'absolute',
+    bottom: 0,
+    backgroundColor: theme.colors.error,
+  },
+  dangerSection: {
+    marginTop: 32,
+    marginBottom: 32,
   },
 });

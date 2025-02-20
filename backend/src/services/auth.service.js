@@ -1,6 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+//const bcrypt = require('bcrypt');
 const { encrypt, decrypt } = require('../config/crypto.config');
 const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/jwt.config');
 
@@ -35,7 +35,7 @@ async function registerUser(email, password, username, name, lastName, secondLas
                 password: password,
                 username: username,
                 status: true,
-                idUserType: 1,//De momento solo registra usuarios normales, una vez se implemente el sistema de roles y JWT se cambiara
+                idUserType: 1,//De momento solo registra usuarios adminstradores, una vez se implemente el sistema de roles y JWT se cambiara
             },
         });
 
@@ -61,39 +61,40 @@ async function loginUser(email, username, password) {
     if (email) whereCondition.email = email;
     if (username) whereCondition.username = username;
 
-    const user = await prisma.user.findFirst({
+    // First check if user exists at all (regardless of status)
+    const userExists = await prisma.user.findFirst({
         where: {
             OR: Object.keys(whereCondition).map((key) => ({ [key]: whereCondition[key] }))
         }
     });
 
-    if (!user) {
+    if (!userExists) {
         throw new Error('Usuario no encontrado');
     }
 
-    // Comparar contraseñas con bcrypt
+    // Then check if user is active
+    if (!userExists.status) {
+        throw new Error('Cuenta desactivada');
+    }
 
-    // if (!bcrypt.compareSync(password, user.password)) {
-    //     throw new Error('Contraseña incorrecta');
-    // }
-
-    if (password !== user.password) {
+    // Check password
+    if (password !== userExists.password) {
         throw new Error('Contraseña incorrecta');
     }
 
-    // Generate JWT token
+    // Generate token
     const token = jwt.sign(
         {
-            userId: user.idUser,
-            email: user.email,
-            username: user.username,
-            userType: user.idUserType
+            userId: userExists.idUser,
+            email: userExists.email,
+            username: userExists.username,
+            userType: userExists.idUserType
         },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRES_IN }
     );
 
-    const { password: _, ...userWithoutPassword } = user;
+    const { password: _, ...userWithoutPassword } = userExists;
     return {
         user: userWithoutPassword,
         token
@@ -105,7 +106,10 @@ async function deleteUserProfile(userId) {
         // Soft delete del usuario
         const user = await tx.user.update({
             where: { idUser: userId },
-            data: { status: false }
+            data: {
+                status: false,
+                updatedAt: new Date()
+            }
         });
 
         // Soft delete de la información asociada
@@ -131,7 +135,13 @@ async function deleteUserProfile(userId) {
             data: { status: false }
         });
 
-        return { message: 'Cuenta desactivada exitosamente' };
+        // Invalidate any active sessions/tokens
+        // Note: This is handled by the auth middleware checking user status
+
+        return {
+            message: 'Cuenta desactivada exitosamente',
+            details: 'Tu cuenta y datos asociados han sido desactivados'
+        };
     });
 }
 
@@ -196,9 +206,36 @@ async function updatePassword(userId, oldPassword, newPassword) {
     }
 }
 
+async function updateEmail(userId, email) {
+    // Validate if email already exists
+    const existingUser = await prisma.user.findUnique({
+        where: { email }
+    });
+
+    if (existingUser && existingUser.idUser !== userId) {
+        throw new Error('Este correo electrónico ya está en uso');
+    }
+
+    // Update email
+    const updatedUser = await prisma.user.update({
+        where: { idUser: userId },
+        data: { email },
+        select: {
+            idUser: true,
+            email: true,
+            username: true,
+            status: true,
+            idUserType: true
+        }
+    });
+
+    return updatedUser;
+}
+
 module.exports = {
     registerUser,
     loginUser,
     deleteUserProfile,
-    updatePassword
+    updatePassword,
+    updateEmail
 };
