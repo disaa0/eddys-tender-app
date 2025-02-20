@@ -64,6 +64,8 @@ export default function Profile() {
           title="Correo"
           description={userInfoH.email}
           left={(props) => <List.Icon {...props} icon="email" />}
+          right={(props) => <List.Icon {...props} icon="chevron-right" />}
+          onPress={() => router.push('/profile/edit-email')}
         />
         <Divider />
         <List.Item

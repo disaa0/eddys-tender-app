@@ -197,29 +197,30 @@ async function updatePassword(userId, oldPassword, newPassword) {
 }
 
 async function updateEmail(userId, email) {
-    try {
-        const user = await prisma.user.findUnique({
-            where: { idUser: userId }
-        });
+    // Validate if email already exists
+    const existingUser = await prisma.user.findUnique({
+        where: { email }
+    });
 
-        if (!user) {
-            throw new Error('Usuario no encontrado');
-        }
-
-        await prisma.user.update({
-            where: { idUser: userId },
-            data: {
-                email: email,
-                updatedAt: new Date()
-            }
-        });
-
-        return { message: 'Correo electrónico actualizado exitosamente' };
-    } catch (error) {
-        throw error;
+    if (existingUser && existingUser.idUser !== userId) {
+        throw new Error('Este correo electrónico ya está en uso');
     }
-}
 
+    // Update email
+    const updatedUser = await prisma.user.update({
+        where: { idUser: userId },
+        data: { email },
+        select: {
+            idUser: true,
+            email: true,
+            username: true,
+            status: true,
+            idUserType: true
+        }
+    });
+
+    return updatedUser;
+}
 
 module.exports = {
     registerUser,

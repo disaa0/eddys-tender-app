@@ -47,7 +47,11 @@ class ApiService {
     }
 
     async getUserProfile() {
-        return this.request('/auth/profile', 'GET');
+        return this.request('/user/profile', 'GET');
+    }
+
+    async updateEmail(email) {
+        return this.request('/auth/email', 'PUT', { email });
     }
 }
 

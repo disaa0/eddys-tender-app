@@ -37,6 +37,22 @@ class AuthService {
     async logout() {
         await AsyncStorage.multiRemove(['userToken', 'userData']);
     }
+
+    async updateEmail(email) {
+        try {
+            const response = await api.updateEmail(email);
+            // Update stored user data
+            const currentUser = await this.getUser();
+            if (currentUser) {
+                currentUser.email = email;
+                await this.setUser(currentUser);
+            }
+            return response;
+        } catch (error) {
+            console.error('Update email error:', error);
+            throw error;
+        }
+    }
 }
 
 export default new AuthService();

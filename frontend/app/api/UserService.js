@@ -4,7 +4,7 @@ class UserService {
     // Método para obtener la información del usuario
     async getUserInfo() {
         try {
-            const response = await api.get('/user/profile');
+            const response = await api.getUserProfile();
             // console.log(response);
             return response; // Deberías tener el endpoint adecuado para traer la información.
         } catch (error) {

@@ -101,6 +101,13 @@ export default function AppLayout() {
               href: null,
             }}
           />
+          <Tabs.Screen
+            name="profile/edit-email"
+            options={{
+              href: null,
+              title: 'Editar Correo',
+            }}
+          />
         </Tabs>
       </SafeAreaView>
     </SafeAreaProvider>

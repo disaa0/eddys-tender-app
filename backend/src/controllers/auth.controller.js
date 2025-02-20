@@ -50,9 +50,21 @@ async function updateEmail(req, res) {
     try {
         const userId = req.user.userId;
         const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: 'El correo electrónico es requerido' });
+        }
+
         const result = await authService.updateEmail(userId, email);
-        res.status(200).json(result);
+        res.status(200).json({
+            message: 'Correo electrónico actualizado exitosamente',
+            user: result
+        });
     } catch (error) {
+        // Handle specific error cases
+        if (error.code === 'P2002') {
+            return res.status(400).json({ message: 'Este correo electrónico ya está en uso' });
+        }
         res.status(400).json({ message: error.message });
     }
 }
