@@ -3,10 +3,34 @@ import { Avatar, Text, List, Divider, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { theme } from '../theme';
 import { useAuth } from '../context/AuthContext';
+import { useUserInfo } from '../hooks/useUserInfo';
+
 
 export default function Profile() {
   const router = useRouter();
   const { logout } = useAuth();
+  // hook personalizado para obtener la información del usuario
+  // Descomentar para usar el hook personalizado
+  //
+  // const { userInfoH, loading, error } = useUserInfo(); // Usamos el hook aquí
+
+  // Si está cargando, muestra un mensaje de loading
+  // if (loading) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <Text>Loading...</Text>
+  //     </View>
+  //   );
+  // }
+
+  // // Si hubo un error, muestra el mensaje de error
+  // if (error) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <Text>{error}</Text>
+  //     </View>
+  //   );
+  // }
 
   const userInfo = {
     name: 'Alejandro Fontes',
@@ -15,7 +39,6 @@ export default function Profile() {
     address: 'Calle Principal 123, Colonia Centro',
     memberSince: '2024',
   };
-
   return (
     <ScrollView style={styles.container}>
       <Surface style={styles.header} elevation={2}>
@@ -122,5 +145,10 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 8,
     color: theme.colors.primary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

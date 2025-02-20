@@ -3,7 +3,6 @@ import { TextInput, Button, Text } from 'react-native-paper';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { theme } from '../theme';
-import AuthService from '../api/AuthService';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
