@@ -355,3 +355,163 @@ Para acceder a los endpoints de administrador, el usuario debe:
    - Se registra quién realizó los cambios (idUserAdded)
    - Se mantiene historial de estados
    - Timestamps automáticos 
+
+## 9. ENDPOINTS DE USUARIO
+
+### 9.1 Actualizar Email
+
+**PUT /api/auth/email**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Cuerpo de la Petición:**
+```json
+{
+    "email": "nuevo@email.com"
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Correo electrónico actualizado exitosamente"
+}
+```
+
+**Errores Posibles:**
+- 400: Email inválido
+- 400: Email ya existe
+- 401: Token no proporcionado
+- 403: Token inválido
+
+## 10. ENDPOINTS DE PRODUCTOS
+
+### 10.1 Listar Productos
+
+**GET /api/products**
+
+**Parámetros de Query:**
+- page: Número de página (default: 1)
+- limit: Productos por página (fijo: 5)
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Productos obtenidos correctamente",
+    "data": {
+        "products": [
+            {
+                "idProduct": 1,
+                "name": "Hamburguesa Clásica",
+                "description": "Hamburguesa con carne, lechuga, tomate y queso",
+                "price": 89.99,
+                "status": true,
+                "productType": {
+                    "type": "Comida"
+                }
+            }
+        ],
+        "totalPages": 3,
+        "currentPage": 1
+    }
+}
+```
+
+### 10.2 Agregar Producto
+
+**POST /api/products**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Cuerpo de la Petición:**
+```json
+{
+    "idProductType": 1,
+    "name": "Nuevo Producto",
+    "description": "Descripción del producto",
+    "price": 99.99,
+    "status": true
+}
+```
+
+**Respuesta Exitosa (201):**
+```json
+{
+    "message": "Producto agregado exitosamente",
+    "product": {
+        "idProduct": 1,
+        "name": "Nuevo Producto",
+        "description": "Descripción del producto",
+        "price": 99.99,
+        "status": true
+    }
+}
+```
+
+### 10.3 Modificar Detalles de Producto
+
+**PATCH /api/products/{id}**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Cuerpo de la Petición:**
+```json
+{
+    "name": "Nombre Actualizado",
+    "description": "Nueva descripción"
+}
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Detalles del producto actualizados correctamente",
+    "product": {
+        "idProduct": 1,
+        "name": "Nombre Actualizado",
+        "description": "Nueva descripción",
+        "price": 99.99,
+        "status": true
+    }
+}
+```
+
+## 11. VALIDACIONES DE PRODUCTOS
+
+### 11.1 Creación de Producto
+- **idProductType**: Número entero positivo
+- **name**: Mínimo 3 caracteres
+- **description**: Mínimo 3 caracteres
+- **price**: Número positivo
+- **status**: Booleano
+
+### 11.2 Actualización de Detalles
+- **name**: (Opcional) Mínimo 3 caracteres
+- **description**: (Opcional) Mínimo 3 caracteres
+- Al menos uno de los campos debe estar presente
+
+## 12. NOTAS TÉCNICAS ADICIONALES
+
+### 12.1 Paginación
+- Implementada en listado de productos
+- 5 productos por página
+- Incluye total de páginas y página actual
+
+### 12.2 Validaciones
+- Uso de Zod para validación de datos
+- Manejo de errores específicos por campo
+- Transformación automática de tipos
+
+### 12.3 Seguridad
+- Verificación de roles para endpoints administrativos
+- Validación de propiedad de recursos
+- Sanitización de datos de entrada 
