@@ -1,173 +1,202 @@
-import { View, FlatList, StyleSheet, Image } from 'react-native';
-import { Card, Text, Searchbar, Chip, Surface } from 'react-native-paper';
-import { useState } from 'react';
+import { View, FlatList, StyleSheet, Alert } from 'react-native';
+import { Card, Text, Searchbar, Button, ActivityIndicator, IconButton } from 'react-native-paper';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import { theme } from '../theme';
-import { MaterialIcons } from '@expo/vector-icons';
-import ProductCard from '../components/ProductCard';
-import CategoryChips from '../components/CategoryChips';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { FILTERS } from '../(app)';
+import AdminApiService from '../api/AdminApiService';
 
-export default function adminDashboard() {
-  const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
-
-// Importar imágenes de manera segura
-const PRODUCT_IMAGES = {
-  tenders: require('../../assets/products/tenders.png'),
-  burger: require('../../assets/products/burger.png'),
-  // limonada: require('../../assets/products/limonada.png'),
-  // papas: require('../../assets/products/papas.png')
-};
-
-const PRODUCTS = [
-  {
-    id: 1,
-    name: 'Tenders',
-    price: 165,
-    category: 'Combos',
-    imageKey: 'tenders',
-    description: 'Deliciosas tiras de pollo empanizadas',
-  },
-  {
-    id: 2,
-    name: 'Burger',
-    price: 165,
-    category: 'Combos',
-    imageKey: 'burger',
-    description: 'Hamburguesa clásica con queso',
-  },
-  {
-    id: 3,
-    name: 'Limonada',
-    price: 40,
-    category: 'Bebidas',
-    imageKey: 'limonada',
-    description: 'Limonada natural',
-  },
-  {
-    id: 4,
-    name: 'Orden de papas',
-    description: '250 gr',
-    price: 30,
-    category: 'Complementos',
-    imageKey: 'papas',
-  },
-];
+export default function AdminDashboard() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedFilter, setSelectedFilter] = useState('');
   const router = useRouter();
 
-  const renderProduct = ({ item }) => {
-    const imageSource = PRODUCT_IMAGES[item.imageKey];
-    return (
-      <ProductCard
-        product={{ ...item, imageSource }}
-        onPress={() => router.push(`/product/${item.id}`)}
-        onAddToCart={() => {
-          // Implementar lógica para agregar al carrito
-          router.push('/cart');
-        }}
-      />
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await AdminApiService.getProducts(page);
+      setProducts(response.data.products);
+      setTotalPages(response.data.totalPages);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load products on page change
+  useEffect(() => {
+    loadProducts();
+  }, [page]);
+
+  // Refresh products when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      loadProducts();
+    }, [])
+  );
+
+  const handleToggleStatus = async (id) => {
+    try {
+      await AdminApiService.toggleProductStatus(id);
+      loadProducts(); // Reload products after toggle
+    } catch (err) {
+      console.error('Error toggling product status:', err);
+    }
+  };
+
+  const handleEditProduct = (productId) => {
+    router.push({
+      pathname: '/(appAdmin)/product/[id]',
+      params: { id: productId }
+    });
+  };
+
+  const handleBack = () => {
+    Alert.alert(
+      'Salir del Panel',
+      '¿Deseas salir del panel de administración?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Salir',
+          onPress: () => router.push('/(app)')
+        }
+      ]
     );
   };
 
+  const handleAddProduct = () => {
+    router.push('/(appAdmin)/addProduct');
+  };
+
+  const renderProduct = ({ item }) => (
+    <Card
+      style={styles.productCard}
+      onPress={() => handleEditProduct(item.idProduct)}
+    >
+      <Card.Content>
+        <View style={styles.productHeader}>
+          <Text variant="titleMedium">{item.name}</Text>
+          <IconButton
+            icon="pencil"
+            size={20}
+            onPress={() => handleEditProduct(item.idProduct)}
+          />
+        </View>
+        <Text variant="bodyMedium">Precio: ${item.price}</Text>
+        <Text variant="bodyMedium">
+          Estado: {item.status ? 'Activo' : 'Inactivo'}
+        </Text>
+      </Card.Content>
+    </Card>
+  );
+
+  if (loading && page === 1) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>EDDY'S</Text>
-          <MaterialIcons name="person" size={24} color={theme.colors.primary} />
-        </View>
-
-        <View style={styles.searchContainer}>
-          <MaterialIcons
-            name="search"
-            size={24}
-            color="#666"
-            style={styles.searchIcon}
-          />
-          <Searchbar
-            placeholder="Buscar"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            style={styles.searchbar}
-            inputStyle={styles.searchInput}
-            icon={() => null}
-          />
-        </View>
-
-        <CategoryChips
-          categories={FILTERS}
-          selectedCategory={selectedFilter}
-          onSelect={setSelectedFilter}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <IconButton
+          icon="arrow-left"
+          size={24}
+          onPress={handleBack}
         />
-
-        <CategoryChips
-          categories={CATEGORIES}
-          selectedCategory={selectedCategory}
-          onSelect={setSelectedCategory}
-        />
-
-        <FlatList
-          data={PRODUCTS.sort((a,b) => {
-            if (selectedFilter == 'A-Z')
-              return(a.name.localeCompare(b.name))
-            else if (selectedFilter == 'Z-A')
-              return (b.name.localeCompare(a.name))
-            else if (selectedFilter == 'Más pedidos')
-              return ((a.id - b.id))
-          })}
-          numColumns={2}
-          renderItem={renderProduct}
-          contentContainerStyle={styles.productList}
+        <Text variant="titleLarge" style={styles.title}>Panel de Administración</Text>
+        <IconButton
+          icon="plus"
+          size={24}
+          onPress={handleAddProduct}
         />
       </View>
-    </SafeAreaView>
+
+      <Searchbar
+        placeholder="Buscar productos"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        style={styles.searchbar}
+      />
+
+      <FlatList
+        data={products}
+        renderItem={renderProduct}
+        keyExtractor={(item) => item.idProduct.toString()}
+        contentContainerStyle={styles.productList}
+        onEndReached={() => {
+          if (page < totalPages) {
+            setPage(page + 1);
+          }
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          loading && page > 1 ? (
+            <ActivityIndicator style={styles.loadingMore} />
+          ) : null
+        }
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff', // Asegura que el notch no muestre un color incorrecto
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    padding: 16,
+    backgroundColor: theme.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  searchIcon: {
-    marginRight: 8,
+  title: {
+    flex: 1,
+    textAlign: 'center',
   },
   searchbar: {
-    flex: 1,
-    elevation: 0,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 20,
-    height: 40,
-  },
-  searchInput: {
-    fontSize: 16,
+    margin: 16,
   },
   productList: {
+    padding: 16,
+  },
+  productCard: {
+    marginBottom: 16,
+  },
+  productHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingMore: {
     padding: 16,
   },
 });

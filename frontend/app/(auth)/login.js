@@ -6,6 +6,7 @@ import { theme } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { ActivityIndicator } from 'react-native-paper';
 import { API_URL } from '../config';
+import { useRouter } from 'expo-router';
 
 export default function Login() {
   const { login } = useAuth();
@@ -14,6 +15,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [errors, setErrors] = useState({});
+  const router = useRouter();
 
   const handleLogin = async () => {
     setLoading(true);
@@ -31,8 +33,14 @@ export default function Login() {
         password,
       };
 
-      await login(credentials);
-      // No need to handle navigation here, AuthContext will handle it
+      const response = await login(credentials);
+
+      // Check user type and redirect accordingly
+      if (response.user.idUserType === 1) {
+        router.replace('/(appAdmin)');
+      } else {
+        router.replace('/(app)');
+      }
 
     } catch (error) {
       setError(error.message);

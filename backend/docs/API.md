@@ -227,11 +227,123 @@ Authorization: Bearer <token>
 
 ## 8. ENDPOINTS DE ADMINISTRADOR
 
-### 8.1 Activar/Desactivar Producto
+### 8.1 Gestión de Productos
 
-**PATCH /api/admin/products/{id}/status**
+**GET /api/admin/products**
 
-Alterna el estado de un producto entre activo e inactivo.
+Lista todos los productos con paginación.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Query:**
+- page: Número de página (default: 1)
+- limit: Productos por página (default: 5)
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Productos obtenidos correctamente",
+    "data": {
+        "products": [
+            {
+                "idProduct": 1,
+                "name": "Hamburguesa Clásica",
+                "description": "Hamburguesa con carne, lechuga, tomate y queso",
+                "price": 89.99,
+                "status": true,
+                "productType": {
+                    "type": "Comida"
+                }
+            }
+        ],
+        "totalPages": 3,
+        "currentPage": 1
+    }
+}
+```
+
+**GET /api/admin/products/:id**
+
+Obtiene un producto específico por ID.
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Producto obtenido correctamente",
+    "data": {
+        "product": {
+            "idProduct": 1,
+            "name": "Hamburguesa Clásica",
+            "description": "Hamburguesa con carne, lechuga, tomate y queso",
+            "price": 89.99,
+            "status": true,
+            "idProductType": 1,
+            "idUserAdded": 1,
+            "createdAt": "2025-02-20T16:06:12.006Z"
+        }
+    }
+}
+```
+
+**Errores Posibles:**
+- 400: ID de producto inválido
+- 404: Producto no encontrado
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+
+**POST /api/admin/products**
+
+Crea un nuevo producto.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Cuerpo de la Petición:**
+```json
+{
+    "name": "Nuevo Producto",
+    "description": "Descripción del producto",
+    "price": 99.99,
+    "ingredients": ["ing1", "ing2"],
+    "category": "Comida",
+    "image": "url_imagen"
+}
+```
+
+**PUT /api/admin/products/:id**
+
+Modifica los detalles de un producto existente.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+- id: ID del producto a modificar
+
+**Cuerpo de la Petición:**
+```json
+{
+    "name": "Nombre Actualizado",
+    "description": "Nueva descripción",
+    "price": 109.99
+}
+```
+
+**PATCH /api/admin/products/:id/status**
+
+Alterna el estado de un producto.
 
 **Headers Requeridos:**
 ```

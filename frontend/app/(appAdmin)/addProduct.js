@@ -1,29 +1,66 @@
 import { View, Alert, StyleSheet, ScrollView, Image } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import { Button, TextInput, IconButton, Text, Card, Snackbar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import * as ImagePicker from "expo-image-picker";
-import axios from "axios";
+import AdminApiService from '../api/AdminApiService';
 import RNPickerSelect from "react-native-picker-select";
+import { theme } from '../theme';
 
-
-
-export default function addProduct() {
+export default function AddProduct() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", price: "", description: "", image:"o", ingredients:[], category:"" });
-  const [category, setCategory] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [form, setForm] = useState({
+    name: "",
+    price: "",
+    description: "",
+    idProductType: "",
+    status: true
+  });
   const [image, setImage] = useState("");
+  const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
 
+  // Validate form data
+  const validateForm = () => {
+    const errors = [];
 
-  const handleChange = (key, value) => {
-    if (key == "ingredients"){
-        value = value.split(",")
+    // Name validation
+    if (!form.name.trim()) {
+      errors.push('El nombre del producto es requerido');
+    } else if (form.name.trim().length < 3) {
+      errors.push('El nombre debe tener al menos 3 caracteres');
     }
-    setForm({ ...form, [key]: value });
+
+    // Price validation
+    const price = parseFloat(form.price);
+    if (!form.price) {
+      errors.push('El precio es requerido');
+    } else if (isNaN(price) || price <= 0) {
+      errors.push('El precio debe ser un número válido mayor a 0');
+    }
+
+    // Description validation
+    if (!form.description.trim()) {
+      errors.push('La descripción es requerida');
+    } else if (form.description.trim().length < 10) {
+      errors.push('La descripción debe tener al menos 10 caracteres');
+    }
+
+    // Product type validation
+    if (!form.idProductType) {
+      errors.push('El tipo de producto es requerido');
+    }
+
+    return errors;
   };
 
-// 📌 Pick an image from the gallery
-const pickImage = async () => {
+  const handleChange = (key, value) => {
+    setForm({ ...form, [key]: value });
+    if (error) setError('');
+  };
+
+  const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -35,181 +72,218 @@ const pickImage = async () => {
     }
   };
 
-  // 📌 Upload the selected image
-  const uploadImage = async () => {
-    if (!image) {
-      Alert.alert("No Image Selected", "Please select an image first.");
-      return;
-    }
-
-    let formData = new FormData();
-    formData.append("file", {
-      uri: image,
-      name: "upload.jpg",
-      type: "image/jpeg",
-    });
-
+  const handleAddProduct = async () => {
     try {
-      const response = await axios.post("YOUR_SERVER_URL/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      Alert.alert("Upload Successful", "Image uploaded successfully!");
-      console.log("Server Response:", response.data);
-    } catch (error) {
-      Alert.alert("Upload Failed", "Something went wrong.");
-      console.error("Upload error:", error);
-    }
-  };
-/* const express = require("express");
-const multer = require("multer");
-
-const upload = multer({ dest: "uploads/" }); // Save files in "uploads" folder
-const app = express();
-
-app.post("/upload", upload.single("file"), (req, res) => {
-res.json({ message: "File uploaded successfully", file: req.file });
-});
-
-app.listen(3000, () => console.log("Server running on port 3000")); */
-
-  const handleAddItem = () => {
-    // Implementar lógica para agregar item
-    setForm({ ...form, category: category });
-    console.log(form)
-    if (!form.name || !form.price || !form.description|| !form.image || !form.ingredients|| !form.category) {
-        console.log("Por favor llene todos los campos.");
+      const validationErrors = validateForm();
+      if (validationErrors.length > 0) {
+        setError(validationErrors.join('\n'));
         return;
       }
-    console.log("Form Submitted:", form);
-    Alert.alert("Éxito", "Item agregado.");
-    router.push('/adminDashboard');
-    setForm({ name: "", price: "", description: "", image:"o", ingredients:[], category:""});
-    setImage("")
-    setCategory(undefined)
+
+      setLoading(true);
+      setError('');
+
+      const productData = {
+        ...form,
+        price: parseFloat(form.price),
+        idProductType: parseInt(form.idProductType),
+      };
+
+      const response = await AdminApiService.addProduct(productData);
+
+      if (response) {
+        setSnackbar({
+          visible: true,
+          message: 'Producto agregado correctamente'
+        });
+
+        setTimeout(() => {
+          router.replace('/(appAdmin)/adminDashboard');
+        }, 1500);
+      }
+
+    } catch (err) {
+      setError(err.message || 'Error al agregar el producto');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <ScrollView style={styles.container}>
-        
-        <View>
-            <Button mode="contained" style={styles.addButton} title="Pick an Image" onPress={pickImage}>Sube una imagen</Button>
-            {image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginVertical: 10 }} />}
-            {image && <Button title="Upload Image" onPress={uploadImage} />}
-        </View>
-        
-        <View style={styles.content}>
-        <TextInput
-            label="Nombre del producto"
-            mode="outlined" 
-            style={styles.input} 
-            value={form.name} 
-            onChangeText={(text) => handleChange("name", text)} 
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <IconButton
+          icon="arrow-left"
+          size={24}
+          onPress={() => router.back()}
         />
-        <TextInput
-            label="Precio"
-            mode="outlined" 
-            style={styles.input} 
-            placeholder="$"
-            value={form.price} 
-            onChangeText={(text) => handleChange("price", text)} 
-            keyboardType="numeric"
-        />
-        <TextInput 
-            label="Descripción"
-            mode="outlined"
-            style={styles.input} 
-            placeholder="Descripción del producto"
-            value={form.description} 
-            onChangeText={(text) => handleChange("description", text)} 
-            multiline
-            numberOfLines={3}
-        />
+        <Text variant="titleLarge" style={styles.title}>Agregar Producto</Text>
+        <View style={{ width: 48 }} /> {/* Spacer */}
+      </View>
 
-        <TextInput 
-            label="Ingredientes (separar por comas ',')"
-            mode="outlined"
-            style={styles.input} 
-            value={form.ingredients} 
-            onChangeText={(text) => handleChange("ingredients", text)} 
-            multiline
-            numberOfLines={3}
-        />
+      <ScrollView style={styles.scrollView}>
+        <Card style={styles.card}>
+          <Card.Content>
+            <Button
+              mode="contained"
+              onPress={pickImage}
+              style={styles.imageButton}
+              icon="camera"
+            >
+              Seleccionar Imagen
+            </Button>
 
-        </View>
-        <View style={styles.container1}>
-        <RNPickerSelect
-        onValueChange={(value) => setCategory(value)}
-        items={[
-          { label: "Comida", value: "Comida" },
-          { label: "Bebida", value: "Bebida" },
-          { label: "Extra", value: "Extra" },
-        ]}
-        placeholder={{ label: "Seleccione una categoria", value: undefined }}
-        style={pickerSelectStyles}
-      />
+            {image && (
+              <Image
+                source={{ uri: image }}
+                style={styles.imagePreview}
+              />
+            )}
 
-        </View>
+            <TextInput
+              mode="outlined"
+              label="Nombre del producto *"
+              value={form.name}
+              onChangeText={(text) => handleChange("name", text)}
+              style={styles.input}
+              maxLength={50}
+            />
 
-      <Button
-        mode="contained"
-        onPress={handleAddItem}
-        style={styles.addButton}
+            <TextInput
+              mode="outlined"
+              label="Precio *"
+              value={form.price}
+              onChangeText={(text) => handleChange("price", text)}
+              keyboardType="decimal-pad"
+              style={styles.input}
+              left={<TextInput.Affix text="$" />}
+            />
+
+            <TextInput
+              mode="outlined"
+              label="Descripción *"
+              value={form.description}
+              onChangeText={(text) => handleChange("description", text)}
+              multiline
+              numberOfLines={3}
+              style={styles.input}
+            />
+
+            <View style={styles.pickerContainer}>
+              <Text style={styles.pickerLabel}>Tipo de Producto *</Text>
+              <RNPickerSelect
+                onValueChange={(value) => handleChange("idProductType", value)}
+                items={[
+                  { label: "Comida", value: "1" },
+                  { label: "Bebida", value: "2" },
+                  { label: "Extra", value: "3" },
+                ]}
+                placeholder={{ label: "Seleccione un tipo", value: null }}
+                style={pickerSelectStyles}
+              />
+            </View>
+
+            {error ? (
+              <Text style={styles.errorText}>{error}</Text>
+            ) : null}
+
+            <Button
+              mode="contained"
+              onPress={handleAddProduct}
+              style={styles.addButton}
+              loading={loading}
+              disabled={loading}
+            >
+              Agregar Producto
+            </Button>
+          </Card.Content>
+        </Card>
+      </ScrollView>
+
+      <Snackbar
+        visible={snackbar.visible}
+        onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
+        duration={1500}
+        style={styles.snackbar}
       >
-        Agregar
-      </Button>
-    </ScrollView>
+        {snackbar.message}
+      </Snackbar>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-    container1: {
-        flex: 1, 
-        justifyContent: "center", 
-        padding: 16,
-
-    },
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
-  content: {
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 16,
+    backgroundColor: theme.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
   },
-  price: {
-    marginVertical: 8,
-    color: '#2196F3',
+  title: {
+    flex: 1,
+    textAlign: 'center',
   },
-  description: {
-    marginVertical: 8,
+  scrollView: {
+    flex: 1,
   },
-  sectionTitle: {
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  ingredients: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 16,
-  },
-  sauces: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 16,
-  },
-  chip: {
-    margin: 4,
-  },
-  quantity: {
-    marginVertical: 8,
-  },
-  notes: {
-    marginVertical: 8,
-  },
-  addButton: {
+  card: {
     margin: 16,
   },
-}); 
+  input: {
+    marginBottom: 16,
+  },
+  imageButton: {
+    marginBottom: 16,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    marginBottom: 16,
+    borderRadius: 8,
+  },
+  pickerContainer: {
+    marginBottom: 16,
+  },
+  pickerLabel: {
+    marginBottom: 8,
+    color: theme.colors.primary,
+  },
+  errorText: {
+    color: theme.colors.error,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  addButton: {
+    marginTop: 8,
+  },
+  snackbar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: theme.colors.primary,
+  }
+});
+
 const pickerSelectStyles = {
-    inputIOS: { borderWidth: 1, borderColor: "#ccc", padding: 16, borderRadius: 5, marginTop: 10 },
-    inputAndroid: { borderWidth: 1, borderColor: "#ccc", padding: 16, borderRadius: 5, marginTop: 10 },
+  inputIOS: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 16,
+    borderRadius: 5,
+    marginTop: 10
+  },
+  inputAndroid: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 16,
+    borderRadius: 5,
+    marginTop: 10
+  },
 };

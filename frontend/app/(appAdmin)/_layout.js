@@ -1,100 +1,83 @@
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../theme';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
+import { useEffect } from 'react';
+import { useRouter, useSegments } from 'expo-router';
+import { IconButton } from 'react-native-paper';
+import { View, ActivityIndicator } from 'react-native';
 
+export default function AdminLayout() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  const segments = useSegments();
 
+  useEffect(() => {
+    if (isLoading) return;
+    if (segments[0] === '(appAdmin)' && user?.idUserType !== 1) {
+      router.replace('/(app)');
+    }
+  }, [isLoading, user, segments]);
 
-export default function AppLayout() {
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  if (!user || user.idUserType !== 1) {
+    return null;
+  }
+
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
-        <Tabs
-          screenOptions={{
-            tabBarActiveTintColor: theme.colors.surface,
-            tabBarInactiveTintColor: '#000',
-            tabBarStyle: {
-              backgroundColor: theme.colors.primary,
-              borderTopColor: '#E0E0E0',
-              borderTopWidth: 1,
-              elevation: 0,
-              shadowOpacity: 0,
-              height: 60,
-              paddingBottom: 10,
-              paddingTop: 8,
-              // position: 'absolute',
-              marginBottom: -10,
-            },
-            headerStyle: {
-              backgroundColor: theme.colors.surface,
-              elevation: 0,
-              shadowOpacity: 0,
-              borderBottomWidth: 1,
-              borderBottomColor: '#E0E0E0',
-            },
-            headerTintColor: theme.colors.text,
-            tabBarShowLabel: false,
-            animation: 'fade',
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: { display: 'none' },
+        }}
+      >
+        {/* Main Admin Routes */}
+        <Tabs.Screen
+          name="adminDashboard"
+          options={{
+            title: 'Panel Admin',
           }}
-        >
-          <Tabs.Screen
-            name="adminDashboard"
-            options={{
-              title: 'Inicio',
-              headerShown: false,
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="home" size={28} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="addProduct"
-            options={{
-              title: 'Añadir Producto',
-              headerShown: true,
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="add-circle-outline" size={28} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="profile"
-            options={{
-              title: 'Perfil',
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="person" size={28} color={color} />
-              ),
-            }}
-          />
-          <Tabs.Screen
-            name="orders"
-            options={{
-              title: 'Soporte',
-              tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="chat" size={28} color={color} />
-              ),
-            }}
-          />
-         
-        
-      
-          {/* Ocultar estas rutas de la barra de tabs */}
-          <Tabs.Screen
-            name="chat"
-            options={{
-              href:null,
-            }}
-          />
-
-          <Tabs.Screen
-            name="product/[id]"
-            options={{
-              headerShown: false,
-              href: null,
-            }}
-          />
-        </Tabs>
-      </SafeAreaView>
+        />
+        <Tabs.Screen
+          name="products/index"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="product/[id]"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="addProduct"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="orders"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            href: null,
+          }}
+        />
+      </Tabs>
     </SafeAreaProvider>
   );
 }
