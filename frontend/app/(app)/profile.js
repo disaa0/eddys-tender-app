@@ -2,9 +2,11 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Avatar, Text, List, Divider, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { theme } from '../theme';
+import { useAuth } from '../context/AuthContext';
 
 export default function Profile() {
   const router = useRouter();
+  const { logout } = useAuth();
 
   const userInfo = {
     name: 'Alejandro Fontes',
@@ -74,7 +76,7 @@ export default function Profile() {
             <List.Icon {...props} icon="logout" color={theme.colors.error} />
           )}
           titleStyle={{ color: theme.colors.error }}
-          onPress={() => router.push('/login')}
+          onPress={logout}
         />
       </Surface>
     </ScrollView>

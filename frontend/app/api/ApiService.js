@@ -48,6 +48,7 @@ class ApiService {
 }
 
 // Crear una instancia de la API con la URL base
-const api = new ApiService("http://localhost:3000/api");
+const api = new ApiService("http://10.10.128.183:3000/api");
+// const api = new ApiService("http://localhost:3000/api");
 
 export default api;

@@ -4,8 +4,10 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import { theme } from '../theme';
 import AuthService from '../api/AuthService';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -20,8 +22,8 @@ export default function Login() {
     };
 
     try {
-      const response = await AuthService.login(userData);
-      console.log(response);
+      login(userData);
+      // console.log(response.token);
     } catch (error) {
       console.error('Error en el login:', error);
     }

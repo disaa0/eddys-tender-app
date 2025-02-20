@@ -1,10 +1,23 @@
-import api from "./ApiService";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from './ApiService';
 
 class AuthService {
     async login(userData) {
-        return await api.post("/auth/login", userData);
+        const response = await api.post("/auth/login", userData);
+        console.log(response);
+        if (response.token) {
+            await AsyncStorage.setItem('userToken', response.token);
+        }
+        return response;
+    }
+
+    async getToken() {
+        return await AsyncStorage.getItem('userToken');
+    }
+
+    async logout() {
+        await AsyncStorage.removeItem('userToken');
     }
 }
 
-// Exportamos una instancia para reutilizar en toda la app
 export default new AuthService();

@@ -2,17 +2,19 @@ const express = require("express");
 const rateLimit = require('express-rate-limit');
 const app = express();
 const authRoutes = require('./routes/auth.routes');
+const cors = require('cors');
 
 // Rate limiting configuration
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo después de 15 minutos'
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo después de 15 minutos'
 });
 
 // Middlewares básicos
 app.use(express.json());
 app.use(limiter); // Apply rate limiting to all routes
+app.use(cors());
 
 //Rutas
 app.use('/api/auth', authRoutes);
