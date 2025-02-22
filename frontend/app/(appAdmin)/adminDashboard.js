@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { theme } from '../theme';
 import AdminApiService from '../api/AdminApiService';
+import CategoryChips from '../components/CategoryChips';
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -14,7 +15,10 @@ export default function AdminDashboard() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
   const router = useRouter();
+
+  const CATEGORIES = ['Todos', 'Comida', 'Bebidas'];
 
   const loadProducts = async () => {
     try {
@@ -78,6 +82,30 @@ export default function AdminDashboard() {
     router.push('/(appAdmin)/addProduct');
   };
 
+  const getProductTypeLabel = (idProductType) => {
+    switch (idProductType) {
+      case 1:
+        return 'Comida';
+      case 2:
+        return 'Bebida';
+      default:
+        return 'Otro';
+    }
+  };
+
+  // Función para filtrar productos
+  const getFilteredProducts = () => {
+    return products.filter((product) => {
+      // Filtrar por categoría
+      const categoryMatch = selectedCategory === 'Todos' || getProductTypeLabel(product.idProductType) === selectedCategory;
+
+      // Filtrar por búsqueda
+      const searchMatch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return categoryMatch && searchMatch;
+    });
+  };
+
   const renderProduct = ({ item }) => (
     <Card
       style={styles.productCard}
@@ -92,6 +120,9 @@ export default function AdminDashboard() {
             onPress={() => handleEditProduct(item.idProduct)}
           />
         </View>
+        <Text variant="bodySmall" style={styles.productType}>
+          {getProductTypeLabel(item.idProductType)}
+        </Text>
         <Text variant="bodyMedium">Precio: ${item.price}</Text>
         <Text variant="bodyMedium">
           Estado: {item.status ? 'Activo' : 'Inactivo'}
@@ -138,24 +169,33 @@ export default function AdminDashboard() {
         onChangeText={setSearchQuery}
         style={styles.searchbar}
       />
+      <CategoryChips
+        categories={CATEGORIES}
+        selectedCategory={selectedCategory}
+        onSelect={setSelectedCategory}
+      />
 
       <FlatList
-        data={products}
+        data={getFilteredProducts()} // Filtramos productos antes de renderizar
         renderItem={renderProduct}
         keyExtractor={(item) => item.idProduct.toString()}
         contentContainerStyle={styles.productList}
+        ListEmptyComponent={
+          !loading && (
+            <View style={styles.centered}>
+              <Text>No hay productos disponibles.</Text>
+            </View>
+          )
+        }
         onEndReached={() => {
-          if (page < totalPages) {
-            setPage(page + 1);
+          if (!loading && page < totalPages) {
+            setPage((prevPage) => prevPage + 1);
           }
         }}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          loading && page > 1 ? (
-            <ActivityIndicator style={styles.loadingMore} />
-          ) : null
-        }
+        ListFooterComponent={loading && page > 1 ? <ActivityIndicator style={styles.loadingMore} /> : null}
       />
+
     </View>
   );
 }
