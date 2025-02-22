@@ -18,7 +18,7 @@ export default function AdminDashboard() {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const router = useRouter();
 
-  const CATEGORIES = ['Todos', 'Comida', 'Bebidas'];
+  const CATEGORIES = ['Todos', 'Comida', 'Bebida'];
 
   const loadProducts = async () => {
     try {
