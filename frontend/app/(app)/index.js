@@ -9,6 +9,7 @@ import CategoryChips from '../components/CategoryChips';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
+export const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
 
 // Importar imágenes de manera segura
 const PRODUCT_IMAGES = {
@@ -56,6 +57,7 @@ const PRODUCTS = [
 export default function Index() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedFilter, setSelectedFilter] = useState('');
   const router = useRouter();
 
   const renderProduct = ({ item }) => {
@@ -96,6 +98,11 @@ export default function Index() {
             icon={() => null}
           />
         </View>
+        <CategoryChips
+          categories={FILTERS}
+          selectedCategory={selectedFilter}
+          onSelect={setSelectedFilter}
+        />
 
         <CategoryChips
           categories={CATEGORIES}

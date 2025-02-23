@@ -30,8 +30,7 @@ app.use(cors());
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/user', userRoutes);
-app.use('/', productRoutes);
+app.use('/api/products', productRoutes);
 
 // Rutas de ejemplo
 app.get("/", (req, res) => {

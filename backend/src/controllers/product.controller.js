@@ -1,5 +1,6 @@
 const { getProducts, createProduct, updateProductDetails } = require('../services/product.service');
 const { productSchema, productDetailsSchema } = require('../middlewares/validateInput');
+const prisma = require('../lib/prisma');
 
 async function getAllProducts(req, res) {
     try {
@@ -15,8 +16,6 @@ async function getAllProducts(req, res) {
         res.status(500).json({ message: "Error al obtener productos", error: error.message });
     }
 }
-
-
 
 async function addProduct(req, res) {
     try {
@@ -59,5 +58,46 @@ async function modifyProductDetails(req, res) {
     }
 }
 
+async function getProduct(req, res) {
+    try {
+        const productId = parseInt(req.params.id);
 
-module.exports = { getAllProducts, addProduct, modifyProductDetails };
+        if (isNaN(productId)) {
+            return res.status(400).json({
+                message: "ID de producto inválido"
+            });
+        }
+
+        const product = await prisma.product.findUnique({
+            where: { idProduct: productId },
+            include: {
+                productType: {
+                    select: {
+                        type: true
+                    }
+                }
+            }
+        });
+
+        if (!product) {
+            return res.status(404).json({
+                message: "Producto no encontrado"
+            });
+        }
+
+        res.json({
+            message: "Producto obtenido correctamente",
+            data: {
+                product: product
+            }
+        });
+    } catch (error) {
+        console.error('Error getting product:', error);
+        res.status(500).json({
+            message: "Error al obtener el producto",
+            error: error.message
+        });
+    }
+}
+
+module.exports = { getAllProducts, getProduct, addProduct, modifyProductDetails };
