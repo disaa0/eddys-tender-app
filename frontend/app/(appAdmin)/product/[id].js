@@ -259,14 +259,17 @@ export default function ProductDetails() {
               mode="outlined"
               label="Nombre del producto *"
               value={form.name}
+              multiline
+              numberOfLines={1}
               onChangeText={(text) => handleChange('name', text)}
-              style={styles.input}
+              style={[styles.input, { textAlignVertical: 'top', height: 100 }]}
               placeholder="Ingrese el nombre del producto"
               maxLength={50}
               right={<TextInput.Affix text={`${form.name.length}/50`} />}
             />
 
-            <TextInput
+            {/* CAMBIAR SI SE PIDE */}
+            {/* <TextInput
               mode="outlined"
               label="Precio *"
               value={form.price}
@@ -276,7 +279,7 @@ export default function ProductDetails() {
               placeholder="0.00"
               left={<TextInput.Affix text="$" />}
               right={<TextInput.Affix text={form.price ? `$${parseFloat(form.price).toFixed(2)}` : '$0.00'} />}
-            />
+            /> */}
 
             <TextInput
               mode="outlined"
@@ -285,20 +288,21 @@ export default function ProductDetails() {
               onChangeText={(text) => handleChange('description', text)}
               multiline
               numberOfLines={3}
-              style={styles.input}
+              style={[styles.input, { textAlignVertical: 'center' }]}
               placeholder="Describa el producto"
               maxLength={500}
               right={<TextInput.Affix text={`${form.description.length}/500`} />}
             />
 
-            <View style={styles.switchContainer}>
+            {/* CAMBIAR SI SE PIDE */}
+            {/* <View style={styles.switchContainer}>
               <Text>Estado del producto</Text>
               <Switch
                 value={form.status}
                 onValueChange={(value) => handleChange('status', value)}
                 color={theme.colors.primary}
               />
-            </View>
+            </View> */}
           </Card.Content>
         </Card>
 
@@ -364,6 +368,7 @@ const styles = StyleSheet.create({
   },
   input: {
     marginVertical: 8,
+
   },
   buttonContainer: {
     padding: 16,
