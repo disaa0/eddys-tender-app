@@ -1,5 +1,4 @@
 # Reporte Técnico del Backend
-> Última actualización: 2024-02-20
 
 ## 1. Resumen Ejecutivo
 
@@ -17,7 +16,7 @@ Sistema backend para Eddy's Tender, una aplicación de gestión de pedidos de co
 ## 2. Arquitectura del Sistema
 
 ### 2.1 Estructura de Directorios
-~~~
+```
 backend/
 ├── src/
 │   ├── config/          # Configuraciones JWT y crypto
@@ -32,10 +31,10 @@ backend/
 │   ├── migrations/     # Historial de cambios DB
 │   └── seed.js        # Datos iniciales
 └── docs/              # Documentación API
-~~~
+```
 
 ### 2.2 Configuración de Seguridad
-~~~typescript
+```typescript
 // Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -49,13 +48,13 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-~~~
+```
 
 ## 3. Sistema de Autenticación
 
 ### 3.1 Gestión de Usuarios
 1. **Registro**
-   ~~~typescript
+   ```typescript
    interface RegisterDto {
      email: string;      // Único
      username: string;   // Único
@@ -65,10 +64,10 @@ app.use(cors({
      secondLastName?: string;
      phone: string;      // 10 dígitos
    }
-   ~~~
+   ```
 
 2. **Login**
-   ~~~typescript
+   ```typescript
    interface LoginResponse {
      message: string;
      user: {
@@ -80,11 +79,11 @@ app.use(cors({
      };
      token: string;
    }
-   ~~~
+   ```
 
 ### 3.2 Seguridad
 1. **Encriptación**
-   ~~~javascript
+   ```javascript
    const crypto = require('crypto');
    const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
    const IV_LENGTH = 16;
@@ -94,22 +93,22 @@ app.use(cors({
      const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
      // ...
    }
-   ~~~
+   ```
 
 2. **JWT**
-   ~~~javascript
+   ```javascript
    const JWT_CONFIG = {
      secret: process.env.JWT_SECRET,
      expiresIn: '24h',
      algorithm: 'HS256'
    };
-   ~~~
+   ```
 
 ## 4. Modelo de Datos
 
 ### 4.1 Entidades Principales
 1. **Users y Autenticación**
-   ~~~prisma
+   ```prisma
    model User {
      idUser        Int      @id @default(autoincrement())
      email         String   @unique
@@ -122,10 +121,10 @@ app.use(cors({
      userType      UserType @relation(fields: [idUserType], references: [idUserType])
      information   UserInformation?
    }
-   ~~~
+   ```
 
 2. **Productos y Personalización**
-   ~~~prisma
+   ```prisma
    model Product {
      idProduct     Int      @id @default(autoincrement())
      name          String
@@ -137,11 +136,11 @@ app.use(cors({
      productType   ProductType @relation(fields: [idProductType], references: [idProductType])
      userAdded     User    @relation(fields: [idUserAdded], references: [idUser])
    }
-   ~~~
+   ```
 
 ### 4.2 Sistema de Pedidos
 1. **Carrito y Items**
-   ~~~prisma
+   ```prisma
    model Cart {
      idCart    Int      @id @default(autoincrement())
      idUser    Int
@@ -151,10 +150,10 @@ app.use(cors({
      items     ItemCart[]
      orders    Order[]
    }
-   ~~~
+   ```
 
 2. **Órdenes y Notificaciones**
-   ~~~prisma
+   ```prisma
    model Order {
      idOrder       Int      @id @default(autoincrement())
      totalPrice    Float
@@ -163,31 +162,31 @@ app.use(cors({
      orderStatus   OrderStatus @relation(fields: [idOrderStatus], references: [idOrderStatus])
      notifications Notification[]
    }
-   ~~~
+   ```
 
 ## 5. API REST
 
 ### 5.1 Endpoints de Autenticación
-~~~http
+```http
 POST /api/auth/register
 POST /api/auth/login
 GET /api/auth/profile
 DELETE /api/auth/profile
 PUT /api/auth/password
 PUT /api/auth/email
-~~~
+```
 
 ### 5.2 Endpoints de Productos
-~~~http
+```http
 GET /api/products
 GET /api/products/:id
 POST /api/admin/products
 PUT /api/admin/products/:id
 PATCH /api/admin/products/:id/status
-~~~
+```
 
 ### 5.3 Validaciones
-~~~typescript
+```typescript
 const userSchema = z.object({
   username: z.string().min(3).max(12),
   email: z.string().email(),
@@ -201,7 +200,7 @@ const userSchema = z.object({
   name: z.string().transform(v => v.toUpperCase()),
   lastName: z.string().regex(/^[A-ZÁÉÍÓÚÑa-záéíóúñ\s]+$/)
 });
-~~~
+```
 
 ## 6. Datos Iniciales (Seed)
 
@@ -225,7 +224,7 @@ const userSchema = z.object({
    - Cancelado
 
 ### 6.2 Usuario Administrador
-~~~json
+```json
 {
   "email": "admin@admin.com",
   "username": "admin",
@@ -234,4 +233,4 @@ const userSchema = z.object({
   "lastName": "ADMINISTRADOR",
   "phone": "6622757172"
 }
-~~~ 
+``` 
