@@ -17,8 +17,8 @@ datasource db {
 model User {
   idUser      Int      @id @default(autoincrement())  // ID único
   idUserType  Int      @map("idUserType")  // ID del tipo de usuario
-  email       String   @unique
-  username    String   @unique
+  email       String   
+  username    String   
   password    String
   status      Boolean
   createdAt   DateTime @default(now())

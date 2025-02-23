@@ -10,20 +10,33 @@ const SALT_ROUNDS = 10;
 async function registerUser(email, password, username, name, lastName, secondLastName, phone, /*idUserType*/) {
     return await prisma.$transaction(async (tx) => {
 
-        const existingEmail = await tx.user.findUnique({
+        //cambiar findUnique por findFirst
+        // const existingEmail = await tx.user.findUnique({
+        //     where: {
+        //         email: email,
+        //     },
+        // });
+        // if (existingEmail) {
+        //     throw new Error('Email ya existente');
+        // }
+
+        const existingEmail = await tx.user.findFirst({
             where: {
                 email: email,
-            },
+                status: true
+            }
         });
         if (existingEmail) {
-            throw new Error('Email ya existente');
+            throw new Error('Email ya registrado');
         }
 
-        const existingUsername = await tx.user.findUnique({
+        const existingUsername = await tx.user.findFirst({
             where: {
                 username: username,
+                status: true
             },
         });
+
         if (existingUsername) {
             throw new Error('Nombre de usuario ya existente');
         }
@@ -207,29 +220,33 @@ async function updatePassword(userId, oldPassword, newPassword) {
 }
 
 async function updateEmail(userId, email) {
-    // Validate if email already exists
-    const existingUser = await prisma.user.findUnique({
-        where: { email }
-    });
+    try {
+        // Validate if email already exists
+        const existingUser = await prisma.user.findFirst({
+            where: { email, status: true }
+        });
 
-    if (existingUser && existingUser.idUser !== userId) {
-        throw new Error('Este correo electrónico ya está en uso');
-    }
-
-    // Update email
-    const updatedUser = await prisma.user.update({
-        where: { idUser: userId },
-        data: { email },
-        select: {
-            idUser: true,
-            email: true,
-            username: true,
-            status: true,
-            idUserType: true
+        if (existingUser && existingUser.idUser !== userId) {
+            throw new Error('Este correo electrónico ya está en uso');
         }
-    });
 
-    return updatedUser;
+        // Update email
+        const updatedUser = await prisma.user.update({
+            where: { idUser: userId },
+            data: { email },
+            select: {
+                idUser: true,
+                email: true,
+                username: true,
+                status: true,
+                idUserType: true
+            }
+        });
+
+        return updatedUser;
+    } catch (error) {
+        throw error;
+    }
 }
 
 module.exports = {
