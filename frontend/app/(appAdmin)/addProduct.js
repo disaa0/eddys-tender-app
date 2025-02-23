@@ -1,10 +1,9 @@
 import { View, Alert, StyleSheet, ScrollView, Image } from 'react-native';
-import { Button, TextInput, IconButton, Text, Card, Snackbar } from 'react-native-paper';
+import { Button, TextInput, IconButton, Text, Card, Snackbar, Menu } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import * as ImagePicker from "expo-image-picker";
 import AdminApiService from '../api/AdminApiService';
-import RNPickerSelect from "react-native-picker-select";
 import { theme } from '../theme';
 
 export default function AddProduct() {
@@ -20,6 +19,10 @@ export default function AddProduct() {
   });
   const [image, setImage] = useState("");
   const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
+  const [visible, setVisible] = useState(false);
+  const [selected, setSelected] = useState("");
+  const [anchor, setAnchor] = useState(null);
+
 
   // Validate form data
   const validateForm = () => {
@@ -117,6 +120,12 @@ export default function AddProduct() {
     }
   };
 
+  const handleSelect = (value, label) => {
+    setSelected(label);
+    setForm({ ...form, idProductType: value });
+    setVisible(false);
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -179,16 +188,20 @@ export default function AddProduct() {
 
             <View style={styles.pickerContainer}>
               <Text style={styles.pickerLabel}>Tipo de Producto *</Text>
-              <RNPickerSelect
-                onValueChange={(value) => handleChange("idProductType", value)}
-                items={[
-                  { label: "Comida", value: "1" },
-                  { label: "Bebida", value: "2" },
-                  { label: "Extra", value: "3" },
-                ]}
-                placeholder={{ label: "Seleccione un tipo", value: null }}
-                style={pickerSelectStyles}
-              />
+
+              <Menu
+                visible={visible}
+                onDismiss={() => setVisible(false)}
+                anchor={
+                  <Button mode="outlined" onPress={() => setVisible(true)}>
+                    {selected || "Seleccione un tipo"}
+                  </Button>
+                }
+              >
+                <Menu.Item title="Comida" onPress={() => handleSelect("1", "Comida")} />
+                <Menu.Item title="Bebida" onPress={() => handleSelect("2", "Bebida")} />
+                <Menu.Item title="Extra" onPress={() => handleSelect("3", "Extra")} />
+              </Menu>
             </View>
 
             {error ? (
