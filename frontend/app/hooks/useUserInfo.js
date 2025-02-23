@@ -33,5 +33,5 @@ export function useUserInfo() {
         }, [fetchUserInfo])
     );
 
-    return { userInfoH, loading, error };
+    return { userInfoH, loading, error, fetchUserInfo };
 }
