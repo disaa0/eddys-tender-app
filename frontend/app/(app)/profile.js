@@ -14,10 +14,11 @@ export default function Profile() {
   // hook personalizado para obtener la información del usuario
   // Descomentar para usar el hook personalizado
 
-  const { userInfoH, loading, error } = useUserInfo(); // Usamos el hook aquí
+  const { userInfoH, loading, error, fetchUserInfo } = useUserInfo(); // Usamos el hook aquí
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
+  const [retryCount, setRetryCount] = useState(0);
 
   const handleDeleteAccount = async () => {
     try {
@@ -47,6 +48,13 @@ export default function Profile() {
     }
   };
 
+  const handleRetry = () => {
+    setRetryCount((prev) => prev + 1);
+    setSnackbar({ visible: false, message: '' }); // Opcional, para ocultar errores previos
+    fetchUserInfo();
+  };
+
+
   // Si está cargando, muestra un mensaje de loading
   if (loading) {
     return (
@@ -55,12 +63,18 @@ export default function Profile() {
       </View>
     );
   }
-
-  // Si hubo un error, muestra el mensaje de error
   if (error) {
     return (
       <View style={styles.loadingContainer}>
         <Text>{error}</Text>
+        <Button mode="contained" onPress={handleRetry} style={{ marginTop: 10 }}>
+          Reintentar
+        </Button>
+        {retryCount >= 3 && (
+          <Button mode="contained" onPress={logout} style={{ marginTop: 10 }}>
+            Cerrar Sesión
+          </Button>
+        )}
       </View>
     );
   }
