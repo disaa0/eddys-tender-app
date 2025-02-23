@@ -101,10 +101,13 @@ const productSchema = z.object({
 });
 
 const productDetailsSchema = z.object({
-    name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }).optional(),
-    description: z.string().min(3, { message: "La descripción debe tener al menos 3 caracteres" }).optional()
-}).refine(data => data.name !== undefined || data.description !== undefined, {
-    message: "Debe enviar al menos un campo: nombre o description"
+    name: z.string().min(3).optional(),
+    description: z.string().min(3).optional(),
+    price: z.number().positive().or(z.string().regex(/^\d+\.?\d{0,2}$/).transform(Number)).optional(),
+    idProductType: z.number().positive().optional(),
+    status: z.boolean().optional()
+}).refine(data => Object.keys(data).length > 0, {
+    message: "Al menos un campo debe ser proporcionado para actualizar"
 });
 
 module.exports = {

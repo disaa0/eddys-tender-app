@@ -9,7 +9,7 @@ const productRoutes = require('./routes/product.routes');
 
 // Configurar CORS
 app.use(cors({
-  origin: "http://localhost:8081", // Permitir peticiones desde el frontend
+  origin: "*", // Permitir peticiones desde el frontend
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));

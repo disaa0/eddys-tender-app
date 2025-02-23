@@ -42,7 +42,13 @@ async function modifyProductDetails(req, res) {
             return res.status(400).json({ message: "ID de producto inválido" });
         }
 
-        const parsedData = productDetailsSchema.parse(req.body);
+        // Parse the price as a float if it exists
+        const updateData = {
+            ...req.body,
+            price: req.body.price ? parseFloat(req.body.price) : undefined
+        };
+
+        const parsedData = productDetailsSchema.parse(updateData);
 
         const updatedProduct = await updateProductDetails(productId, parsedData);
 
@@ -51,6 +57,7 @@ async function modifyProductDetails(req, res) {
             product: updatedProduct
         });
     } catch (error) {
+        console.error('Modify product error:', error);
         res.status(400).json({
             message: "Error al actualizar detalles del producto",
             error: error.errors || error.message
@@ -100,4 +107,109 @@ async function getProduct(req, res) {
     }
 }
 
-module.exports = { getAllProducts, getProduct, addProduct, modifyProductDetails };
+async function getProductPersonalizations(req, res) {
+    try {
+        const productId = parseInt(req.params.id);
+        if (isNaN(productId)) {
+            return res.status(400).json({ message: "ID de producto inválido" });
+        }
+
+        const personalizations = await prisma.productPersonalization.findMany({
+            where: {
+                idProduct: productId,
+                status: true
+            },
+            include: {
+                personalization: true
+            }
+        });
+
+        res.json({
+            message: "Personalizaciones obtenidas correctamente",
+            data: { personalizations }
+        });
+    } catch (error) {
+        console.error('Error getting personalizations:', error);
+        res.status(500).json({
+            message: "Error al obtener personalizaciones",
+            error: error.message
+        });
+    }
+}
+
+async function updateProductPersonalization(req, res) {
+    try {
+        const productId = parseInt(req.params.id);
+        const { name, status } = req.body;
+        const userId = req.user.userId;
+
+        // Create or update personalization
+        const personalization = await prisma.personalization.create({
+            data: {
+                name,
+                status,
+                idUserAdded: userId,
+            }
+        });
+
+        // Link personalization to product
+        const productPersonalization = await prisma.productPersonalization.create({
+            data: {
+                idProduct: productId,
+                idPersonalization: personalization.idPersonalization,
+                idUserAdded: userId,
+                status: true
+            }
+        });
+
+        res.json({
+            message: "Personalización actualizada exitosamente",
+            data: {
+                personalization,
+                productPersonalization
+            }
+        });
+    } catch (error) {
+        console.error('Error updating personalization:', error);
+        res.status(400).json({
+            message: "Error al actualizar personalización",
+            error: error.message
+        });
+    }
+}
+
+async function updatePersonalizationStatus(req, res) {
+    try {
+        const productId = parseInt(req.params.id);
+        const personalizationId = parseInt(req.params.personalizationId);
+        const { status } = req.body;
+
+        if (isNaN(productId) || isNaN(personalizationId)) {
+            return res.status(400).json({ message: "ID inválido" });
+        }
+
+        const updatedPersonalization = await prisma.productPersonalization.update({
+            where: {
+                idProductPersonalization: personalizationId,
+                idProduct: productId
+            },
+            data: { status },
+            include: {
+                personalization: true
+            }
+        });
+
+        res.json({
+            message: "Estado de personalización actualizado correctamente",
+            data: { personalization: updatedPersonalization }
+        });
+    } catch (error) {
+        console.error('Error updating personalization status:', error);
+        res.status(400).json({
+            message: "Error al actualizar estado de personalización",
+            error: error.message
+        });
+    }
+}
+
+module.exports = { getAllProducts, getProduct, addProduct, modifyProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus };

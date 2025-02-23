@@ -37,7 +37,6 @@ async function createProduct(userId, data) {
 }
 
 async function updateProductDetails(productId, data) {
-
     try {
         const existingProduct = await prisma.product.findUnique({
             where: { idProduct: productId }
@@ -47,18 +46,21 @@ async function updateProductDetails(productId, data) {
             throw new Error("Producto no encontrado");
         }
 
-        // Actualizar solo los campos que se envían
+        // Convert price to float if it exists in the data
+        const updateData = {
+            ...data,
+            price: data.price !== undefined ? parseFloat(data.price) : existingProduct.price
+        };
+
+        // Actualizar los campos que se envían
         const updatedProduct = await prisma.product.update({
             where: { idProduct: productId },
-            data: {
-                name: data.name !== undefined ? data.name : existingProduct.name,
-                description: data.description !== undefined ? data.description : existingProduct.description
-            }
+            data: updateData
         });
-
 
         return updatedProduct;
     } catch (error) {
+        console.error('Update product error:', error);
         throw new Error(error.message);
     }
 }

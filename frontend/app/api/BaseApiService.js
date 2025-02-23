@@ -29,11 +29,16 @@ export class BaseApiService {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Error en la petición');
+                const error = new Error(data.message || 'Error en la petición');
+                error.response = { data, status: response.status };
+                throw error;
             }
 
             return data;
         } catch (error) {
+            if (error.response) {
+                throw error; // Re-throw if we already formatted the error
+            }
             console.error('API Error:', error);
             throw error;
         }

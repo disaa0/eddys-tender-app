@@ -599,7 +599,8 @@ Authorization: Bearer <token>
 ```json
 {
     "name": "Nombre Actualizado",
-    "description": "Nueva descripción"
+    "description": "Nueva descripción",
+    "price": 109.99
 }
 ```
 
@@ -611,7 +612,7 @@ Authorization: Bearer <token>
         "idProduct": 1,
         "name": "Nombre Actualizado",
         "description": "Nueva descripción",
-        "price": 99.99,
+        "price": 109.99,
         "status": true
     }
 }

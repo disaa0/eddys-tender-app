@@ -62,6 +62,23 @@ class AdminApiService extends BaseApiService {
     async updateProductCustomization(id, customizationData) {
         return this.request(`/admin/products/${id}/customization`, 'PUT', customizationData);
     }
+
+    // Get product personalizations
+    async getProductPersonalizations(productId) {
+        return this.request(`/products/${productId}/personalizations`, 'GET');
+    }
+
+    // Update product personalization
+    async updateProductPersonalization(productId, personalizationData) {
+        return this.request(`/products/${productId}/personalization`, 'PUT', personalizationData);
+    }
+
+    // Toggle personalization status
+    async togglePersonalizationStatus(productId, personalizationId, status) {
+        return this.request(`/products/${productId}/personalization/${personalizationId}/status`, 'PATCH', {
+            status
+        });
+    }
 }
 
 // Export a single instance

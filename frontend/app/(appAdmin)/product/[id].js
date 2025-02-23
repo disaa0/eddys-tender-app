@@ -1,5 +1,5 @@
 import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
-import { Button, Card, Text, TextInput, IconButton, Switch, Snackbar } from 'react-native-paper';
+import { Button, Card, Text, TextInput, IconButton, Switch, Snackbar, List, Dialog, Portal } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import AdminApiService from '../../api/AdminApiService';
@@ -20,9 +20,13 @@ export default function ProductDetails() {
     idProductType: 1,
     status: true
   });
+  const [personalizations, setPersonalizations] = useState([]);
+  const [personalizationDialog, setPersonalizationDialog] = useState(false);
+  const [newPersonalization, setNewPersonalization] = useState({ name: '', status: true });
 
   useEffect(() => {
     loadProduct();
+    loadPersonalizations();
   }, [id]);
 
   const loadProduct = async () => {
@@ -53,6 +57,21 @@ export default function ProductDetails() {
       Alert.alert('Error', err.message || 'No se pudo cargar el producto');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPersonalizations = async () => {
+    try {
+      const response = await AdminApiService.getProductPersonalizations(id);
+      if (response?.data?.personalizations) {
+        setPersonalizations(response.data.personalizations);
+      }
+    } catch (error) {
+      console.error('Load personalizations error:', error);
+      setSnackbar({
+        visible: true,
+        message: 'Error al cargar personalizaciones'
+      });
     }
   };
 
@@ -217,6 +236,49 @@ export default function ProductDetails() {
     }
   };
 
+  const handleUpdatePersonalization = async () => {
+    try {
+      if (!newPersonalization.name.trim()) {
+        setSnackbar({
+          visible: true,
+          message: 'El nombre de la personalización es requerido'
+        });
+        return;
+      }
+
+      await AdminApiService.updateProductPersonalization(id, newPersonalization);
+      setPersonalizationDialog(false);
+      loadPersonalizations();
+      setSnackbar({
+        visible: true,
+        message: 'Personalización actualizada correctamente'
+      });
+    } catch (error) {
+      console.error('Update personalization error:', error);
+      setSnackbar({
+        visible: true,
+        message: 'Error al actualizar personalización'
+      });
+    }
+  };
+
+  const handleTogglePersonalization = async (personalizationId, newStatus) => {
+    try {
+      await AdminApiService.togglePersonalizationStatus(id, personalizationId, newStatus);
+      loadPersonalizations(); // Reload personalizations to reflect changes
+      setSnackbar({
+        visible: true,
+        message: `Personalización ${newStatus ? 'activada' : 'desactivada'} correctamente`
+      });
+    } catch (error) {
+      console.error('Toggle personalization error:', error);
+      setSnackbar({
+        visible: true,
+        message: 'Error al actualizar estado de la personalización'
+      });
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -268,8 +330,7 @@ export default function ProductDetails() {
               right={<TextInput.Affix text={`${form.name.length}/50`} />}
             />
 
-            {/* CAMBIAR SI SE PIDE */}
-            {/* <TextInput
+            <TextInput
               mode="outlined"
               label="Precio *"
               value={form.price}
@@ -279,7 +340,7 @@ export default function ProductDetails() {
               placeholder="0.00"
               left={<TextInput.Affix text="$" />}
               right={<TextInput.Affix text={form.price ? `$${parseFloat(form.price).toFixed(2)}` : '$0.00'} />}
-            /> */}
+            />
 
             <TextInput
               mode="outlined"
@@ -303,6 +364,33 @@ export default function ProductDetails() {
                 color={theme.colors.primary}
               />
             </View> */}
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.card}>
+          <Card.Title title="Personalizaciones" />
+          <Card.Content>
+            <Button
+              mode="contained"
+              onPress={() => setPersonalizationDialog(true)}
+              style={styles.button}
+              icon="plus"
+            >
+              Agregar Personalización
+            </Button>
+
+            {personalizations.map((item) => (
+              <List.Item
+                key={item.idProductPersonalization}
+                title={item.personalization.name}
+                right={(props) => (
+                  <Switch
+                    value={item.status}
+                    onValueChange={(value) => handleTogglePersonalization(item.idProductPersonalization, value)}
+                  />
+                )}
+              />
+            ))}
           </Card.Content>
         </Card>
 
@@ -336,6 +424,28 @@ export default function ProductDetails() {
       >
         {snackbar.message}
       </Snackbar>
+
+      <Portal>
+        <Dialog
+          visible={personalizationDialog}
+          onDismiss={() => setPersonalizationDialog(false)}
+        >
+          <Dialog.Title>Nueva Personalización</Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              mode="outlined"
+              label="Nombre"
+              value={newPersonalization.name}
+              onChangeText={(text) => setNewPersonalization({ ...newPersonalization, name: text })}
+              style={styles.input}
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setPersonalizationDialog(false)}>Cancelar</Button>
+            <Button onPress={handleUpdatePersonalization}>Guardar</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }

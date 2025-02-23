@@ -44,7 +44,11 @@ export default function Register() {
       await api.register(userData);
       router.push('/login');
     } catch (error) {
-      setError(error.message);
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      } else {
+        setError(error.message || 'Error en el registro');
+      }
       console.error('Error en el registro:', error);
     } finally {
       setLoading(false);
