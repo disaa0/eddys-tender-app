@@ -1,5 +1,5 @@
-import { View, FlatList, StyleSheet, Alert } from 'react-native';
-import { Card, Text, Searchbar, Button, ActivityIndicator, IconButton } from 'react-native-paper';
+import { View, FlatList, StyleSheet, Alert, TouchableWithoutFeedback } from 'react-native';
+import { Card, Text, Searchbar, Button, ActivityIndicator, IconButton, Switch } from 'react-native-paper';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -48,8 +48,20 @@ export default function AdminDashboard() {
   const handleToggleStatus = async (id) => {
     try {
       await AdminApiService.toggleProductStatus(id);
-      loadProducts(); // Reload products after toggle
+
+      setProducts(products.map(product =>
+        product.idProduct === id
+          ? { ...product, status: !product.status }
+          : product
+      ));
+
+      await loadProducts();
     } catch (err) {
+      Alert.alert(
+        'Error',
+        'No se pudo cambiar el estado del producto. Por favor, intente nuevamente.',
+        [{ text: 'OK' }]
+      );
       console.error('Error toggling product status:', err);
     }
   };
@@ -114,17 +126,41 @@ export default function AdminDashboard() {
       <Card.Content>
         <View style={styles.productHeader}>
           <Text variant="titleMedium">{item.name}</Text>
-          <IconButton
-            icon="pencil"
-            size={20}
-            onPress={() => handleEditProduct(item.idProduct)}
-          />
+          <View style={styles.productActions}>
+            <TouchableWithoutFeedback
+              onPress={(e) => {
+                e.stopPropagation();
+                handleToggleStatus(item.idProduct);
+              }}
+            >
+              <View>
+                <Switch
+                  value={item.status}
+                  onValueChange={() => { }}  // Move logic to TouchableWithoutFeedback
+                />
+              </View>
+            </TouchableWithoutFeedback>
+
+            <TouchableWithoutFeedback
+              onPress={(e) => {
+                e.stopPropagation();
+                handleEditProduct(item.idProduct);
+              }}
+            >
+              <View>
+                <IconButton
+                  icon="pencil"
+                  size={20}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
         </View>
         <Text variant="bodySmall" style={styles.productType}>
           {getProductTypeLabel(item.idProductType)}
         </Text>
         <Text variant="bodyMedium">Precio: ${item.price}</Text>
-        <Text variant="bodyMedium">
+        <Text variant="bodyMedium" style={item.status ? styles.activeStatus : styles.inactiveStatus}>
           Estado: {item.status ? 'Activo' : 'Inactivo'}
         </Text>
       </Card.Content>
@@ -231,6 +267,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  productActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   centered: {
     flex: 1,
     justifyContent: 'center',
@@ -238,5 +278,11 @@ const styles = StyleSheet.create({
   },
   loadingMore: {
     padding: 16,
+  },
+  activeStatus: {
+    color: theme.colors.primary,
+  },
+  inactiveStatus: {
+    color: theme.colors.error,
   },
 });

@@ -2,23 +2,29 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function toggleProductStatus(productId) {
-    const product = await prisma.product.findUnique({
-        where: { idProduct: productId }
-    });
+    try {
+        // Find current product
+        const product = await prisma.product.findUnique({
+            where: { idProduct: productId }
+        });
 
-    if (!product) {
-        throw new Error('Producto no encontrado');
+        if (!product) {
+            throw new Error('Producto no encontrado');
+        }
+
+        // Toggle status
+        const updatedProduct = await prisma.product.update({
+            where: { idProduct: productId },
+            data: { status: !product.status }
+        });
+
+        return {
+            message: `Producto ${updatedProduct.status ? 'activado' : 'desactivado'} exitosamente`,
+            product: updatedProduct
+        };
+    } catch (error) {
+        throw new Error(`Error al cambiar estado del producto: ${error.message}`);
     }
-
-    const updatedProduct = await prisma.product.update({
-        where: { idProduct: productId },
-        data: { status: !product.status }
-    });
-
-    return {
-        message: `Producto ${updatedProduct.status ? 'activado' : 'desactivado'} exitosamente`,
-        product: updatedProduct
-    };
 }
 
 async function updateProductCustomization(productId, customizationData, userId) {
