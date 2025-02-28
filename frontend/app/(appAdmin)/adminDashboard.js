@@ -130,13 +130,13 @@ export default function AdminDashboard() {
             <TouchableWithoutFeedback
               onPress={(e) => {
                 e.stopPropagation();
-                handleToggleStatus(item.idProduct);
+                // handleToggleStatus(item.idProduct);
               }}
             >
               <View>
                 <Switch
                   value={item.status}
-                  onValueChange={() => { }}  // Move logic to TouchableWithoutFeedback
+                  onValueChange={() => handleToggleStatus(item.idProduct)} // Llama la función toggle
                 />
               </View>
             </TouchableWithoutFeedback>

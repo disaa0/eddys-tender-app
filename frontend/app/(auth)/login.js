@@ -55,79 +55,81 @@ export default function Login() {
   };
 
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        <View style={styles.container}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('../../assets/logo.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <Text variant="headlineMedium" style={styles.title}>
-              ¡Bienvenido!
-            </Text>
-          </View>
-
-          {error ? (
-            <Text style={styles.errorText}>{error}</Text>
-          ) : null}
-
-          <TextInput
-            mode="outlined"
-            label="Email o nombre de usuario"
-            value={emailOrUsername}
-            onChangeText={setEmailOrUsername}
-            style={[styles.input, (getFieldError('email') || getFieldError('username')) && styles.inputError]}
-            error={!!getFieldError('email') || !!getFieldError('username')}
-            autoCapitalize="none"
-          />
-          {getFieldError('email') && (
-            <Text style={styles.fieldError}>{getFieldError('email')}</Text>
-          )}
-          {getFieldError('username') && (
-            <Text style={styles.fieldError}>{getFieldError('username')}</Text>
-          )}
-
-          <TextInput
-            mode="outlined"
-            label="Contraseña"
-            value={password}
-            onChangeText={setPassword}
-            style={[styles.input, getFieldError('password') && styles.inputError]}
-            error={!!getFieldError('password')}
-            secureTextEntry
-          />
-          {getFieldError('password') && (
-            <Text style={styles.fieldError}>{getFieldError('password')}</Text>
-          )}
-
-          <Button
-            mode="contained"
-            onPress={handleLogin}
-            style={styles.button}
-            buttonColor={theme.colors.primary}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color={theme.colors.surface} />
-            ) : (
-              'Iniciar Sesión'
-            )}
-          </Button>
-
-          <Link href="/register" asChild>
-            <Button mode="text" textColor={theme.colors.surface}>
-              ¿No tienes cuenta? Regístrate
-            </Button>
-          </Link>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../../assets/eddys.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
       </View>
-    </ImageBackground>
+      <View style={styles.welcomeContainer}>
+        <Text variant="headlineMedium" style={styles.welcomeMessage}>
+          Bienvenido, Usuario
+        </Text>
+      </View>
+
+      {
+        error ? (
+          <Text style={styles.errorText}>{error}</Text>
+        ) : null
+      }
+
+      <TextInput
+        mode="outlined"
+        label="Email o nombre de usuario"
+        value={emailOrUsername}
+        onChangeText={setEmailOrUsername}
+        style={[styles.input, (getFieldError('email') || getFieldError('username')) && styles.inputError]}
+        error={!!getFieldError('email') || !!getFieldError('username')}
+        autoCapitalize="none"
+      />
+      {
+        getFieldError('email') && (
+          <Text style={styles.fieldError}>{getFieldError('email')}</Text>
+        )
+      }
+      {
+        getFieldError('username') && (
+          <Text style={styles.fieldError}>{getFieldError('username')}</Text>
+        )
+      }
+
+      <TextInput
+        mode="outlined"
+        label="Contraseña"
+        value={password}
+        onChangeText={setPassword}
+        style={[styles.input, getFieldError('password') && styles.inputError]}
+        error={!!getFieldError('password')}
+        secureTextEntry
+      />
+      {
+        getFieldError('password') && (
+          <Text style={styles.fieldError}>{getFieldError('password')}</Text>
+        )
+      }
+
+      <Button
+        mode="contained"
+        onPress={handleLogin}
+        style={styles.button}
+        buttonColor={theme.colors.primary}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color={theme.colors.surface} />
+        ) : (
+          'Iniciar Sesión'
+        )}
+      </Button>
+
+      <Link href="/register" asChild>
+        <Button mode="text" textColor={theme.colors.primary}>
+          ¿No tienes cuenta? Regístrate
+        </Button>
+      </Link>
+    </View >
   );
 }
 
@@ -143,16 +145,21 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    alignContent: 'center',
+    padding: 20,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: 10,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    height: '20vh',
+    marginBottom: 100,
+    marginTop: -50,
   },
   logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
+    width: 300,
+    height: 300,
+    marginBottom: 0,
   },
   title: {
     color: theme.colors.surface,
@@ -197,5 +204,14 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: theme.colors.error,
+  },
+  welcomeContainer: {
+    marginBottom: 20,
+    alignItems: 'flex-start',
+  },
+  welcomeMessage: {
+    color: theme.colors.primary,
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });
