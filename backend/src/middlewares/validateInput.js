@@ -4,7 +4,7 @@ const { z } = require('zod');
 const registerSchema = z.object({
     username: z.string()
         .min(3, { message: "Nombre de usuario debe contener al menos 3 caracteres" })
-        .max(12, { message: "Nombre de usuario no puede tener más de 12 caracteres" }),
+        .max(16, { message: "Nombre de usuario no puede tener más de 16 caracteres" }),
     email: z.string().email({ message: "Correo no válido" }),
     password: z.string()
         .min(6, { message: "Contraseña debe tener al menos 6 caracteres" })
