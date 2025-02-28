@@ -1,12 +1,17 @@
-import { View, FlatList, StyleSheet, Alert, TouchableWithoutFeedback } from 'react-native';
+import { View, FlatList, StyleSheet, Alert, TouchableWithoutFeedback, Image, TouchableOpacity } from 'react-native';
 import { Card, Text, Searchbar, Button, ActivityIndicator, IconButton, Switch } from 'react-native-paper';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { theme } from '../theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+const logo = require('../../assets/eddys.png');
+import Animated, { FadeInDown, FadeIn, FadeOut, FadeInUp, Layout } from 'react-native-reanimated';
 import AdminApiService from '../api/AdminApiService';
 import CategoryChips from '../components/CategoryChips';
+import SortChips from '../components/SortChips';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -16,9 +21,12 @@ export default function AdminDashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [selectedFilter, setSelectedFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const router = useRouter();
 
   const CATEGORIES = ['Todos', 'Comida', 'Bebida'];
+  const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
 
   const loadProducts = async () => {
     try {
@@ -45,6 +53,12 @@ export default function AdminDashboard() {
     }, [])
   );
 
+  const handleSelectedFilter = (filter) => {
+    if (filter === selectedFilter) {
+      setSelectedFilter('')
+    } else setSelectedFilter(filter)
+    setShowFilters(false)
+  }
   const handleToggleStatus = async (id) => {
     try {
       await AdminApiService.toggleProductStatus(id);
@@ -113,56 +127,65 @@ export default function AdminDashboard() {
 
       // Filtrar por búsqueda
       const searchMatch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-
       return categoryMatch && searchMatch;
+    });
+  };
+
+  //Funcion para ordenar productos
+  const getSortedProducts = () => {
+    return getFilteredProducts().sort((a, b) => {
+      if (selectedFilter === 'A-Z') {
+        return a.name.localeCompare(b.name);
+      } else if (selectedFilter === 'Z-A') {
+        return b.name.localeCompare(a.name);
+      } else if (selectedFilter === 'Más pedidos') {
+        return 0 //(b.orderCount || 0) - (a.orderCount || 0); // Sort by most ordered
+      } else {
+        return 0; // No sorting if filter is not recognized
+      }
     });
   };
 
   const renderProduct = ({ item }) => (
     <Card
       style={styles.productCard}
-      onPress={() => handleEditProduct(item.idProduct)}
+      onPress={(e) => {
+        e.stopPropagation();
+        handleEditProduct(item.idProduct);
+      }}
     >
+      <Image
+        source={require('../../assets/products/tenders.png')}
+        style={styles.cardImage}
+        resizeMode="cover"
+      />
       <Card.Content>
-        <View style={styles.productHeader}>
-          <Text variant="titleMedium">{item.name}</Text>
-          <View style={styles.productActions}>
-            <TouchableWithoutFeedback
-              onPress={(e) => {
-                e.stopPropagation();
-                // handleToggleStatus(item.idProduct);
-              }}
-            >
-              <View>
-                <Switch
-                  value={item.status}
-                  onValueChange={() => handleToggleStatus(item.idProduct)} // Llama la función toggle
-                />
-              </View>
-            </TouchableWithoutFeedback>
 
-            <TouchableWithoutFeedback
-              onPress={(e) => {
-                e.stopPropagation();
-                handleEditProduct(item.idProduct);
-              }}
-            >
-              <View>
-                <IconButton
-                  icon="pencil"
-                  size={20}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
+        <View style={styles.productHeader}>
+          <Text style={styles.cardTitle}>{item.name}</Text>
         </View>
-        <Text variant="bodySmall" style={styles.productType}>
-          {getProductTypeLabel(item.idProductType)}
+        <Text style={styles.cardDescription}>
+          {item.description}
         </Text>
-        <Text variant="bodyMedium">Precio: ${item.price}</Text>
+        <Text style={styles.cardPrice}>${item.price}</Text>
         <Text variant="bodyMedium" style={item.status ? styles.activeStatus : styles.inactiveStatus}>
-          Estado: {item.status ? 'Activo' : 'Inactivo'}
+          {item.status ? 'Activo' : 'Inactivo'}
         </Text>
+        <View style={styles.productActions}>
+          <TouchableWithoutFeedback
+            onPress={(e) => {
+              e.stopPropagation();
+              handleToggleStatus(item.status);
+            }}
+          >
+            <View>
+              <Switch
+                value={item.status}
+                onValueChange={() => handleToggleStatus(item.idProduct)} // Llama la función toggle
+              />
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
       </Card.Content>
     </Card>
   );
@@ -184,59 +207,113 @@ export default function AdminDashboard() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <IconButton
-          icon="arrow-left"
-          size={24}
-          onPress={handleBack}
-        />
-        <Text variant="titleLarge" style={styles.title}>Panel de Administración</Text>
-        <IconButton
-          icon="plus"
-          size={24}
-          onPress={handleAddProduct}
-        />
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.logoContainer}>
+          <Image source={logo} style={styles.logo} />
+        </View>
 
-      <Searchbar
-        placeholder="Buscar productos"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        style={styles.searchbar}
-      />
-      <CategoryChips
-        categories={CATEGORIES}
-        selectedCategory={selectedCategory}
-        onSelect={setSelectedCategory}
-      />
+        <View style={styles.searchContainer}>
+          <Searchbar
+            placeholder="Buscar"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={styles.searchbar}
+            inputStyle={styles.searchInput}
+            icon="magnify" // Ícono de lupa
+            placeholderTextColor="#666" // Color del texto de placeholder
+          />
+          {
+            !showFilters && (selectedFilter == '') && (
+              <Animated.View entering={FadeIn.duration(300)}
+                exiting={FadeOut.duration(300)}>
+                <TouchableOpacity style={styles.sortButton} onPress={() => setShowFilters(!showFilters)}
+                >
+                  <MaterialIcons name="filter-list" size={24} color="#ffffff" />
+                </TouchableOpacity>
+              </Animated.View>
 
-      <FlatList
-        data={getFilteredProducts()} // Filtramos productos antes de renderizar
-        renderItem={renderProduct}
-        keyExtractor={(item) => item.idProduct.toString()}
-        contentContainerStyle={styles.productList}
-        ListEmptyComponent={
-          !loading && (
-            <View style={styles.centered}>
-              <Text>No hay productos disponibles.</Text>
-            </View>
-          )
-        }
-        onEndReached={() => {
-          if (!loading && page < totalPages) {
-            setPage((prevPage) => prevPage + 1);
+
+            )
           }
-        }}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={loading && page > 1 ? <ActivityIndicator style={styles.loadingMore} /> : null}
-      />
+          {/* Animación de filtros */}
+          {(showFilters) && (
+            <Animated.View
+              entering={FadeIn.duration(300)}
+              exiting={FadeOut.duration(300)}
+              style={styles.filtersContainer}
+            >
+              <SortChips
+                categories={FILTERS}
+                selectedCategory={selectedFilter}
+                onSelect={handleSelectedFilter}
+                horizontal={false}
+              />
+            </Animated.View>
+          )}
+          {
+            (selectedFilter != '') && !showFilters && (
+              <Animated.View entering={FadeIn.duration(300)}
+                exiting={FadeOut.duration(300)}>
+                <TouchableOpacity style={styles.sortButton} onPress={() => setShowFilters(true)}>
+                  {(selectedFilter != 'Más pedidos') ? (<Text>{selectedFilter}</Text>) : (
+                    <TouchableOpacity style={styles.sortButton} onPress={() => setShowFilters(!showFilters)}
+                    >
+                      <MaterialIcons name="star" size={24} color="#ffffff" />
+                    </TouchableOpacity>
+                  )}
+                </TouchableOpacity>
+              </Animated.View>
 
-    </View>
+
+            )
+          }
+
+        </View>
+        {/* Componente de categorías con animación */}
+        <View style={styles.categoriesContainer}>
+          <CategoryChips
+            categories={CATEGORIES}
+            selectedCategory={selectedCategory}
+            onSelect={setSelectedCategory}
+            horizontal={true}
+          />
+        </View>
+
+
+
+        <FlatList
+          data={getSortedProducts()} // Filtramos y sorteamos productos antes de renderizar
+          numColumns={2}
+          renderItem={renderProduct}
+          keyExtractor={(item) => item.idProduct.toString()}
+          contentContainerStyle={styles.productList}
+          ListEmptyComponent={
+            !loading && (
+              <View style={styles.centered}>
+                <Text>No hay productos disponibles.</Text>
+              </View>
+            )
+          }
+          onEndReached={() => {
+            if (!loading && page < totalPages) {
+              setPage((prevPage) => prevPage + 1);
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={loading && page > 1 ? <ActivityIndicator style={styles.loadingMore} /> : null}
+        />
+
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff', // Asegura que el notch no muestre un color incorrecto
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -253,19 +330,93 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
-  searchbar: {
-    margin: 16,
+  logo: {
+    width: 300, // Ajusta el ancho del logo
+    height: 90, // Ajusta la altura del logo
+    resizeMode: 'contain', // Asegura que el logo se ajuste correctamente
   },
-  productList: {
-    padding: 16,
+  logoContainer: {
+    alignItems: 'center', // Centrar el logo horizontalmente
+    marginTop: 10, // Espacio arriba del logo
+    marginBottom: 10, // Espacio debajo del logo
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchbar: {
+    flex: 1,
+    elevation: 0,
+    backgroundColor: '#ffffff',
+    borderRadius: 17,
+    height: 50,
+    marginRight: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  searchInput: {
+    fontSize: 16,
+    color: '#000', // Color del texto ingresado
+  },
+  sortButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 50,
+    height: 50,
+    borderRadius: 13,
+    backgroundColor: theme.colors.primary,
+    marginRight: 0,
+  },
+  filtersContainer: {
+    paddingHorizontal: 0,
+    marginBottom: 10,
+    right: 0,
   },
   productCard: {
-    marginBottom: 16,
+    flex: 1,
+    maxWidth: '50%',
+    borderRadius: 12,
+    margin: 8,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
+  cardImage: {
+    width: '100%',
+    height: 120,
+    backgroundColor: '#F5F5F5',
+  },
+  cardTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: 600,
+    marginBottom: 4,
+  },
+  cardDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  cardPrice: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.primary,
   },
   productHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: 8,
   },
   productActions: {
     flexDirection: 'row',

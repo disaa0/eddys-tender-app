@@ -1,11 +1,86 @@
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Avatar, Text, List, Divider, Surface } from 'react-native-paper';
+import { Avatar, Text, List, Divider, Surface, Button, Snackbar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { theme } from '../theme';
+import { useAuth } from '../context/AuthContext';
+import { useUserInfo } from '../hooks/useUserInfo';
+import { useState } from 'react';
+import ConfirmationDialog from '../components/ConfirmationDialog';
+import AuthService from '../api/AuthService';
 
 export default function Profile() {
   const router = useRouter();
+  const { logout, user } = useAuth();
+  // hook personalizado para obtener la información del usuario
+  // Descomentar para usar el hook personalizado
 
+  const { userInfoH, loading, error, fetchUserInfo } = useUserInfo(); // Usamos el hook aquí
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
+  const [retryCount, setRetryCount] = useState(0);
+  const [logOutDialogVisible, setLogOutDialogVisible] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeleting(true);
+      const response = await AuthService.deleteProfile();
+
+      // Show success message briefly before logout
+      setSnackbar({
+        visible: true,
+        message: response.message || 'Cuenta eliminada exitosamente'
+      });
+
+      // Wait a moment to show the message before logging out
+      setTimeout(async () => {
+        await logout();
+      }, 1500);
+
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setSnackbar({
+        visible: true,
+        message: error.message || 'Error al eliminar la cuenta'
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogVisible(false);
+    }
+  };
+
+  const handleRetry = () => {
+    setRetryCount((prev) => prev + 1);
+    setSnackbar({ visible: false, message: '' }); // Opcional, para ocultar errores previos
+    fetchUserInfo();
+  };
+
+
+  // Si está cargando, muestra un mensaje de loading
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>{error}</Text>
+        <Button mode="contained" onPress={handleRetry} style={{ marginTop: 10 }}>
+          Reintentar
+        </Button>
+        {retryCount >= 3 && (
+          <Button mode="contained" onPress={logout} style={{ marginTop: 10 }}>
+            Cerrar Sesión
+          </Button>
+        )}
+      </View>
+    );
+  }
+
+  // console.log(userInfoH);
   const userInfo = {
     name: 'Alejandro Fontes',
     email: 'alejandrofontes@gmail.com',
@@ -13,71 +88,129 @@ export default function Profile() {
     address: 'Calle Principal 123, Colonia Centro',
     memberSince: '2024',
   };
-
   return (
-    <ScrollView style={styles.container}>
-      <Surface style={styles.header} elevation={2}>
-        <Avatar.Image
-          size={120}
-          source={require('../../assets/profile.png')}
-          style={[styles.avatar, styles.squareAvatar]}
-        />
-        <Text variant="headlineSmall" style={styles.name}>
-          {userInfo.name}
-        </Text>
-        <Text variant="bodyLarge" style={styles.memberSince}>
-          Miembro desde {userInfo.memberSince}
-        </Text>
-      </Surface>
+    <>
+      <ScrollView style={styles.container}>
+        <Surface style={styles.header} elevation={2}>
+          <Avatar.Image
+            size={120}
+            source={require('../../assets/profile.png')}
+            style={[styles.avatar, styles.squareAvatar]}
+          />
+          <Text variant="headlineSmall" style={styles.name}>
+            {userInfoH.userInformation.name + ' ' + userInfoH.userInformation.lastName}
+          </Text>
+          <Text variant="bodyLarge" style={styles.memberSince}>
+            Miembro desde {new Date(userInfoH.createdAt).getFullYear()}
+          </Text>
+        </Surface>
 
-      <Surface style={styles.infoSection} elevation={1}>
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          Información Personal
-        </Text>
-        <List.Item
-          title="Correo"
-          description={userInfo.email}
-          left={(props) => <List.Icon {...props} icon="email" />}
-        />
-        <Divider />
-        <List.Item
-          title="Teléfono"
-          description={userInfo.phone}
-          left={(props) => <List.Icon {...props} icon="phone" />}
-        />
-        <Divider />
-        <List.Item
-          title="Dirección"
-          description={userInfo.address}
-          left={(props) => <List.Icon {...props} icon="map-marker" />}
-        />
-      </Surface>
+        <Surface style={styles.infoSection} elevation={1}>
+          <Text variant="titleMedium" style={styles.sectionTitle}>
+            Información Personal
+          </Text>
+          <List.Item
+            title="Correo"
+            description={userInfoH.email}
+            left={(props) => <List.Icon {...props} icon="email" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/profile/edit-email')}
+          />
+          <Divider />
+          <List.Item
+            title="Teléfono"
+            description={userInfoH.userInformation.phone}
+            left={(props) => <List.Icon {...props} icon="phone" />}
+          />
+          <Divider />
+          <List.Item
+            title="Dirección"
+            description={userInfoH.userInformation?.address || 'No especificada'}
+            left={(props) => <List.Icon {...props} icon="map-marker" />}
+          />
+        </Surface>
 
-      <Surface style={styles.infoSection} elevation={1}>
-        <List.Item
-          title="Historial de Pedidos"
-          left={(props) => <List.Icon {...props} icon="history" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
-          onPress={() => router.push('/orders')}
-        />
-        <Divider />
-        <List.Item
-          title="Métodos de Pago"
-          left={(props) => <List.Icon {...props} icon="credit-card" />}
-          right={(props) => <List.Icon {...props} icon="chevron-right" />}
-          onPress={() => router.push('/profile/payment-methods')}
-        />
-        <Divider />
-        <List.Item
+        <Surface style={styles.infoSection} elevation={1}>
+          <List.Item
+            title="Historial de Pedidos"
+            left={(props) => <List.Icon {...props} icon="history" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/orders')}
+          />
+          <Divider />
+          <List.Item
+            title="Métodos de Pago"
+            left={(props) => <List.Icon {...props} icon="credit-card" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/profile/payment-methods')}
+          />
+          <Divider />
+          <List.Item
+            title="Cerrar Sesión"
+            left={(props) => (
+              <List.Icon {...props} icon="logout" color={theme.colors.error} />
+            )}
+            titleStyle={{ color: theme.colors.error }}
+            onPress={() => setLogOutDialogVisible(true)}
+          />
+        </Surface>
+
+        <ConfirmationDialog
+          visible={logOutDialogVisible}
+          onDismiss={() => setLogOutDialogVisible(false)}
+          onConfirm={logout}
           title="Cerrar Sesión"
-          left={(props) => (
-            <List.Icon {...props} icon="logout" color={theme.colors.error} />
-          )}
-          titleStyle={{ color: theme.colors.error }}
-          onPress={() => router.push('/login')}
+          message="¿Estás seguro que deseas cerrar sesión?"
+
         />
-      </Surface>
-    </ScrollView>
+
+        {/* Add Admin Access section if user is admin */}
+        {user?.idUserType === 1 && (
+          <Surface style={styles.infoSection} elevation={1}>
+            <List.Item
+              title="Salir del panel de administrador"
+              left={(props) => (
+                <List.Icon {...props} icon="shield-account" color={theme.colors.primary} />
+              )}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => router.push('/')}
+            />
+          </Surface>
+        )}
+
+        <Surface style={[styles.infoSection, styles.dangerSection]} elevation={1}>
+          <List.Item
+            title="Eliminar Cuenta"
+            description="Esta acción no se puede deshacer"
+            left={(props) => (
+              <List.Icon {...props} icon="delete" color={theme.colors.error} />
+            )}
+            onPress={() => setDeleteDialogVisible(true)}
+            disabled={isDeleting}
+            titleStyle={{ color: theme.colors.error }}
+          />
+        </Surface>
+
+        <ConfirmationDialog
+          visible={deleteDialogVisible}
+          onDismiss={() => !isDeleting && setDeleteDialogVisible(false)}
+          onConfirm={handleDeleteAccount}
+          title="Eliminar Cuenta"
+          message="¿Estás seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer y perderás todo tu historial y datos."
+          confirmButtonDisabled={isDeleting}
+          confirmButtonLoading={isDeleting}
+        />
+      </ScrollView>
+
+      <Snackbar
+        visible={snackbar.visible}
+        onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
+        duration={3000}
+        style={styles.snackbar}
+      >
+        {snackbar.message}
+      </Snackbar>
+    </>
   );
 }
 
@@ -85,6 +218,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    marginBottom: 90,
   },
   header: {
     alignItems: 'center',
@@ -120,5 +254,22 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 8,
     color: theme.colors.primary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  snackbar: {
+    position: 'absolute',
+    bottom: 0,
+    backgroundColor: theme.colors.error,
+  },
+  dangerSection: {
+    marginTop: 32,
+    marginBottom: 32,
+  },
+  adminSection: {
+    marginTop: 16,
   },
 });

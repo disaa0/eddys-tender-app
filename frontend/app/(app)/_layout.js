@@ -3,44 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet, View } from 'react-native';
 
-const styles = StyleSheet.create({
-  tabBarStyle: {
-    position: 'absolute',
-    backgroundColor: '#ff3814',
-    height: 80,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    elevation: 0,
-    shadowOpacity: 0,
-    borderTopWidth: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: 30,
-  },
-  cartIconContainer: {
-    position: 'absolute', // Asegura que el botón se posicione correctamente
-    top: -35,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 70,
-    height: 70,
-    backgroundColor: '#ff3814',
-    borderRadius: 35,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  tabBarIconStyle: {
-    paddingTop: 10,
-  },
-});
+
 
 export default function AppLayout() {
   return (
@@ -136,3 +99,42 @@ export default function AppLayout() {
     </SafeAreaProvider>
   );
 }
+
+export const styles = StyleSheet.create({
+  tabBarStyle: {
+    position: 'absolute',
+    backgroundColor: '#ff3814',
+    height: 80,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    elevation: 0,
+    shadowOpacity: 0,
+    borderTopWidth: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 30,
+  },
+  cartIconContainer: {
+    position: 'absolute', // Asegura que el botón se posicione correctamente
+    top: -35,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 70,
+    height: 70,
+    backgroundColor: '#ff3814',
+    borderRadius: 35,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  tabBarIconStyle: {
+    paddingTop: 10,
+  },
+});

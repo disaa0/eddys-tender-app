@@ -50,7 +50,7 @@ function AppContent() {
       >
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        <Stack.Screen name="(appAdmin)" options={{ headerShown: true, title: "Admin" }} />
+        <Stack.Screen name="(appAdmin)" options={{ headerShown: true, title: "Panel Administrador" }} />
       </Stack>
     </PaperProvider>
   );

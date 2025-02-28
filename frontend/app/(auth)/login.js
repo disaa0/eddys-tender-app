@@ -65,7 +65,7 @@ export default function Login() {
       </View>
       <View style={styles.welcomeContainer}>
         <Text variant="headlineMedium" style={styles.welcomeMessage}>
-          Bienvenido, Usuario
+          Inicia sesión o registrate
         </Text>
       </View>
 
@@ -126,7 +126,7 @@ export default function Login() {
 
       <Link href="/register" asChild>
         <Button mode="text" textColor={theme.colors.primary}>
-          ¿No tienes cuenta? Regístrate
+          ¿No tienes cuenta? Regístrate.
         </Button>
       </Link>
     </View >
@@ -134,15 +134,6 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)', // Semi-transparent overlay
-    padding: 20,
-  },
   container: {
     flex: 1,
     alignContent: 'center',

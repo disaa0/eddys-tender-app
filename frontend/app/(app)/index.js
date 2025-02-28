@@ -11,7 +11,7 @@ const logo = require('../../assets/eddys.png');
 import Animated, { FadeInDown, FadeIn, FadeOut, FadeInUp, Layout } from 'react-native-reanimated';
 
 const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
-export const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
+const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
 
 // Importar imágenes de manera segura
 const PRODUCT_IMAGES = {
@@ -112,6 +112,7 @@ export default function Index() {
             <MaterialIcons name="filter-list" size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
+
         {/* Animación de filtros */}
         {showFilters && (
           <Animated.View
