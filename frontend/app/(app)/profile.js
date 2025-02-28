@@ -19,6 +19,7 @@ export default function Profile() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
   const [retryCount, setRetryCount] = useState(0);
+  const [logOutDialogVisible, setLogOutDialogVisible] = useState(false);
 
   const handleDeleteAccount = async () => {
     try {
@@ -150,9 +151,18 @@ export default function Profile() {
               <List.Icon {...props} icon="logout" color={theme.colors.error} />
             )}
             titleStyle={{ color: theme.colors.error }}
-            onPress={logout}
+            onPress={() => setLogOutDialogVisible(true)}
           />
         </Surface>
+
+        <ConfirmationDialog
+          visible={logOutDialogVisible}
+          onDismiss={() => setLogOutDialogVisible(false)}
+          onConfirm={logout}
+          title="Cerrar Sesión"
+          message="¿Estás seguro que deseas cerrar sesión?"
+
+        />
 
         {/* Add Admin Access section if user is admin */}
         {user?.idUserType === 1 && (

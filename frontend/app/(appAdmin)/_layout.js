@@ -1,11 +1,9 @@
 import { Tabs } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
-import { IconButton } from 'react-native-paper';
 import { View, ActivityIndicator } from 'react-native';
 
 export default function AdminLayout() {
@@ -38,6 +36,7 @@ export default function AdminLayout() {
         screenOptions={{
           headerShown: false,
           tabBarStyle: { display: 'none' },
+          animation: 'fade',
         }}
       >
         {/* Main Admin Routes */}
