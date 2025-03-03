@@ -74,61 +74,62 @@ export default function Login() {
           <Text style={styles.errorText}>{error}</Text>
         ) : null
       }
+      <View style={styles.formContainer}>
+        <TextInput
+          mode="outlined"
+          label="Email o nombre de usuario"
+          value={emailOrUsername}
+          onChangeText={setEmailOrUsername}
+          style={[styles.input, (getFieldError('email') || getFieldError('username')) && styles.inputError]}
+          error={!!getFieldError('email') || !!getFieldError('username')}
+          autoCapitalize="none"
+        />
+        {
+          getFieldError('email') && (
+            <Text style={styles.fieldError}>{getFieldError('email')}</Text>
+          )
+        }
+        {
+          getFieldError('username') && (
+            <Text style={styles.fieldError}>{getFieldError('username')}</Text>
+          )
+        }
 
-      <TextInput
-        mode="outlined"
-        label="Email o nombre de usuario"
-        value={emailOrUsername}
-        onChangeText={setEmailOrUsername}
-        style={[styles.input, (getFieldError('email') || getFieldError('username')) && styles.inputError]}
-        error={!!getFieldError('email') || !!getFieldError('username')}
-        autoCapitalize="none"
-      />
-      {
-        getFieldError('email') && (
-          <Text style={styles.fieldError}>{getFieldError('email')}</Text>
-        )
-      }
-      {
-        getFieldError('username') && (
-          <Text style={styles.fieldError}>{getFieldError('username')}</Text>
-        )
-      }
+        <TextInput
+          mode="outlined"
+          label="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          style={[styles.input, getFieldError('password') && styles.inputError]}
+          error={!!getFieldError('password')}
+          secureTextEntry
+        />
+        {
+          getFieldError('password') && (
+            <Text style={styles.fieldError}>{getFieldError('password')}</Text>
+          )
+        }
 
-      <TextInput
-        mode="outlined"
-        label="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        style={[styles.input, getFieldError('password') && styles.inputError]}
-        error={!!getFieldError('password')}
-        secureTextEntry
-      />
-      {
-        getFieldError('password') && (
-          <Text style={styles.fieldError}>{getFieldError('password')}</Text>
-        )
-      }
-
-      <Button
-        mode="contained"
-        onPress={handleLogin}
-        style={styles.button}
-        buttonColor={theme.colors.primary}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color={theme.colors.surface} />
-        ) : (
-          'Iniciar Sesión'
-        )}
-      </Button>
-
-      <Link href="/register" asChild>
-        <Button mode="text" textColor={theme.colors.primary}>
-          ¿No tienes cuenta? Regístrate.
+        <Button
+          mode="contained"
+          onPress={handleLogin}
+          style={styles.button}
+          buttonColor={theme.colors.primary}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={theme.colors.surface} />
+          ) : (
+            'Iniciar Sesión'
+          )}
         </Button>
-      </Link>
+
+        <Link style={styles.link} href="/register" asChild>
+          <Button mode="text" textColor={theme.colors.primary}>
+            ¿No tienes cuenta? Regístrate.
+          </Button>
+        </Link>
+      </View>
     </View >
   );
 }
@@ -204,5 +205,14 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  formContainer: {
+    marginTop: 0,
+    justifyContent: 'center',
+  },
+  link: {
+    color: theme.colors.primary,
+    textAlign: 'center',
+    marginTop: 10,
   },
 });

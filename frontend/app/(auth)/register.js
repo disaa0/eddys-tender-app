@@ -174,7 +174,7 @@ export default function Register() {
         )}
       </Button>
 
-      <Link href="/login" asChild>
+      <Link style={styles.link} href="/login" asChild>
         <Button mode="text" textColor={theme.colors.primary}>
           ¿Ya tienes cuenta? Inicia sesión
         </Button>
@@ -194,8 +194,8 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     height: '20vh',
-    marginBottom: 100,
-    marginTop: -50,
+    marginBottom: 50,
+    marginTop: -100,
   },
   logo: {
     width: 300,
@@ -255,4 +255,7 @@ const styles = StyleSheet.create({
   inputError: {
     borderColor: theme.colors.error,
   },
+  link: {
+    marginBottom: "80px"
+  }
 }); 
