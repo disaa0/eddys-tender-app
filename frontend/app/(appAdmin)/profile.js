@@ -161,6 +161,8 @@ export default function Profile() {
           onConfirm={logout}
           title="Cerrar Sesión"
           message="¿Estás seguro que deseas cerrar sesión?"
+          confirmButtonLabel="Cerrar Sesión"
+          confirmButtonLoading={isDeleting}
 
         />
 
