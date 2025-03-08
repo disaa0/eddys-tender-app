@@ -626,6 +626,69 @@ Authorization: Bearer <token>
 - 404: Producto no encontrado
 - 500: Error del servidor
 
+### 10.4 Listar de productos sin paginacion ( Administrador y Cliente )
+
+**GET /products**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+
+**Respuesta Exitosa (200):**
+***Adminstrador***
+
+```json
+{
+    "message": "Productos obtenidos correctamente",
+    "data": {
+        "products": [
+            {
+                "idProduct": 1,
+                "idProductType": 1,
+                "idUserAdded": 1,
+                "name": "Hamburguesa Clásica",
+                "description": "Hamburguesa con carne, lechuga, tomate y queso",
+                "price": 89.99,
+                "status": true,
+                "createdAt": "2025-03-08T02:01:04.163Z"
+            }
+        ]
+    }
+}
+
+```
+
+**Respuesta Exitosa (200):**
+***Cliente***
+
+```json
+{
+    "message": "Productos obtenidos correctamente",
+    "data": {
+        "products": [
+            {
+                "idProduct": 1,
+                "idProductType": 1,
+                "name": "Hamburguesa Clásica",
+                "description": "Hamburguesa con carne, lechuga, tomate y queso",
+                "price": 89.99,
+                "status": true,
+                "createdAt": "2025-03-08T02:01:04.163Z"
+            }
+        ]
+    }
+}
+
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 404: No se encontraron productos
+- 500: Error del servidor
+
+
 ## 11. VALIDACIONES DE PRODUCTOS
 
 ### 11.1 Creación de Producto
