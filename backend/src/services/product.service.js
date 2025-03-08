@@ -1,8 +1,20 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+async function getProducts(userType) {
 
-async function getProducts(page = 1, limit = 5) {
+    const products = await prisma.product.findMany({
+        where: userType !== 1 ? { status: true } : {},
+        orderBy: { createdAt: 'desc' },
+    });
+
+    // Si no es admin, excluimos el campo idUserAdded
+    return userType === 1
+        ? products
+        : products.map(({ idUserAdded, ...rest }) => rest);
+}
+
+async function getProductsPagitination(page = 1, limit = 5) {
     const skip = (page - 1) * limit;
     const products = await prisma.product.findMany({
         skip,
@@ -65,4 +77,4 @@ async function updateProductDetails(productId, data) {
     }
 }
 
-module.exports = { getProducts, createProduct, updateProductDetails };
+module.exports = { getProducts, getProductsPagitination, createProduct, updateProductDetails };

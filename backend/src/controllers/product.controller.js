@@ -1,12 +1,12 @@
-const { getProducts, createProduct, updateProductDetails } = require('../services/product.service');
+const { getProducts, createProduct, updateProductDetails, getProductsPagitination } = require('../services/product.service');
 const { productSchema, productDetailsSchema } = require('../middlewares/validateInput');
 const prisma = require('../lib/prisma');
 
-async function getAllProducts(req, res) {
+async function getAllProductsPagination(req, res) {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 5; // Fijo en 5 productos por página
-        const data = await getProducts(page, limit);
+        const data = await getProductsPagitination(page, limit);
 
         res.json({
             message: "Productos obtenidos correctamente",
@@ -14,6 +14,29 @@ async function getAllProducts(req, res) {
         });
     } catch (error) {
         res.status(500).json({ message: "Error al obtener productos", error: error.message });
+    }
+}
+
+async function getAllProducts(req, res) {
+    try {
+        const userType = req.user.userType;
+        const products = await getProducts(userType);
+
+        if (!products) {
+            return res.status(404).json({
+                message: "No se encontraron productos"
+            });
+        }
+
+        res.status(200).json({
+            message: "Productos obtenidos correctamente",
+            data: { products }
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Error del servidor al obtener productos",
+            error: error.message
+        });
     }
 }
 
@@ -212,4 +235,4 @@ async function updatePersonalizationStatus(req, res) {
     }
 }
 
-module.exports = { getAllProducts, getProduct, addProduct, modifyProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus };
+module.exports = { getAllProducts, getAllProductsPagination, getProduct, addProduct, modifyProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus };
