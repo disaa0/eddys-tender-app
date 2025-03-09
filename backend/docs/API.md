@@ -688,6 +688,85 @@ Authorization: Bearer <token>
 - 404: No se encontraron productos
 - 500: Error del servidor
 
+### 10.5 Agregar productos directamente al carrito
+
+**PUT /cart/cart/items/{id}**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+- id: ID del producto a agregar al carrito
+
+**Cuerpo de la Petición:**
+```json
+{
+    "quantity": 1
+}
+```
+
+**Respuesta Exitosa (201):**
+
+
+```json
+{
+    "message": "Producto agregado al carrito",
+    "cartId": 1,
+    "item": {
+        "idItemCart": 2,
+        "idCart": 1,
+        "idProduct": 3,
+        "quantity": 2,
+        "individualPrice": 25,
+        "status": true
+    }
+}
+
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 400: Error de solicitud
+- 404: Producto no encontrado
+- 500: Error del servidor
+
+### 10.6 Modificar cantidad de un producto en el carrito
+
+**PUT /cart/cart/items/{id}**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+- id: ID del producto a modificar la cantidad en el carrito
+
+**Respuesta Exitosa (201):**
+
+
+```json
+{
+    "message": "Cantidad del producto actualizada en el carrito",
+    "cartId": 2,
+    "item": {
+        "idItemCart": 4,
+        "idCart": 2,
+        "idProduct": 1,
+        "quantity": 3,
+        "individualPrice": 89,
+        "status": true
+    }
+}
+```
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 400: Error de solicitud
+- 404: Producto no encontrado
+- 500: Error del servidor
+
 
 ## 11. VALIDACIONES DE PRODUCTOS
 

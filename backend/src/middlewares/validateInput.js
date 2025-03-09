@@ -110,10 +110,32 @@ const productDetailsSchema = z.object({
     message: "Al menos un campo debe ser proporcionado para actualizar"
 });
 
+const validateAddItemToCart = (req, res, next) => {
+    const schema = z.object({
+        idProduct: z.string().regex(/^\d+$/, "El id del producto debe ser un número entero").transform(Number).refine(val => val > 0, {
+            message: "El id del producto debe ser un número entero mayor que 0"
+        }),
+        quantity: z.number().int().min(1, "La cantidad debe ser al menos 1").max(100, "La cantidad no puede ser mayor a 100")
+    });
+
+    try {
+        const validatedData = schema.parse({
+            idProduct: req.params.idProduct,
+            quantity: req.body.quantity
+        });
+
+        req.validatedData = validatedData;
+        next();
+    } catch (error) {
+        return res.status(400).json({ message: "Error de validación", errors: error.errors });
+    }
+};
+
+
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
     validateEmailUpdate,
     validateCustomization,
-    productSchema, productDetailsSchema
+    productSchema, productDetailsSchema, validateAddItemToCart
 };
