@@ -12,6 +12,7 @@ export default function AdminLayout() {
   const router = useRouter();
   const segments = useSegments();
 
+
   useEffect(() => {
     if (isLoading) return;
     if (segments[0] === '(appAdmin)' && user?.idUserType !== 1) {
@@ -49,6 +50,7 @@ export default function AdminLayout() {
         <Tabs.Screen
           name="adminDashboard"
           options={{
+            headerShown: false,
             tabBarIcon: ({ color }) => (
               <View style={styles.tabBarIconStyle}>
                 <MaterialIcons name="menu" size={28} color={color} />
@@ -104,7 +106,7 @@ const styles = StyleSheet.create({
   tabBarStyle: {
     position: 'absolute',
     backgroundColor: '#ff3814',
-    height: 80,
+    height: 50,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     elevation: 0,
