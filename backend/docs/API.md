@@ -767,6 +767,115 @@ Authorization: Bearer <token>
 - 404: Producto no encontrado
 - 500: Error del servidor
 
+### 10.7 Eliminar un producto en el carrito
+
+**DELETE /cart/cart/items/{id}**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+- id: ID del producto a eliminar en el carrito
+
+**Respuesta Exitosa (200):**
+
+
+```json
+
+{
+    "message": "Producto eliminado del carrito",
+    "cartId": 1,
+    "item": {
+        "idItemCart": 1,
+        "idCart": 1,
+        "idProduct": 1,
+        "quantity": 3,
+        "individualPrice": 89,
+        "status": false
+    }
+}
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 400: Error de peticion
+- 403: Esta producto ya ha sido desactivado en el carrito o este no existe en carrito.
+- 500: Error del servidor
+
+### 10.8 Ver productos en el carrito
+
+**GET /cart/**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+
+
+```json
+{
+    "items": {
+        "cartId": 1,
+        "items": [
+            {
+                "idItemCart": 1,
+                "idCart": 1,
+                "idProduct": 1,
+                "quantity": 3,
+                "individualPrice": 89,
+                "status": true,
+                "product": {
+                    "idProduct": 1,
+                    "idProductType": 1,
+                    "idUserAdded": 1,
+                    "name": "Hamburguesa Clásica",
+                    "description": "Hamburguesa con carne, lechuga, tomate y queso",
+                    "price": 89.99,
+                    "status": true,
+                    "createdAt": "2025-03-10T04:58:13.074Z"
+                }
+            }
+        ]
+    }
+}
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 400: Error de peticion
+- 500: Error del servidor
+
+### 10.9 Ver monto total de productos en el carrito
+
+**GET /cart/total**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+
+
+```json
+{
+    {
+    "totalAmount": {
+        "cartId": 1,
+        "totalAmount": 416
+    }
+}
+}
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 400: Error de peticion
+- 500: Error del servidor
 
 ## 11. VALIDACIONES DE PRODUCTOS
 
@@ -782,19 +891,33 @@ Authorization: Bearer <token>
 - **description**: (Opcional) Mínimo 3 caracteres
 - Al menos uno de los campos debe estar presente
 
-## 12. NOTAS TÉCNICAS ADICIONALES
+## 12. VALIDACIONES DE CARRITO
+### 12.1 Añadir producto directamente al carrito
+- **idProduct**: Número entero positivo
+- **quantity**: Número entero positivo no superior a 100
+- Ambos campos son obligatorios
 
-### 12.1 Paginación
+
+### 12.2 Actualización de Cantidad
+- **idProduct**: Número entero positivo
+- **quantity**: Número entero positivo no superior a 100
+- Ambos campos son obligatorios
+
+
+
+## 13. NOTAS TÉCNICAS ADICIONALES
+
+### 13.1 Paginación
 - Implementada en listado de productos
 - 5 productos por página
 - Incluye total de páginas y página actual
 
-### 12.2 Validaciones
+### 13.2 Validaciones
 - Uso de Zod para validación de datos
 - Manejo de errores específicos por campo
 - Transformación automática de tipos
 
-### 12.3 Seguridad
+### 13.3 Seguridad
 - Verificación de roles para endpoints administrativos
 - Validación de propiedad de recursos
 - Sanitización de datos de entrada 

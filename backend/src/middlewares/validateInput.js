@@ -131,11 +131,25 @@ const validateAddItemToCart = (req, res, next) => {
     }
 };
 
+const validateDeleteItemFromCart = (req, res, next) => {
+    const schema = z.object({
+        idProduct: z.number().int().positive("El ID del producto debe ser un número entero positivo"),
+    });
+
+    const result = schema.safeParse({ idProduct: Number(req.params.idProduct) });
+
+    if (!result.success) {
+        return res.status(400).json({ message: result.error.errors[0].message });
+    }
+
+    next();
+};
+
 
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
     validateEmailUpdate,
     validateCustomization,
-    productSchema, productDetailsSchema, validateAddItemToCart
+    productSchema, productDetailsSchema, validateAddItemToCart, validateDeleteItemFromCart
 };
