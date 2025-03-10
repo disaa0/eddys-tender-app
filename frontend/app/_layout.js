@@ -19,9 +19,10 @@ const combinedTheme = {
 function useProtectedRoute() {
   const segments = useSegments();
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
-  console.log(segments);
-  console.log(isAuthenticated);
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  // console.log(segments);
+  // console.log(isAuthenticated);
+  console.log(isAdmin);
 
   useEffect(() => {
     if (isLoading) return;
@@ -31,7 +32,12 @@ function useProtectedRoute() {
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/login');
     } else if (isAuthenticated && inAuthGroup) {
-      router.replace('/(app)');
+      if (isAdmin) {
+        router.replace('/adminDashboard');
+        return;
+      } else {
+        router.replace('/');
+      }
     }
   }, [isAuthenticated, segments, isLoading]);
 }

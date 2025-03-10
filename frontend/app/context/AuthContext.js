@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
     const [userToken, setUserToken] = useState(null);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         loadStoredAuth();
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }) => {
             const response = await AuthService.login(credentials);
             setUserToken(response.token);
             setUser(response.user);
+            response.user.idUserType === 1 ? setIsAdmin(true) : setIsAdmin(false);
             return true;
         } catch (error) {
             console.error('Login error:', error);
@@ -61,6 +63,7 @@ export const AuthProvider = ({ children }) => {
                 login,
                 logout,
                 isLoading,
+                isAdmin,
             }}
         >
             {children}

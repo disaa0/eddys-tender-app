@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image, ImageBackground } from 'react-native';
+import { View, StyleSheet, Image, ImageBackground, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { Link } from 'expo-router';
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import { API_URL } from '../config';
 import { useRouter } from 'expo-router';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, isAdmin } = useAuth();
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,14 +33,7 @@ export default function Login() {
         password,
       };
 
-      const response = await login(credentials);
-
-      // Check user type and redirect accordingly
-      if (response.user.idUserType === 1) {
-        router.replace('/(appAdmin)');
-      } else {
-        router.replace('/(app)');
-      }
+      await login(credentials);
 
     } catch (error) {
       setError(error.message);
@@ -55,7 +48,9 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <View style={styles.logoContainer}>
         <Image
           source={require('../../assets/eddys.png')}
@@ -130,7 +125,7 @@ export default function Login() {
           </Button>
         </Link>
       </View>
-    </View >
+    </KeyboardAvoidingView>
   );
 }
 
@@ -144,8 +139,8 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    height: '20vh',
-    marginBottom: 100,
+    height: 200,
+    marginBottom: 5,
     marginTop: -50,
   },
   logo: {
