@@ -877,6 +877,194 @@ Authorization: Bearer <token>
 - 400: Error de peticion
 - 500: Error del servidor
 
+### 10.10 Obtener imagen de un producto
+
+**GET /api/products/:id/image**
+
+Obtiene la imagen de un producto específico.
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Respuesta Exitosa:**
+- Devuelve directamente el archivo de imagen
+
+**Errores Posibles:**
+- 400: ID de producto inválido
+- 404: Producto no encontrado
+- 404: Este producto no tiene una imagen
+- 404: Imagen no encontrada en el servidor
+- 500: Error al obtener la imagen del producto
+
+### 10.11 Subir imagen de un producto (Admin)
+
+**POST /api/admin/products/:id/image**
+
+Sube una imagen para un producto específico.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Cuerpo de la Petición:**
+- `productImage`: Archivo de imagen (jpeg, jpg, png, webp)
+
+**Ejemplo de uso con Postman:**
+1. Seleccionar método POST
+2. Ingresar la URL: `http://localhost:3000/api/admin/products/:id/image`
+3. En la pestaña "Headers":
+   - Authorization: Bearer <your_token>
+4. En la pestaña "Body":
+   - Seleccionar "form-data"
+   - Agregar un campo con Key: "productImage"
+   - Cambiar el tipo de "Text" a "File"
+   - Seleccionar el archivo de imagen
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Imagen subida correctamente",
+    "product": {
+        "idProduct": 1,
+        "name": "Nombre del Producto",
+        "imageUrl": "/uploads/products/product-1.jpg"
+    }
+}
+```
+
+**Errores Posibles:**
+- 400: ID de producto inválido
+- 400: No se ha subido ninguna imagen
+- 400: Campo de imagen incorrecto (debe ser 'productImage')
+- 400: Solo se permiten archivos de imagen (jpeg, jpg, png, webp)
+- 400: Tamaño de archivo excede el límite (5MB)
+- 404: Producto no encontrado
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error al subir la imagen del producto
+
+### 10.12 Buscar productos
+
+**GET /api/products/search**
+
+Busca productos con filtros y paginación.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Query:**
+| Parámetro | Tipo | Descripción | Ejemplo |
+|-----------|------|-------------|---------|
+| name | string | Nombre del producto (búsqueda parcial) | ?name=hamburguesa |
+| type | string | Tipo de producto | ?type=Comida |
+| minPrice | number | Precio mínimo | ?minPrice=50 |
+| maxPrice | number | Precio máximo | ?maxPrice=200 |
+| status | boolean | Estado del producto (solo admin) | ?status=true |
+| page | number | Número de página (default: 1) | ?page=1 |
+| limit | number | Productos por página (default: 10) | ?limit=20 |
+
+**Ejemplos de uso:**
+```
+/api/products/search?name=hamburguesa&type=Comida&minPrice=50&maxPrice=200
+/api/products/search?page=2&limit=20
+/api/products/search?type=Bebida&status=true
+```
+
+**Respuesta Exitosa (200):**
+```json
+{
+    "message": "Productos encontrados",
+    "data": {
+        "products": [
+            {
+                "idProduct": 1,
+                "name": "Hamburguesa Clásica",
+                "description": "Hamburguesa con carne, lechuga, tomate y queso",
+                "price": 89.99,
+                "status": true,
+                "productType": {
+                    "type": "Comida"
+                }
+            }
+        ],
+        "pagination": {
+            "totalItems": 50,
+            "totalPages": 5,
+            "currentPage": 1,
+            "itemsPerPage": 10
+        }
+    }
+}
+```
+
+**Notas:**
+- Los usuarios no administradores solo verán productos activos (status = true)
+- Los administradores pueden ver todos los productos y filtrar por status
+- La búsqueda por nombre es insensible a mayúsculas/minúsculas
+- La búsqueda por nombre es parcial (contiene)
+- Los precios deben ser números positivos
+- El orden es alfabético por nombre
+
+**Errores Posibles:**
+- 400: Parámetros de filtro inválidos
+- 401: Token no proporcionado
+- 500: Error del servidor
+
+### 10.13 Obtener Productos Populares
+
+**GET /api/products/popular**
+
+Obtiene una lista de los productos más populares basados en la cantidad de veces que han sido agregados a carritos.
+
+**Parámetros de Query:**
+~~~
+limit: Número de productos a retornar (default: 5)
+~~~
+
+**Respuesta Exitosa (200):**
+~~~json
+{
+    "message": "Productos populares obtenidos correctamente",
+    "data": {
+        "products": [
+            {
+                "idProduct": 1,
+                "name": "Hamburguesa Clásica",
+                "description": "Hamburguesa con carne, lechuga y tomate",
+                "price": 120.00,
+                "status": true,
+                "productType": {
+                    "type": "Comida"
+                },
+                "popularity": 25
+            },
+            // ... más productos
+        ]
+    }
+}
+~~~
+
+**Notas:**
+- Solo retorna productos activos (status = true)
+- El campo "popularity" indica cuántas veces el producto ha sido agregado a carritos
+- Los productos están ordenados por popularidad de mayor a menor
+- Se requiere autenticación
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 500: Error del servidor
+
 ## 11. VALIDACIONES DE PRODUCTOS
 
 ### 11.1 Creación de Producto

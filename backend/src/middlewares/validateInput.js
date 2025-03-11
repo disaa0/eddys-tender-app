@@ -97,7 +97,8 @@ const productSchema = z.object({
     name: z.string().min(3, { message: "El nombre debe tener al menos 3 caracteres" }),
     description: z.string().min(3, { message: "La descripcion no debe esta vacia" }),
     price: z.number().positive({ message: "El precio debe ser un número positivo" }),
-    status: z.boolean()
+    status: z.boolean(),
+    imagePath: z.string().optional()
 });
 
 const productDetailsSchema = z.object({
@@ -105,7 +106,8 @@ const productDetailsSchema = z.object({
     description: z.string().min(3).optional(),
     price: z.number().positive().or(z.string().regex(/^\d+\.?\d{0,2}$/).transform(Number)).optional(),
     idProductType: z.number().positive().optional(),
-    status: z.boolean().optional()
+    status: z.boolean().optional(),
+    imagePath: z.string().optional()
 }).refine(data => Object.keys(data).length > 0, {
     message: "Al menos un campo debe ser proporcionado para actualizar"
 });
@@ -145,11 +147,49 @@ const validateDeleteItemFromCart = (req, res, next) => {
     next();
 };
 
+const searchQuerySchema = z.object({
+    name: z.string().optional(),
+    type: z.string().optional(),
+    minPrice: z.string()
+        .refine(val => !val || !isNaN(val), "El precio mínimo debe ser un número")
+        .refine(val => !val || parseFloat(val) >= 0, "El precio mínimo debe ser positivo")
+        .optional(),
+    maxPrice: z.string()
+        .refine(val => !val || !isNaN(val), "El precio máximo debe ser un número")
+        .refine(val => !val || parseFloat(val) >= 0, "El precio máximo debe ser positivo")
+        .optional(),
+    status: z.enum(['true', 'false']).optional(),
+    page: z.string()
+        .refine(val => !val || (!isNaN(val) && parseInt(val) > 0), "La página debe ser un número positivo")
+        .optional(),
+    limit: z.string()
+        .refine(val => !val || (!isNaN(val) && parseInt(val) > 0), "El límite debe ser un número positivo")
+        .optional()
+}).refine(data => {
+    if (data.minPrice && data.maxPrice) {
+        return parseFloat(data.maxPrice) >= parseFloat(data.minPrice);
+    }
+    return true;
+}, {
+    message: "El precio máximo debe ser mayor o igual al precio mínimo"
+});
+
+const validateSearchQuery = (req, res, next) => {
+    const result = searchQuerySchema.safeParse(req.query);
+    if (!result.success) {
+        return res.status(400).json({
+            message: "Parámetros de búsqueda inválidos",
+            errors: result.error.format()
+        });
+    }
+    next();
+};
 
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
     validateEmailUpdate,
     validateCustomization,
-    productSchema, productDetailsSchema, validateAddItemToCart, validateDeleteItemFromCart
+    productSchema, productDetailsSchema, validateAddItemToCart, validateDeleteItemFromCart,
+    validateSearchQuery
 };

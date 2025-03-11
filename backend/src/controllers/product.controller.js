@@ -1,6 +1,8 @@
 const { getProducts, createProduct, updateProductDetails, getProductsPagitination } = require('../services/product.service');
 const { productSchema, productDetailsSchema } = require('../middlewares/validateInput');
 const prisma = require('../lib/prisma');
+const fs = require('fs');
+const path = require('path');
 
 async function getAllProductsPagination(req, res) {
     try {
@@ -235,4 +237,193 @@ async function updatePersonalizationStatus(req, res) {
     }
 }
 
-module.exports = { getAllProducts, getAllProductsPagination, getProduct, addProduct, modifyProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus };
+async function getProductImage(req, res) {
+    try {
+        const productId = parseInt(req.params.id);
+
+        if (isNaN(productId)) {
+            return res.status(400).json({
+                message: "ID de producto inválido"
+            });
+        }
+
+        const product = await prisma.product.findUnique({
+            where: { idProduct: productId }
+        });
+
+        if (!product) {
+            return res.status(404).json({
+                message: "Producto no encontrado"
+            });
+        }
+
+        // Look for the product image with exact filename pattern
+        const uploadDir = path.join(__dirname, '../../uploads/products');
+        const expectedFilename = `product-${productId}`;
+
+        // Get all files in the directory
+        const files = fs.readdirSync(uploadDir);
+
+        // Find the file that matches our pattern (allowing for any extension)
+        const productImage = files.find(file => {
+            const filename = path.parse(file).name; // Get filename without extension
+            return filename === expectedFilename;
+        });
+
+        if (!productImage) {
+            return res.status(404).json({
+                message: "Este producto no tiene una imagen"
+            });
+        }
+
+        // Send the image file
+        res.sendFile(path.join(uploadDir, productImage));
+
+    } catch (error) {
+        console.error('Error getting product image:', error);
+        res.status(500).json({
+            message: "Error al obtener la imagen del producto",
+            error: error.message
+        });
+    }
+}
+
+const searchProducts = async (req, res) => {
+    try {
+        const { name, type, minPrice, maxPrice, status, page = 1, limit = 10 } = req.query;
+
+        // Build where clause
+        const where = {};
+
+        // Add name filter if provided (MySQL is case-insensitive by default)
+        if (name) {
+            where.name = {
+                contains: name
+            };
+        }
+
+        // Add type filter if provided
+        if (type) {
+            where.productType = {
+                type: {
+                    equals: type // MySQL is case-insensitive by default
+                }
+            };
+        }
+
+        // Add price range if provided
+        if (minPrice || maxPrice) {
+            where.price = {};
+            if (minPrice) where.price.gte = parseFloat(minPrice);
+            if (maxPrice) where.price.lte = parseFloat(maxPrice);
+        }
+
+        // Add status filter if admin
+        if (req.user.idUserType === 1 && status !== undefined) {
+            where.status = status === 'true';
+        } else {
+            // Non-admin users can only see active products
+            where.status = true;
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        // Get total count for pagination
+        const totalCount = await prisma.product.count({ where });
+
+        // Get products
+        const products = await prisma.product.findMany({
+            where,
+            include: {
+                productType: {
+                    select: {
+                        type: true
+                    }
+                }
+            },
+            skip,
+            take: parseInt(limit),
+            orderBy: {
+                name: 'asc'
+            }
+        });
+
+        return res.status(200).json({
+            message: "Productos encontrados",
+            data: {
+                products,
+                pagination: {
+                    totalItems: totalCount,
+                    totalPages: Math.ceil(totalCount / parseInt(limit)),
+                    currentPage: parseInt(page),
+                    itemsPerPage: parseInt(limit)
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error searching products:', error);
+        return res.status(500).json({
+            message: "Error al buscar productos",
+            error: error.toString()
+        });
+    }
+};
+
+async function getPopularProducts(req, res) {
+    try {
+        const { limit = 5 } = req.query;
+        const limitNum = parseInt(limit);
+
+        // Get popular products using Prisma aggregation
+        const popularProducts = await prisma.product.findMany({
+            where: {
+                status: true, // Only active products
+                itemsCart: {
+                    some: {} // Has any items in cart
+                }
+            },
+            include: {
+                productType: {
+                    select: {
+                        type: true
+                    }
+                },
+                _count: {
+                    select: {
+                        itemsCart: true
+                    }
+                }
+            },
+            orderBy: {
+                itemsCart: {
+                    _count: 'desc'
+                }
+            },
+            take: limitNum
+        });
+
+        // Format the response
+        const formattedProducts = popularProducts.map(product => ({
+            ...product,
+            popularity: product._count.itemsCart,
+            _count: undefined // Remove the _count field from response
+        }));
+
+        return res.status(200).json({
+            message: "Productos populares obtenidos correctamente",
+            data: {
+                products: formattedProducts
+            }
+        });
+
+    } catch (error) {
+        console.error('Error getting popular products:', error);
+        return res.status(500).json({
+            message: "Error al obtener productos populares",
+            error: error.toString()
+        });
+    }
+}
+
+module.exports = { getAllProducts, getAllProductsPagination, getProduct, addProduct, modifyProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts };
