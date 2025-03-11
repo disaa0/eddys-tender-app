@@ -1,5 +1,5 @@
 import { View, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { Text, Searchbar } from 'react-native-paper';
+import { Text, Searchbar, Button } from 'react-native-paper';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../theme';
@@ -10,6 +10,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const logo = require('../../assets/eddys.png');
 import Animated, { FadeInDown, FadeIn, FadeOut, FadeInUp, Layout } from 'react-native-reanimated';
 import SortChips from '../components/SortChips';
+import UserService from '../api/UserService';
+import useProducts from '../hooks/useProducts';
 
 const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
 const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
@@ -62,14 +64,40 @@ export default function Index() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedFilter, setSelectedFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const { products, loading, error, renderLoading, renderError } = useProducts();
   const router = useRouter();
 
-  // Filtrar productos según la categoría seleccionada
-  const filteredProducts =
-    selectedCategory === 'All'
-      ? PRODUCTS
-      : PRODUCTS.filter((product) => product.category === selectedCategory);
+  const getProductTypeLabel = (idProductType) => {
+    switch (idProductType) {
+      case 1:
+        return 'Comida';
+      case 2:
+        return 'Bebidas';
+      default:
+        return 'Otro';
+    }
+  };
 
+  // Filtrar productos por categoría y búsqueda
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory =
+      selectedCategory === 'All' || getProductTypeLabel(product.idProductType) === selectedCategory;
+
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesCategory && matchesSearch;
+  })
+    .sort((a, b) => {
+      if (selectedFilter === 'A-Z') {
+        return a.name.localeCompare(b.name);
+      } else if (selectedFilter === 'Z-A') {
+        return b.name.localeCompare(a.name);
+      }
+      // else if (selectedFilter === 'Más pedidos') {
+      //   return (b.orders || 0) - (a.orders || 0); // Ordenar por cantidad de pedidos (si existe)
+      // }
+      return 0;
+    });
 
   const handleSelectedFilter = (filter) => {
     if (filter === selectedFilter) {
@@ -78,7 +106,7 @@ export default function Index() {
     setShowFilters(false)
   }
   const renderProduct = ({ item, index }) => {
-    const imageSource = PRODUCT_IMAGES[item.imageKey];
+    const imageSource = PRODUCT_IMAGES.burger;
     return (
       <Animated.View
         entering={FadeInDown.delay(index * 100).springify()} // Animación de entrada para cada producto
@@ -96,6 +124,9 @@ export default function Index() {
       </Animated.View>
     );
   };
+
+  if (loading) return renderLoading();
+  if (error) return renderError();
 
   return (
     <SafeAreaView style={styles.safeArea}>
