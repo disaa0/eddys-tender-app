@@ -3,7 +3,8 @@ const router = express.Router();
 const { authenticateToken } = require('../middlewares/auth.middleware');
 const { isAdmin } = require('../middlewares/admin.middleware');
 const { getProduct, addProduct, modifyProductDetails, getAllProductsPagination } = require('../controllers/product.controller');
-const { toggleProductStatus, updateProductCustomization } = require('../controllers/admin.controller');
+const { toggleProductStatus, updateProductCustomization, uploadProductImage } = require('../controllers/admin.controller');
+const { handleProductImageUpload } = require('../middlewares/upload.middleware');
 const adminController = require('../controllers/admin.controller');
 
 // Apply authentication middleware to all admin routes
@@ -16,5 +17,8 @@ router.post('/products', isAdmin, addProduct);
 router.put('/products/:id', isAdmin, modifyProductDetails);
 router.patch('/products/:id/status', isAdmin, toggleProductStatus);
 router.put('/products/:id/customization', isAdmin, updateProductCustomization);
+
+// New route for uploading product images
+router.post('/products/:id/image', isAdmin, handleProductImageUpload, uploadProductImage);
 
 module.exports = router; 
