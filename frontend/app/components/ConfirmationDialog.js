@@ -8,7 +8,9 @@ export default function ConfirmationDialog({
     title,
     message,
     confirmButtonDisabled = false,
-    confirmButtonLoading = false
+    confirmButtonLoading = false,
+    cancelButtonLabel = 'Cancelar',
+    confirmButtonLabel = 'Eliminar'
 }) {
     return (
         <Portal>
@@ -22,7 +24,7 @@ export default function ConfirmationDialog({
                         onPress={onDismiss}
                         disabled={confirmButtonLoading}
                     >
-                        Cancelar
+                        {cancelButtonLabel}
                     </Button>
                     <Button
                         onPress={onConfirm}
@@ -30,7 +32,7 @@ export default function ConfirmationDialog({
                         disabled={confirmButtonDisabled}
                         loading={confirmButtonLoading}
                     >
-                        Eliminar
+                        {confirmButtonLabel}
                     </Button>
                 </Dialog.Actions>
             </Dialog>

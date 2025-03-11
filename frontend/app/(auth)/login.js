@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image, ImageBackground } from 'react-native';
+import { View, StyleSheet, Image, ImageBackground, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { Link } from 'expo-router';
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import { API_URL } from '../config';
 import { useRouter } from 'expo-router';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, isAdmin } = useAuth();
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,14 +33,7 @@ export default function Login() {
         password,
       };
 
-      const response = await login(credentials);
-
-      // Check user type and redirect accordingly
-      if (response.user.idUserType === 1) {
-        router.replace('/(appAdmin)');
-      } else {
-        router.replace('/(app)');
-      }
+      await login(credentials);
 
     } catch (error) {
       setError(error.message);
@@ -55,7 +48,9 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <View style={styles.logoContainer}>
         <Image
           source={require('../../assets/eddys.png')}
@@ -74,62 +69,63 @@ export default function Login() {
           <Text style={styles.errorText}>{error}</Text>
         ) : null
       }
+      <View style={styles.formContainer}>
+        <TextInput
+          mode="outlined"
+          label="Email o nombre de usuario"
+          value={emailOrUsername}
+          onChangeText={setEmailOrUsername}
+          style={[styles.input, (getFieldError('email') || getFieldError('username')) && styles.inputError]}
+          error={!!getFieldError('email') || !!getFieldError('username')}
+          autoCapitalize="none"
+        />
+        {
+          getFieldError('email') && (
+            <Text style={styles.fieldError}>{getFieldError('email')}</Text>
+          )
+        }
+        {
+          getFieldError('username') && (
+            <Text style={styles.fieldError}>{getFieldError('username')}</Text>
+          )
+        }
 
-      <TextInput
-        mode="outlined"
-        label="Email o nombre de usuario"
-        value={emailOrUsername}
-        onChangeText={setEmailOrUsername}
-        style={[styles.input, (getFieldError('email') || getFieldError('username')) && styles.inputError]}
-        error={!!getFieldError('email') || !!getFieldError('username')}
-        autoCapitalize="none"
-      />
-      {
-        getFieldError('email') && (
-          <Text style={styles.fieldError}>{getFieldError('email')}</Text>
-        )
-      }
-      {
-        getFieldError('username') && (
-          <Text style={styles.fieldError}>{getFieldError('username')}</Text>
-        )
-      }
+        <TextInput
+          mode="outlined"
+          label="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          style={[styles.input, getFieldError('password') && styles.inputError]}
+          error={!!getFieldError('password')}
+          secureTextEntry
+        />
+        {
+          getFieldError('password') && (
+            <Text style={styles.fieldError}>{getFieldError('password')}</Text>
+          )
+        }
 
-      <TextInput
-        mode="outlined"
-        label="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        style={[styles.input, getFieldError('password') && styles.inputError]}
-        error={!!getFieldError('password')}
-        secureTextEntry
-      />
-      {
-        getFieldError('password') && (
-          <Text style={styles.fieldError}>{getFieldError('password')}</Text>
-        )
-      }
-
-      <Button
-        mode="contained"
-        onPress={handleLogin}
-        style={styles.button}
-        buttonColor={theme.colors.primary}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color={theme.colors.surface} />
-        ) : (
-          'Iniciar Sesión'
-        )}
-      </Button>
-
-      <Link href="/register" asChild>
-        <Button mode="text" textColor={theme.colors.primary}>
-          ¿No tienes cuenta? Regístrate.
+        <Button
+          mode="contained"
+          onPress={handleLogin}
+          style={styles.button}
+          buttonColor={theme.colors.primary}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={theme.colors.surface} />
+          ) : (
+            'Iniciar Sesión'
+          )}
         </Button>
-      </Link>
-    </View >
+
+        <Link style={styles.link} href="/register" asChild>
+          <Button mode="text" textColor={theme.colors.primary}>
+            ¿No tienes cuenta? Regístrate.
+          </Button>
+        </Link>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -143,8 +139,8 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    height: '20vh',
-    marginBottom: 100,
+    height: 200,
+    marginBottom: 5,
     marginTop: -50,
   },
   logo: {
@@ -204,5 +200,14 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  formContainer: {
+    marginTop: 0,
+    justifyContent: 'center',
+  },
+  link: {
+    color: theme.colors.primary,
+    textAlign: 'center',
+    marginTop: 10,
   },
 });

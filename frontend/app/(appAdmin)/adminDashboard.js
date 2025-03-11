@@ -87,23 +87,6 @@ export default function AdminDashboard() {
     });
   };
 
-  const handleBack = () => {
-    Alert.alert(
-      'Salir del Panel',
-      '¿Deseas salir del panel de administración?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel'
-        },
-        {
-          text: 'Salir',
-          onPress: () => router.push('/(app)')
-        }
-      ]
-    );
-  };
-
   const handleAddProduct = () => {
     router.push('/(appAdmin)/addProduct');
   };
@@ -309,7 +292,7 @@ export default function AdminDashboard() {
   );
 }
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff', // Asegura que el notch no muestre un color incorrecto
@@ -435,5 +418,9 @@ const styles = StyleSheet.create({
   },
   inactiveStatus: {
     color: theme.colors.error,
+  },
+  productList: {
+    padding: 8,
+    paddingBottom: 85, // Ajusta este valor según sea necesario
   },
 });

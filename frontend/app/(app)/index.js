@@ -9,6 +9,7 @@ import CategoryChips from '../components/CategoryChips';
 import { SafeAreaView } from 'react-native-safe-area-context';
 const logo = require('../../assets/eddys.png');
 import Animated, { FadeInDown, FadeIn, FadeOut, FadeInUp, Layout } from 'react-native-reanimated';
+import SortChips from '../components/SortChips';
 
 const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
 const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
@@ -69,6 +70,13 @@ export default function Index() {
       ? PRODUCTS
       : PRODUCTS.filter((product) => product.category === selectedCategory);
 
+
+  const handleSelectedFilter = (filter) => {
+    if (filter === selectedFilter) {
+      setSelectedFilter('')
+    } else setSelectedFilter(filter)
+    setShowFilters(false)
+  }
   const renderProduct = ({ item, index }) => {
     const imageSource = PRODUCT_IMAGES[item.imageKey];
     return (
@@ -114,16 +122,17 @@ export default function Index() {
         </View>
 
         {/* Animación de filtros */}
-        {showFilters && (
+        {(showFilters) && (
           <Animated.View
             entering={FadeIn.duration(300)}
             exiting={FadeOut.duration(300)}
             style={styles.filtersContainer}
           >
-            <CategoryChips
+            <SortChips
               categories={FILTERS}
               selectedCategory={selectedFilter}
-              onSelect={setSelectedFilter}
+              onSelect={handleSelectedFilter}
+              horizontal={false}
             />
           </Animated.View>
         )}
@@ -217,4 +226,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 10,
   },
+  orderContainer: {
+    paddingHorizontal: 0,
+    marginBottom: 10,
+    right: 0,
+  }
 });
