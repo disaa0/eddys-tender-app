@@ -187,10 +187,7 @@ const validateSearchQuery = (req, res, next) => {
 
 const shippingAddressSchema = z.object({
     street: z.string().max(100, "Calle demasiado larga"),
-    houseNumber: z.union([
-        z.string().regex(/^s\/n$/i, "Debe ser un número entero positivo o 's/n'"),
-        z.number().int().positive("Debe ser un número entero positivo")
-    ]).transform(val => typeof val === 'number' ? val.toString() : val),
+    houseNumber: z.string().regex(/^\d{1,5}$/, "El número de casa debe ser un número positivo de máximo 5 dígitos"),
     postalCode: z.string().regex(/^\d{5}$/, "El código postal debe tener exactamente 5 dígitos y ser numérico"),
     neighborhood: z.string().max(50, "Vecindario demasiado largo"),
 });
