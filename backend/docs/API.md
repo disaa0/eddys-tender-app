@@ -703,7 +703,7 @@ Authorization: Bearer <token>
 **Cuerpo de la Petición:**
 ```json
 {
-    "quantity": 1
+    "quantity": 3
 }
 ```
 
@@ -1063,6 +1063,65 @@ limit: Número de productos a retornar (default: 5)
 
 **Errores Posibles:**
 - 401: Token no proporcionado
+- 500: Error del servidor
+
+### 10.14 Obetner detalles del producto por ID
+
+**GET /products/{id}**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+**Parámetros URL:**
+- id: ID del producto a consultar
+
+**Respuesta Exitosa (200):**
+***Adminstrador***
+
+```json
+{
+    "message": "Producto obtenido correctamente",
+    "data": {
+        {
+            "idProduct": 1,
+            "idProductType": 1,
+            "idUserAdded": 1,
+            "name": "Hamburguesa Clásica",
+            "description": "Hamburguesa con carne, lechuga, tomate y queso",
+            "price": 89.99,
+            "status": true,
+            "createdAt": "2025-03-08T02:01:04.163Z"
+        }
+    }
+}
+
+```
+
+**Respuesta Exitosa (200):**
+***Cliente***
+
+```json
+{
+    "message": "Producto obtenido correctamente",
+    "data": {
+        {
+            "idProduct": 1,
+            "idProductType": 1,
+            "name": "Hamburguesa Clásica",
+            "description": "Hamburguesa con carne, lechuga, tomate y queso",
+            "price": 89.99,
+            "status": true,
+            "createdAt": "2025-03-08T02:01:04.163Z"
+        }
+    }
+}
+
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 404: No se encontro el producto
 - 500: Error del servidor
 
 ## 11. VALIDACIONES DE PRODUCTOS

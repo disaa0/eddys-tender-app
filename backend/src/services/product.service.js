@@ -1,6 +1,28 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+const getProductDetailsService = async (productId, userType) => {
+    const product = await prisma.product.findFirst({
+        where: {
+            idProduct: productId,
+            ...(userType !== 1 && { status: true }) // Si no es admin, solo mostrar productos activos
+        }
+    });
+
+    if (!product) {
+        throw new Error("Producto no encontrado");
+    }
+
+    // Si no es admin(userType es diferente de 1), excluimos el campo idUserAdded de product
+    if (userType !== 1) {
+        const { idUserAdded, ...rest } = product;
+        return rest;
+    } else {
+        return product;
+    }
+};
+
+
 async function getProducts(userType) {
 
     const products = await prisma.product.findMany({
@@ -77,4 +99,4 @@ async function updateProductDetails(productId, data) {
     }
 }
 
-module.exports = { getProducts, getProductsPagitination, createProduct, updateProductDetails };
+module.exports = { getProducts, getProductDetailsService, getProductsPagitination, createProduct, updateProductDetails };
