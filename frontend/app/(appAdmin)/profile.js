@@ -97,9 +97,6 @@ export default function Profile() {
             source={require('../../assets/profile.png')}
             style={[styles.avatar, styles.squareAvatar]}
           />
-          <Text variant="headlineSmall" style={styles.name}>
-            {userInfoH.userInformation.name + ' ' + userInfoH.userInformation.lastName}
-          </Text>
           <Text variant="bodyLarge" style={styles.memberSince}>
             Miembro desde {new Date(userInfoH.createdAt).getFullYear()}
           </Text>
@@ -109,6 +106,12 @@ export default function Profile() {
           <Text variant="titleMedium" style={styles.sectionTitle}>
             Información Personal
           </Text>
+          <List.Item
+            title="Nombre"
+            description={userInfoH.userInformation.name + ' ' + userInfoH.userInformation.lastName}
+            left={(props) => <List.Icon {...props} icon="account" />}
+          />
+          <Divider />
           <List.Item
             title="Correo"
             description={userInfoH.email}
@@ -219,8 +222,8 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-    marginBottom: 90,
+    backgroundColor: theme.colors.surface,
+    paddingBottom: 90,
   },
   header: {
     alignItems: 'center',
