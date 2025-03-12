@@ -97,6 +97,12 @@ export default function AdminLayout() {
             href: null,
           }}
         />
+        <Tabs.Screen
+          name="profile/editEmail"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
     </SafeAreaProvider>
   );
