@@ -5,7 +5,7 @@ const getProductDetailsService = async (productId, userType) => {
     const product = await prisma.product.findFirst({
         where: {
             idProduct: productId,
-            status: true
+            ...(userType !== 1 && { status: true }) // Si no es admin, solo mostrar productos activos
         }
     });
 
