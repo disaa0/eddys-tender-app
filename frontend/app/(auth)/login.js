@@ -163,7 +163,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1, // Sombra sutil para resaltar el input
     shadowRadius: 4,
     elevation: 3, // Sombra en Android
-    paddingTop: 10, // Eliminar padding superior
   },
   button: {
     marginTop: 10,
