@@ -1,4 +1,4 @@
-const { getProducts, createProduct, updateProductDetails, getProductsPagitination } = require('../services/product.service');
+const { getProducts, createProduct, updateProductDetails, getProductsPagitination, getProductDetailsService } = require('../services/product.service');
 const { productSchema, productDetailsSchema } = require('../middlewares/validateInput');
 const prisma = require('../lib/prisma');
 const fs = require('fs');
@@ -131,6 +131,22 @@ async function getProduct(req, res) {
         });
     }
 }
+
+const getProductDetails = async (req, res) => {
+    const productId = parseInt(req.params.id);
+    const userType = req.user.userType;
+
+    try {
+        const product = await getProductDetailsService(productId, userType);
+        return res.status(200).json(product);
+    } catch (error) {
+        if (error.message === "Producto no encontrado") {
+            return res.status(404).json({ message: error.message });
+        }
+        return res.status(404).json({ message: error.message });
+    }
+};
+
 
 async function getProductPersonalizations(req, res) {
     try {
@@ -426,4 +442,4 @@ async function getPopularProducts(req, res) {
     }
 }
 
-module.exports = { getAllProducts, getAllProductsPagination, getProduct, addProduct, modifyProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts };
+module.exports = { getAllProducts, getAllProductsPagination, getProduct, addProduct, modifyProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts, getProductDetails };

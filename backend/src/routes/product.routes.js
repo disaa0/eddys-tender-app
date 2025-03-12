@@ -1,7 +1,7 @@
 const express = require('express');
 
 const { authenticateToken, isAdmin } = require('../middlewares/auth.middleware');
-const { getAllProducts, getAllProductsPagination, addProduct, modifyProductDetails, getProduct, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts } = require('../controllers/product.controller');
+const { getAllProducts, getAllProductsPagination, addProduct, modifyProductDetails, getProduct, getProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts } = require('../controllers/product.controller');
 const { validateCustomization, validateSearchQuery } = require('../middlewares/validateInput');
 
 
@@ -11,6 +11,8 @@ const router = express.Router();
 router.get('/admin/products', authenticateToken, isAdmin, getAllProductsPagination);
 //obtener todos los productos
 router.get('/', authenticateToken, getAllProducts);
+//obtener detealles de un producto
+router.get('/:id', authenticateToken, getProductDetails);
 // Obtener un producto específico
 router.get('/admin/products/:id', authenticateToken, isAdmin, getProduct);
 router.post('/admin/products', authenticateToken, isAdmin, addProduct);
