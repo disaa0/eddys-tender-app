@@ -1073,7 +1073,8 @@ limit: Número de productos a retornar (default: 5)
 ```
 Authorization: Bearer <token>
 ```
-
+**Parámetros URL:**
+- id: ID del producto a consultar
 
 **Respuesta Exitosa (200):**
 ***Adminstrador***
@@ -1120,7 +1121,7 @@ Authorization: Bearer <token>
 
 **Errores Posibles:**
 - 401: Token no proporcionado
-- 404: No se encontraron productos
+- 404: No se encontro el producto
 - 500: Error del servidor
 
 ## 11. VALIDACIONES DE PRODUCTOS
