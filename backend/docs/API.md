@@ -428,7 +428,140 @@ Authorization: Bearer <token>
 - 403: Usuario no es administrador
 - 500: Error del servidor
 
-### 8.3 Permisos de Administrador
+### 8.3 Obtner Personalizaciónes de Producto
+
+**GET /api/admin/products/{id}/customization**
+
+Obtiene los detalles las personalizaciónes para un producto específico.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "message": "Personalizaciones obtenidas correctamente",
+  "data": {
+    "personalizations": [
+      {
+        "idProductPersonalization": 1,
+        "idUserAdded": 1,
+        "idProduct": 1,
+        "idPersonalization": 1,
+        "status": true,
+        "personalization": {
+          "idPersonalization": 1,
+          "idUserAdded": 1,
+          "name": "Sin Cebolla",
+          "status": true,
+          "createdAt": "2025-03-12T18:20:06.681Z"
+        }
+      },
+      {
+        "idProductPersonalization": 2,
+        "idUserAdded": 1,
+        "idProduct": 1,
+        "idPersonalization": 2,
+        "status": true,
+        "personalization": {
+          "idPersonalization": 2,
+          "idUserAdded": 1,
+          "name": "Extra Queso",
+          "status": true,
+          "createdAt": "2025-03-12T18:20:06.681Z"
+        }
+      },
+      {
+        "idProductPersonalization": 3,
+        "idUserAdded": 1,
+        "idProduct": 1,
+        "idPersonalization": 3,
+        "status": true,
+        "personalization": {
+          "idPersonalization": 3,
+          "idUserAdded": 1,
+          "name": "Sin Gluten",
+          "status": true,
+          "createdAt": "2025-03-12T18:20:06.681Z"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Errores Posibles:**
+- 400: Producto no encontrado
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 8.4 Cambiar status activo o inactivo de la Personalización de Producto
+
+**PUT /api/admin/products/{idProduct}/customization/{idProductPersonalization}**
+
+Cambia el estado de activo o inactivo de personalización para un producto específico.
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| idProduct | number | ID del producto |
+| idProductPersonalization | number | ID de la personalizacion del producto |
+
+**Cuerpo de la Petición:**
+```json
+{
+    "status": true
+}
+```
+
+**Validaciones:**
+- status: Boolean requerido
+
+**Respuesta Exitosa (200):**
+```json
+{
+  "message": "Estado de personalización actualizado correctamente",
+  "data": {
+    "personalization": {
+      "idProductPersonalization": 1,
+      "idUserAdded": 1,
+      "idProduct": 1,
+      "idPersonalization": 1,
+      "status": false,
+      "personalization": {
+        "idPersonalization": 1,
+        "idUserAdded": 1,
+        "name": "Sin Cebolla",
+        "status": true,
+        "createdAt": "2025-03-12T18:20:06.681Z"
+      }
+    }
+  }
+}
+```
+
+**Errores Posibles:**
+- 400: Producto no encontrado
+- 400: Datos de personalización inválidos
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 8.5 Permisos de Administrador
 
 Para acceder a los endpoints de administrador, el usuario debe:
 
@@ -442,7 +575,7 @@ Para acceder a los endpoints de administrador, el usuario debe:
 }
 ```
 
-### 8.4 Consideraciones Técnicas
+### 8.6 Consideraciones Técnicas
 
 1. **Transacciones:**
    - Las operaciones de personalización utilizan transacciones Prisma
@@ -1124,47 +1257,126 @@ Authorization: Bearer <token>
 - 404: No se encontro el producto
 - 500: Error del servidor
 
-## 11. VALIDACIONES DE PRODUCTOS
+## 11. ENDPOINTS DE DIRECCIONES
 
-### 11.1 Creación de Producto
+### 11.1 Agrega una nueva de dirrecion
+**POST /api/shipping-address**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+
+**Cuerpo de la Petición:**
+```json
+{
+  "street": "Av. Luis Encinas Jhonson",
+  "houseNumber": 10, //puede ser "s/n"
+  "postalCode": "83000",
+  "neighborhood": "Centro"
+}
+```
+
+**Respuesta Exitosa (201):**
+
+
+```json
+{
+  "message": "Dirección añadida correctamente",
+  "data": {
+    "idLocation": 2,
+    "idUserInformation": 2,
+    "street": "Av. Luis Encinas Jhonson",
+    "houseNumber": "10",
+    "postalCode": "83000",
+    "neighborhood": "Centro",
+    "status": true
+  }
+}
+
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 400: Error de solicitud
+- 404: Producto no encontrado
+- 500: Error del servidor
+
+### 11.1 Obtener una direccion
+**GET /api/shipping-address**
+
+**Headers Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+
+**Respuesta Exitosa (200):**
+
+
+```json
+{
+  "message": "Dirección obtenida correctamente",
+  "data": {
+    "idLocation": 2,
+    "idUserInformation": 2,
+    "street": "Av. Luis Encinas Jhonson",
+    "houseNumber": "10",
+    "postalCode": "83000",
+    "neighborhood": "Centro",
+    "status": true
+  }
+}
+
+```
+
+**Errores Posibles:**
+- 401: Token no proporcionado
+- 400: No se encontró dirección activa para este usuario."
+- 500: Error del servidor
+
+## 12. VALIDACIONES DE PRODUCTOS
+
+### 12.1 Creación de Producto
 - **idProductType**: Número entero positivo
 - **name**: Mínimo 3 caracteres
 - **description**: Mínimo 3 caracteres
 - **price**: Número positivo
 - **status**: Booleano
 
-### 11.2 Actualización de Detalles
+### 12.2 Actualización de Detalles
 - **name**: (Opcional) Mínimo 3 caracteres
 - **description**: (Opcional) Mínimo 3 caracteres
 - Al menos uno de los campos debe estar presente
 
-## 12. VALIDACIONES DE CARRITO
-### 12.1 Añadir producto directamente al carrito
+## 13. VALIDACIONES DE CARRITO
+### 13.1 Añadir producto directamente al carrito
 - **idProduct**: Número entero positivo
 - **quantity**: Número entero positivo no superior a 100
 - Ambos campos son obligatorios
 
 
-### 12.2 Actualización de Cantidad
+### 13.2 Actualización de Cantidad
 - **idProduct**: Número entero positivo
 - **quantity**: Número entero positivo no superior a 100
 - Ambos campos son obligatorios
 
 
 
-## 13. NOTAS TÉCNICAS ADICIONALES
+## 14. NOTAS TÉCNICAS ADICIONALES
 
-### 13.1 Paginación
+### 14.1 Paginación
 - Implementada en listado de productos
 - 5 productos por página
 - Incluye total de páginas y página actual
 
-### 13.2 Validaciones
+### 14.2 Validaciones
 - Uso de Zod para validación de datos
 - Manejo de errores específicos por campo
 - Transformación automática de tipos
 
-### 13.3 Seguridad
+### 14.3 Seguridad
 - Verificación de roles para endpoints administrativos
 - Validación de propiedad de recursos
 - Sanitización de datos de entrada 

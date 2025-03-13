@@ -185,11 +185,27 @@ const validateSearchQuery = (req, res, next) => {
     next();
 };
 
+const shippingAddressSchema = z.object({
+    street: z.string().max(100, "Calle demasiado larga"),
+    houseNumber: z.string().regex(/^\d{1,5}$/, "El número de casa debe ser un número positivo de máximo 5 dígitos"),
+    postalCode: z.string().regex(/^\d{5}$/, "El código postal debe tener exactamente 5 dígitos y ser numérico"),
+    neighborhood: z.string().max(50, "Vecindario demasiado largo"),
+});
+
+function validateShippingAddress(req, res, next) {
+    try {
+        req.body = shippingAddressSchema.parse(req.body);
+        next();
+    } catch (error) {
+        res.status(400).json({ error: error.errors });
+    }
+}
+
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
     validateEmailUpdate,
     validateCustomization,
     productSchema, productDetailsSchema, validateAddItemToCart, validateDeleteItemFromCart,
-    validateSearchQuery
+    validateSearchQuery, validateShippingAddress
 };

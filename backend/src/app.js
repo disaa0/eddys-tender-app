@@ -8,6 +8,7 @@ const userRoutes = require('./routes/user.routes');
 const adminRoutes = require('./routes/admin.routes');
 const productRoutes = require('./routes/product.routes');
 const cartRoutes = require('./routes/cart.routes');
+const shippingAddressRoutes = require('./routes/shippingAddress.routes');
 
 // Configurar CORS
 app.use(cors({
@@ -37,6 +38,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/shipping-address', shippingAddressRoutes);
 
 // Rutas de ejemplo
 app.get("/", (req, res) => {
