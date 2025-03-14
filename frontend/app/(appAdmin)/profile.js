@@ -190,7 +190,7 @@ export default function Profile() {
           </Surface>
         )}
 
-        <Surface style={[styles.infoSection, styles.dangerSection]} elevation={1}>
+        <Surface style={[styles.infoSection]} elevation={1}>
           <List.Item
             title="Eliminar Cuenta"
             description="Esta acción no se puede deshacer"
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.surface,
-    paddingBottom: 90,
+    paddingBottom: 80,
   },
   header: {
     alignItems: 'center',
@@ -276,10 +276,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     backgroundColor: theme.colors.error,
-  },
-  dangerSection: {
-    marginTop: 32,
-    marginBottom: 32,
   },
   adminSection: {
     marginTop: 16,
