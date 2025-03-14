@@ -2,8 +2,19 @@ const authService = require('../services/auth.service');
 
 async function register(req, res) {
     try {
+        const { email, password, username, name, lastName, secondLastName, phone } = req.body;
+        const idUserType = 2; // Para registro de usuarios clientes
+        const user = await authService.registerUserService(email, password, username, name, lastName, secondLastName, phone, idUserType);
+        res.status(201).json(user);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+async function registerAdmin(req, res) {
+    try {
         const { email, password, username, name, lastName, secondLastName, phone, idUserType } = req.body;
-        const user = await authService.registerUser(email, password, username, name, lastName, secondLastName, phone/*, idUserType*/);
+        const user = await authService.registerUserService(email, password, username, name, lastName, secondLastName, phone, idUserType);
         res.status(201).json(user);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -92,6 +103,7 @@ async function updateEmail(req, res) {
 
 module.exports = {
     register,
+    registerAdmin,
     login,
     deleteProfile,
     updatePassword,

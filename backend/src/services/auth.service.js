@@ -7,18 +7,8 @@ const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/jwt.config');
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
-async function registerUser(email, password, username, name, lastName, secondLastName, phone, /*idUserType*/) {
+async function registerUserService(email, password, username, name, lastName, secondLastName, phone, idUserType) {
     return await prisma.$transaction(async (tx) => {
-
-        //cambiar findUnique por findFirst
-        // const existingEmail = await tx.user.findUnique({
-        //     where: {
-        //         email: email,
-        //     },
-        // });
-        // if (existingEmail) {
-        //     throw new Error('Email ya existente');
-        // }
 
         const existingEmail = await tx.user.findFirst({
             where: {
@@ -48,7 +38,7 @@ async function registerUser(email, password, username, name, lastName, secondLas
                 password: password,
                 username: username,
                 status: true,
-                idUserType: 1,//De momento solo registra usuarios adminstradores, una vez se implemente el sistema de roles y JWT se cambiara
+                idUserType: idUserType,//Para registro de usuarios clientes
             },
         });
 
@@ -250,7 +240,7 @@ async function updateEmail(userId, email) {
 }
 
 module.exports = {
-    registerUser,
+    registerUserService,
     loginUser,
     deleteUserProfile,
     updatePassword,
