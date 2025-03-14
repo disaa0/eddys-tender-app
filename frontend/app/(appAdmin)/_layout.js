@@ -61,6 +61,7 @@ export default function AdminLayout() {
         <Tabs.Screen
           name="addProduct"
           options={{
+            tabBarStyle: { display: 'none' },
             tabBarIcon: () => (
               <View style={styles.cartIconContainer}>
                 <MaterialIcons name="add" size={30} color="#fff" />
@@ -87,6 +88,7 @@ export default function AdminLayout() {
         <Tabs.Screen
           name="product/[id]"
           options={{
+            tabBarStyle: { display: 'none' },
             href: null,
           }}
         />
