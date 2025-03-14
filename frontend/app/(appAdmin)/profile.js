@@ -113,6 +113,13 @@ export default function Profile() {
           />
           <Divider />
           <List.Item
+            title="Cambiar Contraseña"
+            left={(props) => <List.Icon {...props} icon="form-textbox-password" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('./profile/editPassword')}
+          />
+          <Divider />
+          <List.Item
             title="Correo"
             description={userInfoH.email}
             left={(props) => <List.Icon {...props} icon="email" />}

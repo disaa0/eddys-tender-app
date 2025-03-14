@@ -8,6 +8,7 @@ class AuthService {
             if (response.token) {
                 await this.setToken(response.token);
                 await this.setUser(response.user);
+                const currentUser = await this.getUser();
                 return response;
             }
             throw new Error('No se recibió token de autenticación');
@@ -50,6 +51,16 @@ class AuthService {
             return response;
         } catch (error) {
             console.error('Update email error:', error);
+            throw error;
+        }
+    }
+
+    async updatePassword(oldPassword, newPassword) {
+        try {
+            const response = await api.updatePassword(oldPassword, newPassword);
+            return response;
+        } catch (error) {
+            console.error(error);
             throw error;
         }
     }

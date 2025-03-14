@@ -16,6 +16,9 @@ class ApiService extends BaseApiService {
     async updateEmail(email) {
         return this.request('/auth/email', 'PUT', { email });
     }
+    async updatePassword(oldPassword, newPassword) {
+        return this.request('/auth/password', 'PUT', { oldPassword, newPassword });
+    }
 
     async deleteProfile() {
         return this.request('/auth/profile', 'DELETE');

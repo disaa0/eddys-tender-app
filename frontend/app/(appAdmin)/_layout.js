@@ -103,6 +103,12 @@ export default function AdminLayout() {
             href: null,
           }}
         />
+        <Tabs.Screen
+          name="profile/editPassword"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
     </SafeAreaProvider>
   );
