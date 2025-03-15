@@ -14,53 +14,12 @@ import SortChips from '../components/SortChips';
 const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
 const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
 
-// Importar imágenes de manera segura
-const PRODUCT_IMAGES = {
-  tenders: require('../../assets/products/tenders.png'),
-  burger: require('../../assets/products/burger.png'),
-  // limonada: require('../../assets/products/limonada.png'),
-  // papas: require('../../assets/products/papas.png')
-};
-
-const PRODUCTS = [
-  {
-    id: 1,
-    name: 'Tenders',
-    price: 165,
-    category: 'Combos',
-    imageKey: 'tenders',
-    description: 'Deliciosas tiras de pollo empanizadas',
-  },
-  {
-    id: 2,
-    name: 'Burger',
-    price: 165,
-    category: 'Combos',
-    imageKey: 'burger',
-    description: 'Hamburguesa clásica con queso',
-  },
-  {
-    id: 3,
-    name: 'Limonada',
-    price: 40,
-    category: 'Bebidas',
-    imageKey: 'limonada',
-    description: 'Limonada natural',
-  },
-  {
-    id: 4,
-    name: 'Orden de papas',
-    description: '250 gr',
-    price: 30,
-    category: 'Complementos',
-    imageKey: 'papas',
-  },
-];
 
 export default function Index() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedFilter, setSelectedFilter] = useState('');
+  const [filterIcon, setFilterIcon] = useState('filter-list');
   const [showFilters, setShowFilters] = useState(false);
   const router = useRouter();
 
@@ -72,9 +31,15 @@ export default function Index() {
 
 
   const handleSelectedFilter = (filter) => {
-    if (filter === selectedFilter) {
+    if (filter == selectedFilter) {
       setSelectedFilter('')
-    } else setSelectedFilter(filter)
+      setFilterIcon('filter-list')
+    } else {
+      setSelectedFilter(filter)
+      filter == 'Más pedidos' ? setFilterIcon('star') : null
+      filter == 'A-Z' ? setFilterIcon(filter) : null
+      filter == 'Z-A' ? setFilterIcon(filter) : null
+    }
     setShowFilters(false)
   }
   const renderProduct = ({ item, index }) => {
@@ -116,8 +81,11 @@ export default function Index() {
             placeholderTextColor="#666" // Color del texto de placeholder
           />
           <TouchableOpacity style={styles.searchButton} onPress={() => setShowFilters(!showFilters)}
-          >
-            <MaterialIcons name="filter-list" size={24} color="#ffffff" />
+          >{
+              (filterIcon == 'filter-list' || filterIcon == 'star')
+              && (<MaterialIcons name={filterIcon} size={24} color="#ffffff" />) || (filterIcon)
+            }
+
           </TouchableOpacity>
         </View>
 
@@ -203,6 +171,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 13,
     backgroundColor: theme.colors.primary,
+    color: theme.colors.background,
   },
   productList: {
     padding: 16,
