@@ -1,5 +1,5 @@
 import { View, FlatList, StyleSheet, Alert, TouchableWithoutFeedback, Image, TouchableOpacity } from 'react-native';
-import { Card, Text, Searchbar, Button, ActivityIndicator, IconButton, Switch } from 'react-native-paper';
+import { Card, Text, Searchbar, ActivityIndicator, Switch } from 'react-native-paper';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -7,7 +7,7 @@ import { useCallback } from 'react';
 import { theme } from '../theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 const logo = require('../../assets/eddys.png');
-import Animated, { FadeInDown, FadeIn, FadeOut, FadeInUp, Layout } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import AdminApiService from '../api/AdminApiService';
 import CategoryChips from '../components/CategoryChips';
 import SortChips from '../components/SortChips';
@@ -55,17 +55,15 @@ export default function AdminDashboard() {
   );
 
   const handleSelectedFilter = (filter) => {
-    if (filter == selectedFilter) {
-      setSelectedFilter('')
-      setFilterIcon('filter-list')
+    if (filter === selectedFilter) {
+      setSelectedFilter('');
+      setFilterIcon('filter-list');
     } else {
-      setSelectedFilter(filter)
-      filter == 'Más pedidos' ? setFilterIcon('star') : null
-      filter == 'A-Z' ? setFilterIcon(filter) : null
-      filter == 'Z-A' ? setFilterIcon(filter) : null
+      setSelectedFilter(filter);
+      setFilterIcon(filter === 'Más pedidos' ? 'star' : filter);
     }
-    setShowFilters(false)
-  }
+    setShowFilters(false);
+  };
 
   const handleToggleStatus = async (id) => {
     try {
@@ -215,10 +213,11 @@ export default function AdminDashboard() {
             icon="magnify" // Ícono de lupa
             placeholderTextColor="#666" // Color del texto de placeholder
           />
-          <TouchableOpacity style={styles.searchButton} onPress={() => setShowFilters(!showFilters)}
+          <TouchableOpacity style={styles.sortButton} onPress={() => setShowFilters(!showFilters)}
           >{
               (filterIcon == 'filter-list' || filterIcon == 'star')
-              && (<MaterialIcons name={filterIcon} size={24} color="#ffffff" />) || (filterIcon)
+              && (<MaterialIcons name={filterIcon} size={24} color="#ffffff" />)
+              || (<Text style={{ color: theme.colors.background }} >{filterIcon}</Text>)
             }
 
           </TouchableOpacity>
@@ -336,7 +335,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000', // Color del texto ingresado
   },
-  searchButton: {
+  sortButton: {
     justifyContent: 'center',
     alignItems: 'center',
     width: 50,
@@ -356,7 +355,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     maxWidth: '50%',
     borderRadius: 12,
-    margin: 8,
+    padding: 10,
     overflow: 'hidden',
     backgroundColor: '#fff',
   },
@@ -409,7 +408,8 @@ export const styles = StyleSheet.create({
     color: theme.colors.error,
   },
   productList: {
-    padding: 8,
+    padding: 0,
     paddingBottom: 85, // Ajusta este valor según sea necesario
+    margin: 0,
   },
 });

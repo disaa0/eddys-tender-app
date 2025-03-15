@@ -9,30 +9,31 @@ export default function ProductCard({ product, onPress, onAddToCart }) {
   return (
     <Surface style={styles.card} elevation={1}>
       <TouchableRipple onPress={onPress} style={styles.touchable}>
-        <View>
+        <View style={styles.cardContainer}>
           {imageSource && (
-            <Image 
-              source={imageSource} 
-              style={styles.cardImage} 
+            <Image
+              source={imageSource}
+              style={styles.cardImage}
               resizeMode="cover"
             />
           )}
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>{name}</Text>
-            {description && (
-              <Text style={styles.cardDescription}>{description}</Text>
-            )}
-            <Text style={styles.cardPrice}>${price.toFixed(2)}</Text>
+            {description && <Text style={styles.cardDescription}>{description}</Text>}
           </View>
-          <Pressable 
-            style={styles.cartButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              onAddToCart?.();
-            }}
-          >
-            <MaterialIcons name="add-shopping-cart" size={20} color="#fff" />
-          </Pressable>
+          {/* New container for price and cart button */}
+          <View style={styles.priceAndCartContainer}>
+            <Text style={styles.cardPrice}>${price.toFixed(2)}</Text>
+            <Pressable
+              style={styles.cartButton}
+              onPress={(e) => {
+                e.stopPropagation();
+                onAddToCart?.();
+              }}
+            >
+              <MaterialIcons name="add-shopping-cart" size={20} color="#fff" />
+            </Pressable>
+          </View>
         </View>
       </TouchableRipple>
     </Surface>
@@ -50,14 +51,18 @@ const styles = StyleSheet.create({
   touchable: {
     flex: 1,
   },
+  cardContainer: {
+    flex: 1,
+    flexDirection: 'column',
+  },
   cardImage: {
     width: '100%',
     height: 120,
     backgroundColor: '#F5F5F5',
   },
   cardContent: {
+    flex: 1,
     padding: 12,
-    paddingBottom: 48, // Espacio para el botón de carrito
   },
   cardTitle: {
     fontSize: 16,
@@ -69,20 +74,25 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 4,
   },
+  // New style to align price and cart button in the same row
+  priceAndCartContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Aligns price on the left and button on the right
+    alignItems: 'center', // Keeps them vertically aligned
+    paddingHorizontal: 12,
+    paddingBottom: 12,
+  },
   cardPrice: {
     fontSize: 16,
     fontWeight: '600',
     color: theme.colors.primary,
   },
   cartButton: {
-    position: 'absolute',
-    right: 8,
-    bottom: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
-}); 
+});
