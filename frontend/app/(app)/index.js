@@ -1,101 +1,123 @@
 import { View, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { Text, Searchbar } from 'react-native-paper';
-import { useState } from 'react';
+import { Text, Searchbar, ActivityIndicator } from 'react-native-paper';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import ProductCard from '../components/ProductCard';
 import CategoryChips from '../components/CategoryChips';
 import { SafeAreaView } from 'react-native-safe-area-context';
-const logo = require('../../assets/eddys.png');
-import Animated, { FadeInDown, FadeIn, FadeOut, FadeInUp, Layout } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated';
 import SortChips from '../components/SortChips';
+import AdminApiService from '../api/AdminApiService';
+import { useFocusEffect } from '@react-navigation/native';
 
-const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
-const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
-
-// Importar imágenes de manera segura
-const PRODUCT_IMAGES = {
-  tenders: require('../../assets/products/tenders.png'),
-  burger: require('../../assets/products/burger.png'),
-  // limonada: require('../../assets/products/limonada.png'),
-  // papas: require('../../assets/products/papas.png')
-};
-
-const PRODUCTS = [
-  {
-    id: 1,
-    name: 'Tenders',
-    price: 165,
-    category: 'Combos',
-    imageKey: 'tenders',
-    description: 'Deliciosas tiras de pollo empanizadas',
-  },
-  {
-    id: 2,
-    name: 'Burger',
-    price: 165,
-    category: 'Combos',
-    imageKey: 'burger',
-    description: 'Hamburguesa clásica con queso',
-  },
-  {
-    id: 3,
-    name: 'Limonada',
-    price: 40,
-    category: 'Bebidas',
-    imageKey: 'limonada',
-    description: 'Limonada natural',
-  },
-  {
-    id: 4,
-    name: 'Orden de papas',
-    description: '250 gr',
-    price: 30,
-    category: 'Complementos',
-    imageKey: 'papas',
-  },
-];
+const logo = require('../../assets/eddys.png');
 
 export default function Index() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedFilter, setSelectedFilter] = useState('');
+  const [filterIcon, setFilterIcon] = useState('filter-list');
   const [showFilters, setShowFilters] = useState(false);
   const router = useRouter();
 
-  // Filtrar productos según la categoría seleccionada
-  const filteredProducts =
-    selectedCategory === 'All'
-      ? PRODUCTS
-      : PRODUCTS.filter((product) => product.category === selectedCategory);
+  const CATEGORIES = ['Todos', 'Comida', 'Bebida'];
+  const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
 
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await AdminApiService.getProducts(page);
+      setProducts(response.data.products);
+      setTotalPages(response.data.totalPages);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, [page]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProducts();
+    }, [])
+  );
 
   const handleSelectedFilter = (filter) => {
     if (filter === selectedFilter) {
-      setSelectedFilter('')
-    } else setSelectedFilter(filter)
-    setShowFilters(false)
-  }
-  const renderProduct = ({ item, index }) => {
-    const imageSource = PRODUCT_IMAGES[item.imageKey];
-    return (
-      <Animated.View
-        entering={FadeInDown.delay(index * 100).springify()} // Animación de entrada para cada producto
-        layout={Layout.springify()} // Animación de reordenamiento
-        style={styles.productContainer} // Estilo flexible para cada producto
-      >
-        <ProductCard
-          product={{ ...item, imageSource }}
-          onPress={() => router.push(`/product/${item.id}`)}
-          onAddToCart={() => {
-            // Implementar lógica para agregar al carrito
-            router.push('/cart');
-          }}
-        />
-      </Animated.View>
-    );
+      setSelectedFilter('');
+      setFilterIcon('filter-list');
+    } else {
+      setSelectedFilter(filter);
+      setFilterIcon(filter === 'Más pedidos' ? 'star' : filter);
+    }
+    setShowFilters(false);
   };
+
+  const getProductTypeLabel = (idProductType) => {
+    switch (idProductType) {
+      case 1:
+        return 'Comida';
+      case 2:
+        return 'Bebida';
+      default:
+        return 'Otro';
+    }
+  };
+
+  const getFilteredProducts = () => {
+    return products.filter((product) => {
+      const categoryMatch = selectedCategory === 'Todos' || getProductTypeLabel(product.idProductType) === selectedCategory;
+      const searchMatch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return categoryMatch && searchMatch;
+    });
+  };
+
+  const getSortedProducts = () => {
+    return getFilteredProducts().sort((a, b) => {
+      if (selectedFilter === 'A-Z') return a.name.localeCompare(b.name);
+      if (selectedFilter === 'Z-A') return b.name.localeCompare(a.name);
+      return 0;
+    });
+  };
+
+  const renderProduct = ({ item, index }) => (
+    <Animated.View entering={FadeInDown.delay(index * 100).springify()} layout={Layout.springify()} style={styles.productContainer}>
+      <ProductCard
+        product={{
+          ...item,
+          imageSource: require('../../assets/products/tenders.png'), // Reemplázalo con la imagen real
+        }}
+        onPress={() => router.push(`/product/${item.idProduct}`)}
+      />
+    </Animated.View>
+  );
+
+  if (loading && page === 1) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -112,46 +134,44 @@ export default function Index() {
             onChangeText={setSearchQuery}
             style={styles.searchbar}
             inputStyle={styles.searchInput}
-            icon="magnify" // Ícono de lupa
-            placeholderTextColor="#666" // Color del texto de placeholder
+            icon="magnify"
+            placeholderTextColor="#666"
           />
-          <TouchableOpacity style={styles.searchButton} onPress={() => setShowFilters(!showFilters)}
-          >
-            <MaterialIcons name="filter-list" size={24} color="#ffffff" />
+          <TouchableOpacity style={styles.searchButton} onPress={() => setShowFilters(!showFilters)}>
+            {(filterIcon === 'filter-list' || filterIcon === 'star') ? (
+              <MaterialIcons name={filterIcon} size={24} color="#ffffff" />
+            ) : (
+              <Text style={{ color: theme.colors.background }}>{filterIcon}</Text>
+            )}
           </TouchableOpacity>
         </View>
 
-        {/* Animación de filtros */}
-        {(showFilters) && (
-          <Animated.View
-            entering={FadeIn.duration(300)}
-            exiting={FadeOut.duration(300)}
-            style={styles.filtersContainer}
-          >
-            <SortChips
-              categories={FILTERS}
-              selectedCategory={selectedFilter}
-              onSelect={handleSelectedFilter}
-              horizontal={false}
-            />
+        {showFilters && (
+          <Animated.View entering={FadeInDown.duration(300)} style={styles.filtersContainer}>
+            <SortChips categories={FILTERS} selectedCategory={selectedFilter} onSelect={handleSelectedFilter} horizontal={false} />
           </Animated.View>
         )}
 
-        {/* Componente de categorías con animación */}
-        <Animated.View entering={FadeInDown.duration(600)}>
-          <CategoryChips
-            categories={CATEGORIES}
-            selectedCategory={selectedCategory}
-            onSelect={setSelectedCategory} // Actualiza la categoría seleccionada
-          />
-        </Animated.View>
+        <View style={styles.categoriesContainer}>
+          <CategoryChips categories={CATEGORIES} selectedCategory={selectedCategory} onSelect={setSelectedCategory} horizontal={true} />
+        </View>
 
         <FlatList
-          data={filteredProducts}
+          data={getSortedProducts()}
           numColumns={2}
           renderItem={renderProduct}
+          keyExtractor={(item) => item.idProduct.toString()}
           contentContainerStyle={styles.productList}
+          ListEmptyComponent={!loading && <View style={styles.centered}><Text>No hay productos disponibles.</Text></View>}
+          onEndReached={() => {
+            if (!loading && page < totalPages) {
+              setPage((prevPage) => prevPage + 1);
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={loading && page > 1 ? <ActivityIndicator style={styles.loadingMore} /> : null}
         />
+
       </View>
     </SafeAreaView>
   );
@@ -160,24 +180,27 @@ export default function Index() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff', // Asegura que el notch no muestre un color incorrecto
+    backgroundColor: '#fff',
   },
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  logo: {
+    width: 300,
+    height: 90,
+    resizeMode: 'contain',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     marginBottom: 12,
-  },
-  searchIcon: {
-    marginRight: 8,
   },
   searchbar: {
     flex: 1,
@@ -190,45 +213,32 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
-  },
-  searchInput: {
-    fontSize: 16,
-    color: '#000', // Color del texto ingresado
   },
   searchButton: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     borderRadius: 13,
     backgroundColor: theme.colors.primary,
   },
+  filtersContainer: {
+    paddingHorizontal: 0,
+    marginBottom: 10,
+  },
   productList: {
-    padding: 16,
-  },
-  logo: {
-    width: 300, // Ajusta el ancho del logo
-    height: 90, // Ajusta la altura del logo
-    resizeMode: 'contain', // Asegura que el logo se ajuste correctamente
-  },
-  logoContainer: {
-    alignItems: 'center', // Centrar el logo horizontalmente
-    marginTop: 10, // Espacio arriba del logo
-    marginBottom: 10, // Espacio debajo del logo
+    padding: 4,
+    paddingBottom: 85,
   },
   productContainer: {
     flex: 1, // Ocupa el espacio disponible
-    margin: 4, // Margen entre productos
+    padding: 0, // Margen entre productos
     maxWidth: '50%', // Máximo 50% del ancho para 2 columnas
   },
-  filtersContainer: {
-    paddingHorizontal: 15,
-    marginBottom: 10,
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  orderContainer: {
-    paddingHorizontal: 0,
-    marginBottom: 10,
-    right: 0,
-  }
+
 });

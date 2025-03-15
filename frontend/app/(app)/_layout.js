@@ -105,8 +105,6 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: '#ff3814',
     height: 50,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
     elevation: 0,
     shadowOpacity: 0,
     borderTopWidth: 0,
