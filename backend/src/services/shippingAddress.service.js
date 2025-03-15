@@ -12,25 +12,17 @@ async function addShippingAddress(userId, addressData) {
     }
 
     const user = await prisma.userInformation.findFirst({
-        where: { idUserInformation: userId } // Cambiado a findFirst
+        where: { idUserInformation: userId }
     });
 
     if (!user) {
         throw new Error("Usuario no autorizado o inactivo.");
     }
 
-    // Verificar si el usuario ya tiene una dirección activa
-    const existingAddress = await prisma.location.findFirst({
-        where: { idUserInformation: user.idUserInformation, status: true }
-    });
-
-    if (existingAddress) {
-        throw new Error("El usuario ya tiene una dirección activa.");
-    }
     // Crear la dirección en la base de datos
     return prisma.location.create({
         data: {
-            idUserInformation: user.idUserInformation, // Se toma desde el objeto user
+            idUserInformation: user.idUserInformation,
             street: addressData.street,
             houseNumber: addressData.houseNumber,
             postalCode: addressData.postalCode,
@@ -40,8 +32,7 @@ async function addShippingAddress(userId, addressData) {
     });
 }
 
-async function getShippingAddress(userId) {
-
+async function getShippingAddresses(userId) {
     const user = await prisma.userInformation.findFirst({
         where: { idUserInformation: userId }
     });
@@ -50,17 +41,100 @@ async function getShippingAddress(userId) {
         throw new Error("Usuario no autorizado o inactivo.");
     }
 
-    const address = await prisma.location.findFirst({
-        where: { idUserInformation: user.idUserInformation, status: true }
+    // Find all active addresses for this user
+    const addresses = await prisma.location.findMany({
+        where: {
+            idUserInformation: user.idUserInformation,
+            status: true
+        }
     });
 
-    if (!address) {
+    return addresses;
+}
+
+// Keep the single address getter for backward compatibility
+async function getShippingAddress(userId) {
+    const addresses = await getShippingAddresses(userId);
+
+    if (!addresses || addresses.length === 0) {
         throw new Error("No se encontró dirección activa para este usuario.");
     }
 
-    return address;
+    // Return the first active address
+    return addresses[0];
+}
+
+async function updateAddress(userId, addressId, addressData) {
+    // Verificar si el usuario existe y está activo
+    const user = await prisma.userInformation.findFirst({
+        where: { idUserInformation: userId }
+    });
+
+    if (!user) {
+        throw new Error("Usuario no autorizado o inactivo.");
+    }
+
+    // Buscar la dirección específica
+    const address = await prisma.location.findUnique({
+        where: { idLocation: addressId }
+    });
+
+    if (!address) {
+        throw new Error("Dirección no encontrada");
+    }
+
+    // Verificar que la dirección pertenezca al usuario
+    if (address.idUserInformation !== user.idUserInformation) {
+        throw new Error("No tienes permiso para modificar esta dirección");
+    }
+
+    // Actualizar la dirección
+    return prisma.location.update({
+        where: { idLocation: addressId },
+        data: {
+            street: addressData.street,
+            houseNumber: addressData.houseNumber,
+            postalCode: addressData.postalCode,
+            neighborhood: addressData.neighborhood
+        }
+    });
+}
+
+async function deleteAddress(userId, addressId) {
+    // Verificar si el usuario existe y está activo
+    const user = await prisma.userInformation.findFirst({
+        where: { idUserInformation: userId }
+    });
+
+    if (!user) {
+        throw new Error("Usuario no autorizado o inactivo.");
+    }
+
+    // Buscar la dirección específica
+    const address = await prisma.location.findUnique({
+        where: { idLocation: addressId }
+    });
+
+    if (!address) {
+        throw new Error("Dirección no encontrada");
+    }
+
+    // Verificar que la dirección pertenezca al usuario
+    if (address.idUserInformation !== user.idUserInformation) {
+        throw new Error("No tienes permiso para eliminar esta dirección");
+    }
+
+    // Realizar borrado lógico (soft delete)
+    return prisma.location.update({
+        where: { idLocation: addressId },
+        data: { status: false }
+    });
 }
 
 module.exports = {
-    addShippingAddress, getShippingAddress
+    addShippingAddress,
+    getShippingAddress,
+    getShippingAddresses,
+    updateAddress,
+    deleteAddress
 };
