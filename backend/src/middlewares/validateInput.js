@@ -187,7 +187,7 @@ const validateSearchQuery = (req, res, next) => {
 
 const shippingAddressSchema = z.object({
     street: z.string().max(100, "Calle demasiado larga"),
-    houseNumber: z.string().regex(/^\d{1,5}$/, "El número de casa debe ser un número positivo de máximo 5 dígitos"),
+    houseNumber: z.string().regex(/^[\dA-Za-z\-\/]{1,10}$/, "El número de casa debe ser alfanumérico con un máximo de 10 caracteres"),
     postalCode: z.string().regex(/^\d{5}$/, "El código postal debe tener exactamente 5 dígitos y ser numérico"),
     neighborhood: z.string().max(50, "Vecindario demasiado largo"),
 });
@@ -201,11 +201,25 @@ function validateShippingAddress(req, res, next) {
     }
 }
 
+const validateIdParam = (req, res, next) => {
+    const schema = z.object({
+        id: z.number().int().positive("El ID debe ser un número entero positivo"),
+    });
+
+    const result = schema.safeParse({ id: Number(req.params.id) });
+
+    if (!result.success) {
+        return res.status(400).json({ message: result.error.errors[0].message });
+    }
+
+    next();
+};
+
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
     validateEmailUpdate,
     validateCustomization,
     productSchema, productDetailsSchema, validateAddItemToCart, validateDeleteItemFromCart,
-    validateSearchQuery, validateShippingAddress
+    validateSearchQuery, validateShippingAddress, validateIdParam
 };

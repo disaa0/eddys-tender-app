@@ -1415,7 +1415,7 @@ Authorization: Bearer <token>
 
 ## 11. ENDPOINTS DE DIRECCIONES
 
-### 11.1 Agrega una nueva de dirrecion
+### 11.1 Agrega una nueva dirección
 
 **POST /api/shipping-address**
 
@@ -1430,7 +1430,7 @@ Authorization: Bearer <token>
 ```json
 {
   "street": "Av. Luis Encinas Jhonson",
-  "houseNumber": 10, //puede ser "s/n"
+  "houseNumber": "10",
   "postalCode": "83000",
   "neighborhood": "Centro"
 }
@@ -1457,12 +1457,55 @@ Authorization: Bearer <token>
 
 - 401: Token no proporcionado
 - 400: Error de solicitud
-- 404: Producto no encontrado
 - 500: Error del servidor
 
-### 11.1 Obtener una direccion
+### 11.2 Obtener todas las direcciones del usuario
 
 **GET /api/shipping-address**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Direcciones obtenidas correctamente",
+  "data": [
+    {
+      "idLocation": 2,
+      "idUserInformation": 2,
+      "street": "Av. Luis Encinas Jhonson",
+      "houseNumber": "10",
+      "postalCode": "83000",
+      "neighborhood": "Centro",
+      "status": true
+    },
+    {
+      "idLocation": 3,
+      "idUserInformation": 2,
+      "street": "Calle Principal",
+      "houseNumber": "22",
+      "postalCode": "83100",
+      "neighborhood": "Valle Verde",
+      "status": true
+    }
+  ]
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Usuario no autorizado o inactivo
+- 500: Error del servidor
+
+### 11.3 Obtener una dirección específica (compatibilidad)
+
+**GET /api/shipping-address/single**
 
 **Headers Requeridos:**
 
@@ -1490,7 +1533,85 @@ Authorization: Bearer <token>
 **Errores Posibles:**
 
 - 401: Token no proporcionado
-- 400: No se encontró dirección activa para este usuario."
+- 400: No se encontró dirección activa para este usuario
+- 500: Error del servidor
+
+### 11.4 Actualizar una dirección
+
+**PUT /api/shipping-address/:id**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+
+- id: ID de la dirección a actualizar
+
+**Cuerpo de la Petición:**
+
+```json
+{
+  "street": "Calle Reforma",
+  "houseNumber": "42A",
+  "postalCode": "83200",
+  "neighborhood": "Villa California"
+}
+```
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Dirección actualizada correctamente",
+  "data": {
+    "idLocation": 2,
+    "idUserInformation": 2,
+    "street": "Calle Reforma",
+    "houseNumber": "42A",
+    "postalCode": "83200",
+    "neighborhood": "Villa California",
+    "status": true
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Error de validación de datos
+- 403: Dirección no encontrada o sin permiso para modificar
+- 500: Error del servidor
+
+### 11.5 Eliminar una dirección
+
+**DELETE /api/shipping-address/:id**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+
+- id: ID de la dirección a eliminar
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Dirección eliminada correctamente"
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: ID inválido
+- 403: Dirección no encontrada o sin permiso para eliminar
 - 500: Error del servidor
 
 ## 12. VALIDACIONES DE PRODUCTOS
