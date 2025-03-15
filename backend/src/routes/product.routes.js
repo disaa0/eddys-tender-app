@@ -9,10 +9,7 @@ const router = express.Router();
 
 // Obtener listado de productos (admistrador) con paginacion
 router.get('/admin/products', authenticateToken, isAdmin, getAllProductsPagination);
-//obtener todos los productos
-router.get('/', authenticateToken, getAllProducts);
-//obtener detealles de un producto
-// router.get('/:id', authenticateToken, getProductDetails);
+
 // Obtener un producto específico
 router.get('/admin/products/:id', authenticateToken, isAdmin, getProduct);
 router.post('/admin/products', authenticateToken, isAdmin, addProduct);
@@ -35,5 +32,9 @@ router.get('/search', authenticateToken, validateSearchQuery, searchProducts);
 
 // Add this route before other product routes to avoid conflicts
 router.get('/popular', authenticateToken, getPopularProducts);
+
+// Rutas dinamicas al final, el orden es importante
+router.get('/', authenticateToken, getAllProducts);
+router.get('/:id', authenticateToken, getProductDetails);
 
 module.exports = router;
