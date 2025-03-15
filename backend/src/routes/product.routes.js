@@ -12,7 +12,7 @@ router.get('/admin/products', authenticateToken, isAdmin, getAllProductsPaginati
 //obtener todos los productos
 router.get('/', authenticateToken, getAllProducts);
 //obtener detealles de un producto
-router.get('/:id', authenticateToken, getProductDetails);
+// router.get('/:id', authenticateToken, getProductDetails);
 // Obtener un producto específico
 router.get('/admin/products/:id', authenticateToken, isAdmin, getProduct);
 router.post('/admin/products', authenticateToken, isAdmin, addProduct);
