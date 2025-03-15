@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   productList: {
-    padding: 5,
+    padding: 4,
     paddingBottom: 85,
   },
   productContainer: {

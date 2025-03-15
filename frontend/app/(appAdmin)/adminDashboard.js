@@ -355,7 +355,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     maxWidth: '50%',
     borderRadius: 12,
-    padding: 10,
+    margin: 4,
     overflow: 'hidden',
     backgroundColor: '#fff',
   },
@@ -408,7 +408,7 @@ export const styles = StyleSheet.create({
     color: theme.colors.error,
   },
   productList: {
-    padding: 0,
+    padding: 4,
     paddingBottom: 85, // Ajusta este valor según sea necesario
     margin: 0,
   },

@@ -43,7 +43,7 @@ export default function ProductCard({ product, onPress, onAddToCart }) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    margin: 8,
+    margin: 4,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#fff',
