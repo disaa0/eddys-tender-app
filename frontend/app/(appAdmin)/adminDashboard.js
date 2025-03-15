@@ -22,6 +22,7 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedFilter, setSelectedFilter] = useState('');
+  const [filterIcon, setFilterIcon] = useState('filter-list');
   const [showFilters, setShowFilters] = useState(false);
   const router = useRouter();
 
@@ -54,11 +55,18 @@ export default function AdminDashboard() {
   );
 
   const handleSelectedFilter = (filter) => {
-    if (filter === selectedFilter) {
+    if (filter == selectedFilter) {
       setSelectedFilter('')
-    } else setSelectedFilter(filter)
+      setFilterIcon('filter-list')
+    } else {
+      setSelectedFilter(filter)
+      filter == 'Más pedidos' ? setFilterIcon('star') : null
+      filter == 'A-Z' ? setFilterIcon(filter) : null
+      filter == 'Z-A' ? setFilterIcon(filter) : null
+    }
     setShowFilters(false)
   }
+
   const handleToggleStatus = async (id) => {
     try {
       await AdminApiService.toggleProductStatus(id);
@@ -192,6 +200,7 @@ export default function AdminDashboard() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+
         <View style={styles.logoContainer}>
           <Image source={logo} style={styles.logo} />
         </View>
@@ -206,53 +215,31 @@ export default function AdminDashboard() {
             icon="magnify" // Ícono de lupa
             placeholderTextColor="#666" // Color del texto de placeholder
           />
-          {
-            !showFilters && (selectedFilter == '') && (
-              <Animated.View entering={FadeIn.duration(300)}
-                exiting={FadeOut.duration(300)}>
-                <TouchableOpacity style={styles.sortButton} onPress={() => setShowFilters(!showFilters)}
-                >
-                  <MaterialIcons name="filter-list" size={24} color="#ffffff" />
-                </TouchableOpacity>
-              </Animated.View>
+          <TouchableOpacity style={styles.searchButton} onPress={() => setShowFilters(!showFilters)}
+          >{
+              (filterIcon == 'filter-list' || filterIcon == 'star')
+              && (<MaterialIcons name={filterIcon} size={24} color="#ffffff" />) || (filterIcon)
+            }
 
-
-            )
-          }
-          {/* Animación de filtros */}
-          {(showFilters) && (
-            <Animated.View
-              entering={FadeIn.duration(300)}
-              exiting={FadeOut.duration(300)}
-              style={styles.filtersContainer}
-            >
-              <SortChips
-                categories={FILTERS}
-                selectedCategory={selectedFilter}
-                onSelect={handleSelectedFilter}
-                horizontal={false}
-              />
-            </Animated.View>
-          )}
-          {
-            (selectedFilter != '') && !showFilters && (
-              <Animated.View entering={FadeIn.duration(300)}
-                exiting={FadeOut.duration(300)}>
-                <TouchableOpacity style={styles.sortButton} onPress={() => setShowFilters(true)}>
-                  {(selectedFilter != 'Más pedidos') ? (<Text>{selectedFilter}</Text>) : (
-                    <TouchableOpacity style={styles.sortButton} onPress={() => setShowFilters(!showFilters)}
-                    >
-                      <MaterialIcons name="star" size={24} color="#ffffff" />
-                    </TouchableOpacity>
-                  )}
-                </TouchableOpacity>
-              </Animated.View>
-
-
-            )
-          }
-
+          </TouchableOpacity>
         </View>
+
+        {/* Animación de filtros */}
+        {(showFilters) && (
+          <Animated.View
+            entering={FadeIn.duration(300)}
+            exiting={FadeOut.duration(300)}
+            style={styles.filtersContainer}
+          >
+            <SortChips
+              categories={FILTERS}
+              selectedCategory={selectedFilter}
+              onSelect={handleSelectedFilter}
+              horizontal={false}
+            />
+          </Animated.View>
+        )}
+
         {/* Componente de categorías con animación */}
         <View style={styles.categoriesContainer}>
           <CategoryChips
@@ -325,7 +312,7 @@ export const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     paddingHorizontal: 16,
     marginBottom: 12,
   },
@@ -349,14 +336,16 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000', // Color del texto ingresado
   },
-  sortButton: {
+  searchButton: {
     justifyContent: 'center',
     alignItems: 'center',
     width: 50,
     height: 50,
     borderRadius: 13,
     backgroundColor: theme.colors.primary,
+    color: theme.colors.background,
     marginRight: 0,
+
   },
   filtersContainer: {
     paddingHorizontal: 0,

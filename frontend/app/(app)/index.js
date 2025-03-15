@@ -85,6 +85,7 @@ export default function Index() {
     }
     setShowFilters(false)
   }
+
   const renderProduct = ({ item, index }) => {
     const imageSource = PRODUCT_IMAGES[item.imageKey];
     return (
@@ -153,7 +154,7 @@ export default function Index() {
           <CategoryChips
             categories={CATEGORIES}
             selectedCategory={selectedCategory}
-            onSelect={setSelectedCategory} // Actualiza la categoría seleccionada
+            onSelect={setSelectedCategory}
           />
         </Animated.View>
 
@@ -210,11 +211,12 @@ const styles = StyleSheet.create({
   searchButton: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     borderRadius: 13,
     backgroundColor: theme.colors.primary,
     color: theme.colors.background,
+    marginRight: 0,
   },
   productList: {
     padding: 16,
