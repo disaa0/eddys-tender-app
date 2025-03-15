@@ -14,6 +14,49 @@ import SortChips from '../components/SortChips';
 const CATEGORIES = ['All', 'Combos', 'Bebidas', 'Complementos'];
 const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
 
+const PRODUCT_IMAGES = {
+  tenders: require('../../assets/products/tenders.png'),
+  burger: require('../../assets/products/burger.png'),
+  // limonada: require('../../assets/products/limonada.png'),
+  // papas: require('../../assets/products/papas.png')
+};
+
+const PRODUCTS = [
+  {
+    id: 1,
+    name: 'Tenders',
+    price: 165,
+    category: 'Combos',
+    imageKey: 'tenders',
+    description: 'Deliciosas tiras de pollo empanizadas',
+  },
+  {
+    id: 2,
+    name: 'Burger',
+    price: 165,
+    category: 'Combos',
+    imageKey: 'burger',
+    description: 'Hamburguesa clásica con queso',
+  },
+  {
+    id: 3,
+    name: 'Limonada',
+    price: 40,
+    category: 'Bebidas',
+    imageKey: 'limonada',
+    description: 'Limonada natural',
+  },
+  {
+    id: 4,
+    name: 'Orden de papas',
+    description: '250 gr',
+    price: 30,
+    category: 'Complementos',
+    imageKey: 'papas',
+  },
+];
+
+
 
 export default function Index() {
   const [searchQuery, setSearchQuery] = useState('');
