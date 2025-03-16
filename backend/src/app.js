@@ -9,6 +9,8 @@ const adminRoutes = require('./routes/admin.routes');
 const productRoutes = require('./routes/product.routes');
 const cartRoutes = require('./routes/cart.routes');
 const shippingAddressRoutes = require('./routes/shippingAddress.routes');
+const orderRoutes = require('./routes/order.routes');
+const webhookRoutes = require('./routes/webhook.routes');
 
 // Configurar CORS
 app.use(cors({
@@ -24,21 +26,26 @@ const limiter = rateLimit({
   message: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo después de 15 minutos'
 });
 
-// Middlewares básicos
+// IMPORTANT: Register webhook routes BEFORE body parser middleware
+// This ensures webhook requests are handled with raw body data
+app.use('/api/webhooks', webhookRoutes);
+
+// Middlewares básicos - applied to all routes EXCEPT webhooks
 app.use(express.json());
-app.use(limiter); // Apply rate limiting to all routes
+app.use(limiter);
 app.use(cors());
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-//Rutas
+// Regular API routes - these will have parsed JSON bodies
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/shipping-address', shippingAddressRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Rutas de ejemplo
 app.get("/", (req, res) => {

@@ -75,6 +75,7 @@ model Location{
 
   // Relaciones
   userInformation UserInformation @relation(fields: [idUserInformation], references: [idUserInformation])
+  orders Order[]
 
   // Nombre de la tabla
   @@map("location")
@@ -228,17 +229,24 @@ model Order{
   idPaymentType Int
   idShipmentType Int
   idOrderStatus Int
+  idLocation Int?
   createdAt DateTime @default(now())
   deliveryAt DateTime?
   totalPrice Float
   paid Boolean
   paidAt DateTime?
-
+  
+  // Stripe Payment Fields
+  stripePaymentIntentId String? @unique
+  stripeClientSecret String?
+  stripePaymentStatus String?
+  
   // Relaciones
   cart Cart @relation(fields: [idCart], references: [idCart])
   paymentType PaymentType @relation(fields: [idPaymentType], references: [idPaymentType])
   shipmentType ShipmentType @relation(fields: [idShipmentType], references: [idShipmentType])
   orderStatus OrderStatus @relation(fields: [idOrderStatus], references: [idOrderStatus])
+  location Location? @relation(fields: [idLocation], references: [idLocation])
   notifications Notification[]
 
   // Nombre de la tabla
