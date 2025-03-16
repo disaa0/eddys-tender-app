@@ -1,11 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
-//const bcrypt = require('bcrypt');
+const { hashPassword, comparePassword } = require("../config/bcrypt.config");
 const { encrypt, decrypt } = require('../config/crypto.config');
 const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/jwt.config');
 
 const prisma = new PrismaClient();
-const SALT_ROUNDS = 10;
 
 async function registerUserService(email, password, username, name, lastName, secondLastName, phone, idUserType) {
     return await prisma.$transaction(async (tx) => {
@@ -31,11 +30,12 @@ async function registerUserService(email, password, username, name, lastName, se
             throw new Error('Nombre de usuario ya existente');
         }
 
+        const hashedPassword = await hashPassword(password);
         const user = await tx.user.create({
             data: {
                 email: email,
-                //password: bcrypt.hashSync(password, 10), // Encriptar contraseña con bcrypt
-                password: password,
+                //YA HASHEADO... password: bcrypt.hashSync(password, 10), // Encriptar contraseña con bcrypt
+                password: hashedPassword, // Encriptar contraseña con bcrypt aplicable a producción
                 username: username,
                 status: true,
                 idUserType: idUserType,//Para registro de usuarios clientes
@@ -80,8 +80,13 @@ async function loginUser(email, username, password) {
         throw new Error('Cuenta desactivada');
     }
 
-    // Check password
-    if (password !== userExists.password) {
+    // Check password without encryption
+    // if (password !== userExists.password) {
+    //     throw new Error('Contraseña incorrecta');
+    // }
+
+    // Check password with encryption, available in production. not require changes in development.
+    if (!await comparePassword(password, userExists.password)) {
         throw new Error('Contraseña incorrecta');
     }
 
@@ -159,9 +164,10 @@ async function updatePassword(userId, oldPassword, newPassword) {
         }
 
         // DESARROLLO: Comparación directa de contraseñas
-        if (oldPassword !== user.password) {
-            throw new Error('Contraseña actual incorrecta');
-        }
+        // if (oldPassword !== user.password) {
+        //     throw new Error('Contraseña actual incorrecta');
+        // }
+
 
         /* PRODUCCIÓN: Descomentar para usar bcrypt + encryption
         let decryptedOldPassword;
@@ -177,14 +183,21 @@ async function updatePassword(userId, oldPassword, newPassword) {
         }
         */
 
+        // Comparación de contraseñas usando bcrypt en producción
+        if (!await comparePassword(oldPassword, user.password)) {
+            throw new Error('Contraseña actual incorrecta');
+        }
+
+        const hashedNewPassword = await hashPassword(newPassword);
+
         // DESARROLLO: Actualizar contraseña sin encriptar
-        await prisma.user.update({
-            where: { idUser: userId },
-            data: {
-                password: newPassword,
-                updatedAt: new Date()
-            }
-        });
+        // await prisma.user.update({
+        //     where: { idUser: userId },
+        //     data: {
+        //         password: newPassword,
+        //         updatedAt: new Date()
+        //     }
+        // });
 
         /* PRODUCCIÓN: Descomentar para usar bcrypt + encryption
         let encryptedNewPassword;
@@ -202,6 +215,15 @@ async function updatePassword(userId, oldPassword, newPassword) {
             throw new Error('Error al procesar la nueva contraseña');
         }
         */
+
+        // Actualizar contraseña con bcrypt en producción
+        await prisma.user.update({
+            where: { idUser: userId },
+            data: {
+                password: hashedNewPassword,
+                updatedAt: new Date()
+            }
+        });
 
         return { message: 'Contraseña actualizada exitosamente' };
     } catch (error) {
