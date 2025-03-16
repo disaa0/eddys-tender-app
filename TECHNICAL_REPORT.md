@@ -27,7 +27,7 @@ Sistema integral para Eddy's Tender, una aplicación de gestión de pedidos de c
 
 ### 2.1 Estructura de Directorios
 
-~~~
+```
 project-root/
 ├── backend/
 │   ├── src/
@@ -56,12 +56,12 @@ project-root/
 │   ├── assets/            # Imágenes y recursos
 │   └── docs/             # Documentación
 └── docs/                 # Documentación general
-~~~
+```
 
 ### 2.2 Configuración de Seguridad
 
 #### Backend
-~~~typescript
+```typescript
 // Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -75,10 +75,10 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-~~~
+```
 
 #### Frontend
-~~~javascript
+```javascript
 function useProtectedRoute() {
   const segments = useSegments();
   const { isAuthenticated, isLoading } = useAuth();
@@ -92,14 +92,14 @@ function useProtectedRoute() {
     }
   }, [isAuthenticated, segments]);
 }
-~~~
+```
 
 ## 3. Sistema de Autenticación
 
 ### 3.1 Gestión de Usuarios
 
 #### Registro
-~~~typescript
+```typescript
 interface RegisterDto {
   email: string;      // Único
   username: string;   // Único
@@ -109,10 +109,10 @@ interface RegisterDto {
   secondLastName?: string;
   phone: string;      // 10 dígitos
 }
-~~~
+```
 
 #### Validaciones
-~~~typescript
+```typescript
 const userSchema = z.object({
   username: z.string().min(3).max(12),
   email: z.string().email(),
@@ -126,12 +126,12 @@ const userSchema = z.object({
   name: z.string().transform(v => v.toUpperCase()),
   lastName: z.string().regex(/^[A-ZÁÉÍÓÚÑa-záéíóúñ\s]+$/)
 });
-~~~
+```
 
 ### 3.2 Seguridad
 
 #### JWT y Encriptación
-~~~javascript
+```javascript
 const JWT_CONFIG = {
   secret: process.env.JWT_SECRET,
   expiresIn: '24h',
@@ -141,14 +141,14 @@ const JWT_CONFIG = {
 const crypto = require('crypto');
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 const IV_LENGTH = 16;
-~~~
+```
 
 ## 4. Modelo de Datos
 
 ### 4.1 Entidades Principales
 
 #### Users y Autenticación
-~~~prisma
+```prisma
 model User {
   idUser        Int      @id @default(autoincrement())
   email         String   @unique
@@ -161,10 +161,10 @@ model User {
   userType      UserType @relation(fields: [idUserType], references: [idUserType])
   information   UserInformation?
 }
-~~~
+```
 
 #### Productos
-~~~prisma
+```prisma
 model Product {
   idProduct     Int      @id @default(autoincrement())
   name          String
@@ -176,14 +176,14 @@ model Product {
   productType   ProductType @relation(fields: [idProductType], references: [idProductType])
   userAdded     User    @relation(fields: [idUserAdded], references: [idUser])
 }
-~~~
+```
 
 ## 5. Interfaces de Usuario
 
 ### 5.1 Componentes Principales
 
 #### Registro de Usuario
-~~~javascript
+```javascript
 export default function Register() {
   const [name, setName] = useState('');
   const [lastNames, setLastNames] = useState('');
@@ -196,12 +196,12 @@ export default function Register() {
     // Lógica de registro
   };
 }
-~~~
+```
 
 ### 5.2 Estilos y Tema
 
 #### Configuración del Tema
-~~~javascript
+```javascript
 export const theme = {
   colors: {
     primary: '#2196F3',
@@ -223,30 +223,30 @@ export const theme = {
     },
   },
 };
-~~~
+```
 
 ## 6. API REST
 
 ### 6.1 Endpoints Principales
 
 #### Autenticación
-~~~http
+```http
 POST /api/auth/register
 POST /api/auth/login
 GET /api/auth/profile
 DELETE /api/auth/profile
 PUT /api/auth/password
 PUT /api/auth/email
-~~~
+```
 
 #### Productos
-~~~http
+```http
 GET /api/products
 GET /api/products/:id
 POST /api/admin/products
 PUT /api/admin/products/:id
 PATCH /api/admin/products/:id/status
-~~~
+```
 
 ## 7. Consideraciones Técnicas
 
@@ -287,7 +287,7 @@ PATCH /api/admin/products/:id/status
    - Cancelado
 
 ### 8.2 Usuario Administrador
-~~~json
+```json
 {
   "email": "admin@admin.com",
   "username": "admin",
@@ -296,4 +296,4 @@ PATCH /api/admin/products/:id/status
   "lastName": "ADMINISTRADOR",
   "phone": "6622757172"
 }
-~~~ 
+``` 

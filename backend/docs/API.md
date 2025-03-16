@@ -951,7 +951,7 @@ Authorization: Bearer <token>
 
 ### 10.5 Agregar productos directamente al carrito
 
-**PUT /cart/cart/items/{id}**
+**PUT /cart/items/{id}**
 
 **Headers Requeridos:**
 
@@ -997,7 +997,7 @@ Authorization: Bearer <token>
 
 ### 10.6 Modificar cantidad de un producto en el carrito
 
-**PUT /cart/cart/items/{id}**
+**PUT /cart/items/{id}**
 
 **Headers Requeridos:**
 
@@ -1035,7 +1035,7 @@ Authorization: Bearer <token>
 
 ### 10.7 Eliminar un producto en el carrito
 
-**DELETE /cart/cart/items/{id}**
+**DELETE /cart/items/{id}**
 
 **Headers Requeridos:**
 
@@ -1644,21 +1644,286 @@ Authorization: Bearer <token>
 - **quantity**: Número entero positivo no superior a 100
 - Ambos campos son obligatorios
 
-## 14. NOTAS TÉCNICAS ADICIONALES
+## 14. ÓRDENES Y PAGOS
 
-### 14.1 Paginación
+Para la documentación detallada sobre órdenes y pagos con Stripe, consulte:
+
+- [Integración con Stripe](STRIPE.md)
+
+## Endpoints de Pedidos
+
+### 14.1 Crear Nuevo Pedido
+
+**POST /api/orders**
+
+Crea un nuevo pedido a partir del carrito activo del usuario.
+
+**Encabezados Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Cuerpo de la Solicitud:**
+```
+{
+  "idPaymentType": 2,   // 1=Efectivo, 2=Crédito, 3=Débito
+  "idShipmentType": 1,  // 1=Envío, 2=Recogida
+  "idLocation": 3       // Opcional, requerido para envío
+}
+```
+
+**Respuesta (201 Creado):**
+
+Para pagos con tarjeta (tipos 2, 3):
+```
+{
+  "order": {
+    "idOrder": 42,
+    "idCart": 23,
+    "idPaymentType": 2,
+    "idShipmentType": 1,
+    "idOrderStatus": 1,
+    "totalPrice": 258.00,
+    "paid": false,
+    "createdAt": "2023-07-15T14:30:45Z",
+    "stripePaymentIntentId": "pi_3MkVnL2eZvKYlo2C1IFrG8oM",
+    "stripePaymentStatus": "requires_payment_method"
+  },
+  "paymentDetails": {
+    "clientSecret": "pi_3MkVnL2eZvKYlo2C1IFrG8oM_secret_O0FjOJ1VGdEVbqrgmd1ikvPTq",
+    "paymentIntentId": "pi_3MkVnL2eZvKYlo2C1IFrG8oM"
+  }
+}
+```
+
+Para pagos en efectivo (tipo 1):
+```
+{
+  "order": {
+    "idOrder": 43,
+    "idCart": 24,
+    "idPaymentType": 1,
+    "idShipmentType": 2,
+    "idOrderStatus": 1,
+    "totalPrice": 129.00,
+    "paid": false,
+    "createdAt": "2023-07-15T15:12:23Z"
+  }
+}
+```
+
+**Respuestas de Error:**
+- 400: No hay productos en el carrito
+- 400: Se requieren tipo de pago y tipo de envío
+- 401: Token no proporcionado
+- 500: Error del servidor
+
+### 14.2 Obtener Pedidos del Usuario
+
+**GET /api/orders**
+
+Recupera todos los pedidos para el usuario autenticado.
+
+**Encabezados Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta (200 OK):**
+```
+[
+  {
+    "idOrder": 42,
+    "totalPrice": 258.00,
+    "paid": true,
+    "paidAt": "2023-07-15T14:35:12Z",
+    "createdAt": "2023-07-15T14:30:45Z",
+    "deliveryAt": null,
+    "orderStatus": {
+      "idOrderStatus": 2,
+      "status": "Procesando"
+    },
+    "paymentType": {
+      "idPaymentType": 2,
+      "type": "Tarjeta de crédito"
+    },
+    "shipmentType": {
+      "idShipmentType": 1,
+      "type": "Envío a domicilio"
+    }
+  },
+  {
+    "idOrder": 38,
+    "totalPrice": 475.50,
+    "paid": true,
+    "paidAt": "2023-07-12T11:24:18Z",
+    "createdAt": "2023-07-12T11:20:33Z",
+    "deliveryAt": "2023-07-12T13:45:00Z",
+    "orderStatus": {
+      "idOrderStatus": 6,
+      "status": "Entregado"
+    },
+    "paymentType": {
+      "idPaymentType": 1,
+      "type": "Efectivo"
+    },
+    "shipmentType": {
+      "idShipmentType": 1,
+      "type": "Envío a domicilio"
+    }
+  }
+]
+```
+
+**Respuestas de Error:**
+- 401: Token no proporcionado
+- 500: Error del servidor
+
+### 14.3 Obtener Detalles del Pedido
+
+**GET /api/orders/:id**
+
+Recupera información detallada sobre un pedido específico.
+
+**Encabezados Requeridos:**
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta (200 OK):**
+```
+{
+  "idOrder": 42,
+  "idCart": 23,
+  "totalPrice": 258.00,
+  "paid": true,
+  "paidAt": "2023-07-15T14:35:12Z",
+  "createdAt": "2023-07-15T14:30:45Z",
+  "deliveryAt": null,
+  "stripePaymentIntentId": "pi_3MkVnL2eZvKYlo2C1IFrG8oM",
+  "stripePaymentStatus": "succeeded",
+  "orderStatus": {
+    "idOrderStatus": 2,
+    "status": "Procesando"
+  },
+  "paymentType": {
+    "idPaymentType": 2,
+    "type": "Tarjeta de crédito"
+  },
+  "shipmentType": {
+    "idShipmentType": 1,
+    "type": "Envío a domicilio"
+  },
+  "cart": {
+    "idCart": 23,
+    "idUser": 5,
+    "createdAt": "2023-07-15T13:45:22Z",
+    "itemsCart": [
+      {
+        "idItemCart": 57,
+        "quantity": 2,
+        "individualPrice": 129,
+        "product": {
+          "idProduct": 12,
+          "name": "Tender Box",
+          "description": "Exquisito paquete...",
+          "price": 129
+        }
+      }
+    ]
+  }
+}
+```
+
+**Respuestas de Error:**
+- 400: Orden no encontrada
+- 401: Token no proporcionado
+- 500: Error del servidor 
+
+### 14.3 Webhook de Stripe
+
+**POST /api/webhooks/stripe**
+
+Recibe y procesa eventos de webhook de Stripe relacionados con intenciones de pago.
+
+**Encabezados Requeridos:**
+~~~
+Content-Type: application/json
+Stripe-Signature: <firma-generada-por-stripe>
+~~~
+
+**Cuerpo de la Solicitud:**
+El cuerpo es un objeto de evento generado por Stripe. Aquí hay un ejemplo simplificado:
+
+~~~json
+{
+  "id": "evt_1234567890",
+  "object": "event",
+  "type": "payment_intent.succeeded",
+  "data": {
+    "object": {
+      "id": "pi_1234567890",
+      "object": "payment_intent",
+      "amount": 25800,
+      "status": "succeeded"
+    }
+  }
+}
+~~~
+
+**Respuesta (200 OK):**
+
+~~~json
+{
+  "received": true,
+  "type": "payment_intent.succeeded",
+  "result": {
+    "success": true,
+    "order": {
+      "idOrder": 42,
+      "paid": true,
+      "paidAt": "2023-07-15T16:45:22Z",
+      "idOrderStatus": 2,
+      "stripePaymentStatus": "succeeded"
+    }
+  }
+}
+~~~
+
+**Eventos Procesados:**
+
+| Tipo de Evento | Acción |
+|---|---|
+| `payment_intent.succeeded` | Marca la orden como pagada y actualiza su estado |
+| `payment_intent.payment_failed` | Marca la orden como fallida y crea notificación |
+
+**Errores Posibles:**
+- 400: Firma de webhook inválida
+- 400: Formato de evento inválido
+- 500: Error al procesar el evento
+
+**Notas:**
+1. No se requiere autenticación con token para este endpoint ya que Stripe envia su propia firma.
+2. El cuerpo de la petición debe estar en formato raw (no JSON parseado) para verificar la firma.
+3. Requiere una clave secreta de webhook configurada en el .env para mayor seguridad.
+
+~~~
+
+## 15. NOTAS TÉCNICAS ADICIONALES
+
+### 15.1 Paginación
 
 - Implementada en listado de productos
 - 5 productos por página
 - Incluye total de páginas y página actual
 
-### 14.2 Validaciones
+### 15.2 Validaciones
 
 - Uso de Zod para validación de datos
 - Manejo de errores específicos por campo
 - Transformación automática de tipos
 
-### 14.3 Seguridad
+### 15.3 Seguridad
 
 - Verificación de roles para endpoints administrativos
 - Validación de propiedad de recursos
