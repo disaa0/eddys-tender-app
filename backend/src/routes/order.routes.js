@@ -4,7 +4,8 @@ const { authenticateToken } = require('../middlewares/auth.middleware');
 const {
     createOrder,
     getOrderDetails,
-    getUserOrders
+    getUserOrders,
+    searchOrders
 } = require('../controllers/order.controller');
 
 // Apply authentication to all order routes
@@ -12,6 +13,9 @@ router.use(authenticateToken);
 
 // Create a new order
 router.post('/', createOrder);
+
+// Search orders with filters
+router.get('/search', searchOrders);
 
 // Get all orders for the authenticated user
 router.get('/', getUserOrders);

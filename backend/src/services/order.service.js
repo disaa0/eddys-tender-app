@@ -252,9 +252,100 @@ async function handlePaymentFailed(paymentIntent) {
     }
 }
 
+/**
+ * Search orders with filters
+ * @param {number} userId - The user ID
+ * @param {Object} filters - Search filters and pagination options
+ * @returns {Object} - Filtered orders with pagination info
+ */
+async function searchOrders(userId, filters) {
+    const {
+        startDate,
+        endDate,
+        orderStatus,
+        paid,
+        paymentType,
+        shipmentType,
+        minPrice,
+        maxPrice,
+        page = 1,
+        limit = 10
+    } = filters;
+
+    // Build where clause
+    const where = {
+        cart: { idUser: userId }
+    };
+
+    // Add date range filter
+    if (startDate || endDate) {
+        where.createdAt = {};
+        if (startDate) where.createdAt.gte = new Date(startDate);
+        if (endDate) where.createdAt.lte = new Date(endDate);
+    }
+
+    // Add order status filter
+    if (orderStatus) {
+        where.idOrderStatus = parseInt(orderStatus);
+    }
+
+    // Add payment status filter
+    if (paid !== undefined) {
+        where.paid = paid === 'true';
+    }
+
+    // Add payment type filter
+    if (paymentType) {
+        where.idPaymentType = parseInt(paymentType);
+    }
+
+    // Add shipment type filter
+    if (shipmentType) {
+        where.idShipmentType = parseInt(shipmentType);
+    }
+
+    // Add price range filter
+    if (minPrice || maxPrice) {
+        where.totalPrice = {};
+        if (minPrice) where.totalPrice.gte = parseFloat(minPrice);
+        if (maxPrice) where.totalPrice.lte = parseFloat(maxPrice);
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Get total count for pagination
+    const totalCount = await prisma.order.count({ where });
+
+    // Get orders with filters
+    const orders = await prisma.order.findMany({
+        where,
+        include: {
+            orderStatus: true,
+            paymentType: true,
+            shipmentType: true
+        },
+        skip,
+        take: parseInt(limit),
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+
+    return {
+        orders,
+        pagination: {
+            totalItems: totalCount,
+            totalPages: Math.ceil(totalCount / parseInt(limit)),
+            currentPage: parseInt(page),
+            itemsPerPage: parseInt(limit)
+        }
+    };
+}
+
 module.exports = {
     createOrder,
     getOrderDetails,
     getUserOrders,
-    processStripeEvent
+    processStripeEvent,
+    searchOrders
 }; 
