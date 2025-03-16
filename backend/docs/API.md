@@ -1840,7 +1840,79 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor 
 
-### 14.3 Webhook de Stripe
+### 14.4 Buscar Pedidos con Filtros
+
+**GET /api/orders/search**
+
+Permite buscar y filtrar pedidos del usuario actualmente autenticado.
+
+**Encabezados Requeridos:**
+~~~
+Authorization: Bearer <token>
+~~~
+
+**Parámetros de Consulta:**
+~~~
+startDate: Fecha inicial (formato ISO, ej: 2023-10-01)
+endDate: Fecha final (formato ISO, ej: 2023-10-31)
+orderStatus: ID del estado de la orden (1: Pendiente, 2: Procesando, etc.)
+paid: Estado de pago (true/false)
+paymentType: ID del tipo de pago (1: Efectivo, 2: Tarjeta de crédito, etc.)
+shipmentType: ID del tipo de envío (1: Envío a domicilio, 2: Recoger en tienda, etc.)
+minPrice: Precio mínimo
+maxPrice: Precio máximo
+page: Número de página (default: 1)
+limit: Resultados por página (default: 10)
+~~~
+
+**Respuesta (200 OK):**
+~~~json
+{
+  "message": "Pedidos encontrados",
+  "data": {
+    "orders": [
+      {
+        "idOrder": 42,
+        "totalPrice": 258.00,
+        "paid": true,
+        "paidAt": "2023-07-15T14:35:12Z",
+        "createdAt": "2023-07-15T14:30:45Z",
+        "orderStatus": {
+          "idOrderStatus": 2,
+          "status": "Procesando"
+        },
+        "paymentType": {
+          "idPaymentType": 2,
+          "type": "Tarjeta de crédito"
+        },
+        "shipmentType": {
+          "idShipmentType": 1,
+          "type": "Envío a domicilio"
+        }
+      }
+    ],
+    "pagination": {
+      "totalItems": 15,
+      "totalPages": 2,
+      "currentPage": 1,
+      "itemsPerPage": 10
+    }
+  }
+}
+~~~
+
+**Notas:**
+- Los filtros son opcionales y se pueden combinar
+- El rango de fechas filtra por la fecha de creación del pedido
+- Los precios deben ser números positivos
+- Los pedidos se ordenan por fecha de creación (más recientes primero)
+
+**Errores Posibles:**
+- 400: Parámetros de filtro inválidos (formato de fecha, valores numéricos, etc.)
+- 401: Token no proporcionado
+- 500: Error del servidor
+
+### 14.5 Webhook de Stripe
 
 **POST /api/webhooks/stripe**
 
