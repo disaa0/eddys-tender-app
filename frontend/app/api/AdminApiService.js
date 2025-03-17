@@ -8,6 +8,12 @@ class AdminApiService extends BaseApiService {
         });
     }
 
+    async getPopularProducts() {
+        return this.request('/products/popular', 'GET', null, {
+            params: { limit: 5 }
+        });
+    }
+
     // Get single product by ID
     async getProduct(id) {
         try {

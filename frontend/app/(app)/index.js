@@ -43,6 +43,21 @@ export default function Index() {
     }
   };
 
+  const loadPopularProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await AdminApiService.getPopularProducts();
+      console.log(response)
+      setProducts(response.data.products);
+      setTotalPages(response.data.totalPages);
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadProducts();
   }, [page]);
@@ -57,9 +72,13 @@ export default function Index() {
     if (filter === selectedFilter) {
       setSelectedFilter('');
       setFilterIcon('filter-list');
+    } else if (filter === 'Más pedidos') {
+      setFilterIcon('star');
+      setSelectedFilter(filter)
+      loadPopularProducts()
     } else {
       setSelectedFilter(filter);
-      setFilterIcon(filter === 'Más pedidos' ? 'star' : filter);
+      setFilterIcon(filter);
     }
     setShowFilters(false);
   };
