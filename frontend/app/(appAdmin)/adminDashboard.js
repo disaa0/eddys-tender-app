@@ -42,6 +42,19 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadPopularProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await AdminApiService.getPopularProducts();
+      setProducts(response.data.products);
+      setTotalPages(response.data.totalPages);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load products on page change
   useEffect(() => {
     loadProducts();
@@ -58,9 +71,13 @@ export default function AdminDashboard() {
     if (filter === selectedFilter) {
       setSelectedFilter('');
       setFilterIcon('filter-list');
+    } else if (filter === 'Más pedidos') {
+      setFilterIcon('star');
+      setSelectedFilter(filter)
+      loadPopularProducts()
     } else {
       setSelectedFilter(filter);
-      setFilterIcon(filter === 'Más pedidos' ? 'star' : filter);
+      setFilterIcon(filter);
     }
     setShowFilters(false);
   };
@@ -213,7 +230,7 @@ export default function AdminDashboard() {
             icon="magnify" // Ícono de lupa
             placeholderTextColor="#666" // Color del texto de placeholder
           />
-          <TouchableOpacity style={styles.sortButton} onPress={() => setShowFilters(!showFilters)}
+          <TouchableOpacity style={styles.sortButton} onPress={() => { setShowFilters(!showFilters); !showFilters ? setFilterIcon('X') : setFilterIcon('filter-list') }}
           >{
               (filterIcon == 'filter-list' || filterIcon == 'star')
               && (<MaterialIcons name={filterIcon} size={24} color="#ffffff" />)
