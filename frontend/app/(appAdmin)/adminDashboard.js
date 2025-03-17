@@ -46,8 +46,10 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       const response = await AdminApiService.getPopularProducts();
+      console.log(response)
       setProducts(response.data.products);
       setTotalPages(response.data.totalPages);
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -108,10 +110,6 @@ export default function AdminDashboard() {
       pathname: '/(appAdmin)/product/[id]',
       params: { id: productId }
     });
-  };
-
-  const handleAddProduct = () => {
-    router.push('/(appAdmin)/addProduct');
   };
 
   const getProductTypeLabel = (idProductType) => {

@@ -418,7 +418,6 @@ async function getPopularProducts(req, res) {
             },
             take: limitNum
         });
-        console.log(popularProducts)
         // Format the response
         const formattedProducts = popularProducts.map(product => ({
             ...product,
