@@ -1,7 +1,8 @@
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
+import { theme } from '../theme';
 
 
 
@@ -37,7 +38,10 @@ export default function AppLayout() {
             options={{
               tabBarIcon: () => (
                 <View style={styles.cartIconContainer}>
-                  <MaterialIcons name="shopping-cart" size={30} color="#fff" />
+                  <MaterialIcons name="shopping-cart" size={45} color="#fff" />
+                  <View style={styles.cartIconCount}>
+                    <Text style={{ color: theme.colors.primary, }}>0</Text>
+                  </View>
                 </View>
               ),
             }}
@@ -64,6 +68,7 @@ export default function AppLayout() {
           <Tabs.Screen
             name="checkout"
             options={{
+              tabBarStyle: { display: 'none' },
               href: null,
             }}
           />
@@ -131,6 +136,13 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
+  },
+  cartIconCount: {
+    position: 'absolute', // Asegura que el botón se posicione correctamente
+    top: 20,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tabBarIconStyle: {
     paddingTop: 10,

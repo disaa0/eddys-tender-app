@@ -1,9 +1,13 @@
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Card, Button, Text, TextInput, RadioButton, List, Divider } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { Card, Button, RadioButton, List, Divider, TextInput } from 'react-native-paper';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { theme } from '../theme';
+import apiService from '../api/ApiService';
 
 export default function Checkout() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [address, setAddress] = useState({
@@ -12,6 +16,22 @@ export default function Checkout() {
     colony: '',
     reference: '',
   });
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const cartData = await apiService.getCartItems();
+        setCart(cartData);
+      } catch (err) {
+        setError('Error al obtener el carrito');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, []);
 
   // Datos de ejemplo - En producción vendrían de un estado global
   const subtotal = 258; // 2 Tender Box
@@ -46,8 +66,11 @@ export default function Checkout() {
     <ScrollView style={styles.container}>
       {/* Dirección de Entrega */}
       <Card style={styles.card}>
-        <Card.Title title="Dirección de Entrega" />
+        <View style={styles.cardTitleContainer}>
+          <Card.Title title="Dirección de Entrega" />
+        </View>
         <Card.Content>
+
           <TextInput
             mode="outlined"
             label="Calle"
@@ -115,6 +138,11 @@ export default function Checkout() {
         <Card.Title title="Resumen del Pedido" />
         <Card.Content>
           <List.Item
+            title="2 Tenders"
+            right={() => <Text>${subtotal.toFixed(2)}</Text>}
+          />
+          <Divider style={styles.divider} />
+          <List.Item
             title="Subtotal"
             right={() => <Text>${subtotal.toFixed(2)}</Text>}
           />
@@ -139,9 +167,14 @@ export default function Checkout() {
         onPress={handlePlaceOrder}
         style={styles.confirmButton}
       >
-        {paymentMethod === 'card' 
-          ? 'Pagar con Tarjeta'
-          : 'Confirmar Pedido - Pago en Efectivo'}
+        Continuar
+      </Button>
+      <Button
+        mode="contained"
+        onPress={() => { router.push('/cart') }}
+        style={styles.confirmButton}
+      >
+        Volver al carrito
       </Button>
     </ScrollView>
   );
@@ -150,13 +183,19 @@ export default function Checkout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.surface,
+    paddingBottom: 10
   },
   card: {
     margin: 8,
+    backgroundColor: theme.colors.surface,
+  },
+  cardTitleContainer: {
+    flexDirection: 'row',
   },
   input: {
     marginBottom: 12,
+    backgroundColor: theme.colors.surface
   },
   cardInfo: {
     marginTop: 12,
@@ -174,7 +213,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   confirmButton: {
-    margin: 16,
-    marginBottom: 32,
+    margin: 10,
+    marginBottom: 0,
   },
 }); 
