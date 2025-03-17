@@ -23,6 +23,10 @@ class ApiService extends BaseApiService {
     async deleteProfile() {
         return this.request('/auth/profile', 'DELETE');
     }
+
+    async getCartItems() {
+        return this.request('/cart', 'GET');
+    }
 }
 
 const apiService = new ApiService();
