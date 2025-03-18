@@ -2,9 +2,27 @@ import { View, Image, StyleSheet, Pressable } from 'react-native';
 import { Surface, Text, TouchableRipple } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../theme';
+import { useState } from 'react';
+import apiService from '../api/ApiService';
 
-export default function ProductCard({ product, onPress, onAddToCart }) {
+export default function ProductCard({ product, onPress }) {
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState('');
   const { name, price, description, imageSource } = product;
+  const onAddToCart = async (product) => {
+    try {
+      setLoading(true)
+      console.log(product.idProduct)
+      const response = await apiService.AddCartItem(product.idProduct)
+      console.log(response)
+    } catch (error) {
+      setError('Error al agregar producto al carrito');
+      console.error(error);
+    } finally {
+      setLoading(false)
+    }
+
+  }
 
   return (
     <Surface style={styles.card} elevation={1}>
@@ -28,7 +46,7 @@ export default function ProductCard({ product, onPress, onAddToCart }) {
               style={styles.cartButton}
               onPress={(e) => {
                 e.stopPropagation();
-                onAddToCart?.();
+                onAddToCart(product);
               }}
             >
               <MaterialIcons name="add-shopping-cart" size={20} color="#fff" />

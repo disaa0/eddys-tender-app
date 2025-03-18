@@ -1,13 +1,15 @@
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, FlatList } from 'react-native';
 import { Card, Button, RadioButton, List, Divider, TextInput } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { theme } from '../theme';
 import apiService from '../api/ApiService';
 
 export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [cart, setCart] = useState('');
+  const [cartItems, setCartItems] = useState('');
   const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [address, setAddress] = useState({
@@ -17,21 +19,27 @@ export default function Checkout() {
     reference: '',
   });
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const cartData = await apiService.getCartItems();
-        setCart(cartData);
-      } catch (err) {
-        setError('Error al obtener el carrito');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchCart();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchCart = async () => {
+        try {
+          setLoading(true);
+          const cartData = await apiService.getCartItems();
+          setCart(cartData);
+          setCartItems(cart.items.items);
+          console.log(cartItems);
+        } catch (err) {
+          setError('Error al obtener el carrito');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchCart();
+    }, [])
+  );
 
   // Datos de ejemplo - En producción vendrían de un estado global
   const subtotal = 258; // 2 Tender Box
@@ -61,6 +69,14 @@ export default function Checkout() {
     // Procesar orden para pago en efectivo
     router.push('/orders');
   };
+
+  const renderProduct = ({ item, index }) => (
+    < List.Item
+      title={`${item.quantity} ${item.product.name}`}
+      right={() => <Text>${(item.quantity * item.product.price).toFixed(2)}</Text>
+      }
+    />
+  );
 
   return (
     <ScrollView style={styles.container}>
@@ -137,9 +153,14 @@ export default function Checkout() {
       <Card style={styles.card}>
         <Card.Title title="Resumen del Pedido" />
         <Card.Content>
-          <List.Item
-            title="2 Tenders"
-            right={() => <Text>${subtotal.toFixed(2)}</Text>}
+          <FlatList
+            data={cartItems}
+            numColumns={1}
+            renderItem={renderProduct}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.productList}
+            ListEmptyComponent={!loading && <View style={styles.centered}><Text>No hay productos disponibles.</Text></View>}
+
           />
           <Divider style={styles.divider} />
           <List.Item

@@ -27,6 +27,11 @@ class ApiService extends BaseApiService {
     async getCartItems() {
         return this.request('/cart', 'GET');
     }
+
+    async AddCartItem(idProduct, quantity = 1) {
+        return this.request(`/cart/items/${idProduct}`, 'PUT', { idProduct, quantity })
+    }
+
 }
 
 const apiService = new ApiService();
