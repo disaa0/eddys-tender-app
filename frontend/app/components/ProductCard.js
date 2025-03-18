@@ -13,7 +13,7 @@ export default function ProductCard({ product, onPress }) {
     try {
       setLoading(true)
       console.log(product.idProduct)
-      const response = await apiService.AddCartItem(product.idProduct)
+      const response = await apiService.addCartItem(product.idProduct)
       console.log(response)
     } catch (error) {
       setError('Error al agregar producto al carrito');

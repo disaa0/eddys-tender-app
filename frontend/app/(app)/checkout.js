@@ -10,7 +10,6 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cart, setCart] = useState('');
-  const [cartItems, setCartItems] = useState('');
   const [purchaseSuccessfulDialogVisible, setPurchaseSuccessfulDialogVisible] = useState(false);
   const [purchaseErrorDialogVisible, setPurchaseErrorDialogVisible] = useState(false);
   const router = useRouter();
@@ -22,15 +21,14 @@ export default function Checkout() {
     reference: '',
   });
 
-
   useFocusEffect(
     useCallback(() => {
       const fetchCart = async () => {
         try {
+          setCart('')
           setLoading(true);
           const cartData = await apiService.getCartItems();
-          setCart(cartData);
-          setCartItems(cart.items.items);
+          setCart(cartData.items.items);
         } catch (err) {
           setError('Error al obtener el carrito');
           console.error(err);
@@ -60,23 +58,35 @@ export default function Checkout() {
 
   const handleStripePayment = async () => {
     try {
-      // Aquí iría la integración con Stripe
-      router.push('/orders');
+      setLoading(true)
+      setError('Error en la compra')
+      if (error != '') {
+        setPurchaseErrorDialogVisible(true)
+      } else {
+        setPurchaseSuccessfulDialogVisible(true)
+      }
     } catch (error) {
       // Manejar error de pago
+    } finally {
+      setLoading(false)
     }
   };
 
-  const handleCashPayment = () => {
-    if (error != '') {
-      setPurchaseErrorDialogVisible(true)
-    } else {
+  const handleCashPayment = async () => {
+    try {
+      const order = await apiService.createOrder(1, 1, 1);
       setPurchaseSuccessfulDialogVisible(true)
+      console.log(order);
+    } catch (error) {
+      console.error(error)
+      setPurchaseErrorDialogVisible(true);
+    } finally {
+      setLoading(false)
     }
 
   };
 
-  const renderProduct = ({ item, index }) => (
+  const renderProduct = ({ item }) => (
     < List.Item
       title={`${item.quantity} ${item.product.name}`}
       right={() => <Text>${(item.quantity * item.product.price).toFixed(2)}</Text>
@@ -160,7 +170,7 @@ export default function Checkout() {
         <Card.Title title="Resumen del Pedido" />
         <Card.Content>
           <FlatList
-            data={cartItems}
+            data={cart}
             numColumns={1}
             renderItem={renderProduct}
             keyExtractor={(item, index) => index.toString()}

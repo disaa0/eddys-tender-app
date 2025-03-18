@@ -98,7 +98,8 @@ export default function Index() {
     return products.filter((product) => {
       const categoryMatch = selectedCategory === 'Todos' || getProductTypeLabel(product.idProductType) === selectedCategory;
       const searchMatch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return categoryMatch && searchMatch;
+      const activeProducts = product.status == 1;
+      return categoryMatch && searchMatch && activeProducts;
     });
   };
 
