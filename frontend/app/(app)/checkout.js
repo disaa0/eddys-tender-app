@@ -4,12 +4,15 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { theme } from '../theme';
 import apiService from '../api/ApiService';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cart, setCart] = useState('');
   const [cartItems, setCartItems] = useState('');
+  const [purchaseSuccessfulDialogVisible, setPurchaseSuccessfulDialogVisible] = useState(false);
+  const [purchaseErrorDialogVisible, setPurchaseErrorDialogVisible] = useState(false);
   const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [address, setAddress] = useState({
@@ -28,7 +31,6 @@ export default function Checkout() {
           const cartData = await apiService.getCartItems();
           setCart(cartData);
           setCartItems(cart.items.items);
-          console.log(cartItems);
         } catch (err) {
           setError('Error al obtener el carrito');
           console.error(err);
@@ -66,8 +68,12 @@ export default function Checkout() {
   };
 
   const handleCashPayment = () => {
-    // Procesar orden para pago en efectivo
-    router.push('/orders');
+    if (error != '') {
+      setPurchaseErrorDialogVisible(true)
+    } else {
+      setPurchaseSuccessfulDialogVisible(true)
+    }
+
   };
 
   const renderProduct = ({ item, index }) => (
@@ -190,9 +196,29 @@ export default function Checkout() {
       >
         Continuar
       </Button>
+      <ConfirmationDialog
+        visible={purchaseSuccessfulDialogVisible}
+        onDismiss={() => setPurchaseSuccessfulDialogVisible(false)}
+        onConfirm={() => { setPurchaseSuccessfulDialogVisible(false); router.push('/orders') }}
+        title="Compra éxitosa"
+        message="Su orden se ha creado con éxito."
+        confirmButtonLabel="Continuar"
+        cancelButtonLabel=""
+
+      />
+      <ConfirmationDialog
+        visible={purchaseErrorDialogVisible}
+        onDismiss={() => setPurchaseErrorDialogVisible(false)}
+        onConfirm={() => setPurchaseErrorDialogVisible(false)}
+        title="Error en compra"
+        message={error}
+        confirmButtonLabel="Reintentar"
+        cancelButtonLabel=""
+
+      />
       <Button
         mode="contained"
-        onPress={() => { router.push('/cart') }}
+        onPress={() => { router.push('/cart'); }}
         style={styles.confirmButton}
       >
         Volver al carrito

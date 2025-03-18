@@ -1,5 +1,6 @@
 import { Portal, Dialog, Button, Text } from 'react-native-paper';
 import { theme } from '../theme';
+import { StyleSheet } from 'react-native';
 
 export default function ConfirmationDialog({
     visible,
@@ -14,7 +15,7 @@ export default function ConfirmationDialog({
 }) {
     return (
         <Portal>
-            <Dialog visible={visible} onDismiss={onDismiss}>
+            <Dialog style={styles.container} visible={visible} onDismiss={onDismiss}>
                 <Dialog.Title>{title}</Dialog.Title>
                 <Dialog.Content>
                     <Text variant="bodyMedium">{message}</Text>
@@ -38,4 +39,11 @@ export default function ConfirmationDialog({
             </Dialog>
         </Portal>
     );
-} 
+}
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: theme.colors.surface,
+        borderRadius: 30,
+    },
+})
