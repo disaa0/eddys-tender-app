@@ -23,7 +23,7 @@ export default function Checkout() {
 
   useFocusEffect(
     useCallback(() => {
-      const fetchCart = async () => {
+      const getCartItems = async () => {
         try {
           setCart('')
           setLoading(true);
@@ -37,7 +37,7 @@ export default function Checkout() {
         }
       };
 
-      fetchCart();
+      getCartItems();
     }, [])
   );
 
