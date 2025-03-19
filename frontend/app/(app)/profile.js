@@ -127,6 +127,8 @@ export default function Profile() {
             title="Dirección"
             description={userInfoH.userInformation?.address || 'No especificada'}
             left={(props) => <List.Icon {...props} icon="map-marker" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/profile/address')}
           />
         </Surface>
 
