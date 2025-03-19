@@ -1,15 +1,17 @@
-import { View, StyleSheet, ScrollView, Text, FlatList, Linking } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, FlatList } from 'react-native';
 import { Card, Button, RadioButton, List, Divider, TextInput } from 'react-native-paper';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { theme } from '../theme';
 import apiService from '../api/ApiService';
 import ConfirmationDialog from '../components/ConfirmationDialog';
+import { useStripe } from '@stripe/stripe-react-native';
 
 export default function Checkout() {
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [cart, setCart] = useState('');
+  const [cart, setCart] = useState([]);
   const [subtotal, setSubtotal] = useState(0.00);
   const [total, setTotal] = useState(0.00);
   const [purchaseSuccessfulDialogVisible, setPurchaseSuccessfulDialogVisible] = useState(false);
@@ -28,18 +30,15 @@ export default function Checkout() {
     useCallback(() => {
       const getCartItems = async () => {
         try {
-          setCart('')
           setLoading(true);
           const cartData = await apiService.getCartItems();
           setCart(cartData.items.items);
         } catch (err) {
           setError('Error al obtener el carrito');
-          console.error(err);
         } finally {
           setLoading(false);
         }
       };
-
       getCartItems();
     }, [])
   );
@@ -50,65 +49,79 @@ export default function Checkout() {
         try {
           setLoading(true);
           const data = await apiService.getCartTotal();
-          setSubtotal(data.totalAmount.totalAmount)
-          setTotal(subtotal + delivery)
+          setSubtotal(data.totalAmount.totalAmount);
+          setTotal(data.totalAmount.totalAmount + delivery);
         } catch (err) {
           setError('Error al crear orden');
-          console.error(err);
         } finally {
           setLoading(false);
         }
       };
-
       getCartTotal();
     }, [])
   );
 
   const handlePlaceOrder = () => {
     if (paymentMethod === 'card') {
-      // Implementar integración con Stripe
       handleStripePayment();
     } else {
-      // Procesar orden para pago en efectivo
       handleCashPayment();
     }
   };
 
   const handleStripePayment = async () => {
     try {
-      setLoading(true)
-      setError('Error en la compra')
-      if (error != '') {
-        setPurchaseErrorDialogVisible(true)
-      } else {
-        setPurchaseSuccessfulDialogVisible(true)
+      setLoading(true);
+      const order = await apiService.createOrder(2, 1, 1);
+      const { stripeClientSecret } = order.order;
+
+      if (!stripeClientSecret) {
+        throw new Error("No se pudo generar el pago");
       }
+
+      // Initialize Stripe Payment Sheet
+      const { error } = await initPaymentSheet({
+        paymentIntentClientSecret: stripeClientSecret,
+        merchantDisplayName: "Eddy's",
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Open Stripe Payment UI
+      const { error: paymentError } = await presentPaymentSheet();
+
+      if (paymentError) {
+        throw new Error(paymentError.message);
+      }
+
+      setPurchaseSuccessfulDialogVisible(true);
     } catch (error) {
-      // Manejar error de pago
+      setError(error.message || "Error en el pago");
+      setPurchaseErrorDialogVisible(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
   const handleCashPayment = async () => {
     try {
-      const order = await apiService.createOrder(1, 1, 1);
-      setPurchaseSuccessfulDialogVisible(true)
-      console.log(order);
+      setLoading(true);
+      await apiService.createOrder(1, 1, 1);
+      setPurchaseSuccessfulDialogVisible(true);
     } catch (error) {
-      console.error(error)
+      setError(error.message || "Error en el pago");
       setPurchaseErrorDialogVisible(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-
   };
 
   const renderProduct = ({ item }) => (
-    < List.Item
+    <List.Item
       title={`${item.quantity} ${item.product.name}`}
-      right={() => <Text>${(item.quantity * item.product.price).toFixed(2)}</Text>
-      }
+      right={() => <Text>${(item.quantity * item.product.price).toFixed(2)}</Text>}
     />
   );
 
@@ -116,42 +129,12 @@ export default function Checkout() {
     <ScrollView style={styles.container}>
       {/* Dirección de Entrega */}
       <Card style={styles.card}>
-        <View style={styles.cardTitleContainer}>
-          <Card.Title title="Dirección de Entrega" />
-        </View>
+        <Card.Title title="Dirección de Entrega" />
         <Card.Content>
-
-          <TextInput
-            mode="outlined"
-            label="Calle"
-            value={address.street}
-            onChangeText={(text) => setAddress({ ...address, street: text })}
-            style={styles.input}
-          />
-          <TextInput
-            mode="outlined"
-            label="Número"
-            value={address.number}
-            onChangeText={(text) => setAddress({ ...address, number: text })}
-            style={styles.input}
-            keyboardType="number-pad"
-          />
-          <TextInput
-            mode="outlined"
-            label="Colonia"
-            value={address.colony}
-            onChangeText={(text) => setAddress({ ...address, colony: text })}
-            style={styles.input}
-          />
-          <TextInput
-            mode="outlined"
-            label="Referencias"
-            value={address.reference}
-            onChangeText={(text) => setAddress({ ...address, reference: text })}
-            style={styles.input}
-            multiline
-            numberOfLines={2}
-          />
+          <TextInput mode="outlined" label="Calle" value={address.street} onChangeText={text => setAddress({ ...address, street: text })} style={styles.input} />
+          <TextInput mode="outlined" label="Número" value={address.number} onChangeText={text => setAddress({ ...address, number: text })} style={styles.input} keyboardType="number-pad" />
+          <TextInput mode="outlined" label="Colonia" value={address.colony} onChangeText={text => setAddress({ ...address, colony: text })} style={styles.input} />
+          <TextInput mode="outlined" label="Referencias" value={address.reference} onChangeText={text => setAddress({ ...address, reference: text })} style={styles.input} multiline numberOfLines={2} />
         </Card.Content>
       </Card>
 
@@ -159,27 +142,10 @@ export default function Checkout() {
       <Card style={styles.card}>
         <Card.Title title="Método de Pago" />
         <Card.Content>
-          <RadioButton.Group
-            onValueChange={value => setPaymentMethod(value)}
-            value={paymentMethod}
-          >
-            <RadioButton.Item
-              label="Tarjeta de Crédito/Débito"
-              value="card"
-            />
-            <RadioButton.Item
-              label="Efectivo al entregar"
-              value="cash"
-            />
+          <RadioButton.Group onValueChange={value => setPaymentMethod(value)} value={paymentMethod}>
+            <RadioButton.Item label="Tarjeta de Crédito/Débito" value="card" />
+            <RadioButton.Item label="Efectivo al entregar" value="cash" />
           </RadioButton.Group>
-
-          {paymentMethod === 'card' && (
-            <View style={styles.cardInfo}>
-              <Text variant="bodyMedium" style={styles.cardNotice}>
-                Serás redirigido a la pasarela de pago segura de Stripe
-              </Text>
-            </View>
-          )}
         </Card.Content>
       </Card>
 
@@ -187,70 +153,23 @@ export default function Checkout() {
       <Card style={styles.card}>
         <Card.Title title="Resumen del Pedido" />
         <Card.Content>
-          <FlatList
-            data={cart}
-            numColumns={1}
-            renderItem={renderProduct}
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={styles.productList}
-            ListEmptyComponent={!loading && <View style={styles.centered}><Text>No hay productos disponibles.</Text></View>}
-
-          />
+          <FlatList data={cart} renderItem={renderProduct} keyExtractor={(item, index) => index.toString()} contentContainerStyle={styles.productList} />
           <Divider style={styles.divider} />
-          <List.Item
-            title="Subtotal"
-            right={() => <Text>${subtotal.toFixed(2)}</Text>}
-          />
-          <List.Item
-            title="Envío"
-            right={() => <Text>${delivery.toFixed(2)}</Text>}
-          />
+          <List.Item title="Subtotal" right={() => <Text>${subtotal.toFixed(2)}</Text>} />
+          <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
           <Divider style={styles.divider} />
-          <List.Item
-            title="Total"
-            titleStyle={styles.total}
-            right={() => (
-              <Text style={styles.total}>${total.toFixed(2)}</Text>
-            )}
-          />
+          <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} />
         </Card.Content>
       </Card>
 
       {/* Botón de Confirmar Pedido */}
-      <Button
-        mode="contained"
-        onPress={handlePlaceOrder}
-        style={styles.confirmButton}
-      >
-        Continuar
+      <Button mode="contained" onPress={handlePlaceOrder} style={styles.confirmButton} disabled={loading}>
+        {loading ? "Procesando..." : "Continuar"}
       </Button>
-      <ConfirmationDialog
-        visible={purchaseSuccessfulDialogVisible}
-        onDismiss={() => setPurchaseSuccessfulDialogVisible(false)}
-        onConfirm={() => { setPurchaseSuccessfulDialogVisible(false); router.push('/orders') }}
-        title="Compra éxitosa"
-        message="Su orden se ha creado con éxito."
-        confirmButtonLabel="Continuar"
-        cancelButtonLabel=""
 
-      />
-      <ConfirmationDialog
-        visible={purchaseErrorDialogVisible}
-        onDismiss={() => setPurchaseErrorDialogVisible(false)}
-        onConfirm={() => setPurchaseErrorDialogVisible(false)}
-        title="Error en compra"
-        message={error}
-        confirmButtonLabel="Reintentar"
-        cancelButtonLabel=""
-
-      />
-      <Button
-        mode="contained"
-        onPress={() => { router.push('/cart'); }}
-        style={styles.confirmButton}
-      >
-        Volver al carrito
-      </Button>
+      {/* Dialogs */}
+      <ConfirmationDialog visible={purchaseSuccessfulDialogVisible} onDismiss={() => setPurchaseSuccessfulDialogVisible(false)} onConfirm={() => { setPurchaseSuccessfulDialogVisible(false); router.push('/orders'); }} title="Compra exitosa" message="Su orden se ha creado con éxito." confirmButtonLabel="Continuar" />
+      <ConfirmationDialog visible={purchaseErrorDialogVisible} onDismiss={() => setPurchaseErrorDialogVisible(false)} title="Error en compra" message={error} confirmButtonLabel="Reintentar" />
     </ScrollView>
   );
 }
