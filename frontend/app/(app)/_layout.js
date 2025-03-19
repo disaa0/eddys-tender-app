@@ -99,6 +99,13 @@ export default function AppLayout() {
               title: 'Favoritos',
             }}
           />
+          <Tabs.Screen
+            name="profile/address"
+            options={{
+              href: null,
+              title: 'Direcciones',
+            }}
+          />
         </Tabs>
       </SafeAreaView>
     </SafeAreaProvider>

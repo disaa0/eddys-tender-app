@@ -44,6 +44,10 @@ class ApiService extends BaseApiService {
         return this.request(`/cart/items/${idProduct}`, 'DELETE')
     }
 
+    async getShippingAdresses() {
+        return this.request('/shipping-address', 'GET');
+    }
+
 }
 
 const apiService = new ApiService();
