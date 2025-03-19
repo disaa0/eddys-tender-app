@@ -1,19 +1,30 @@
 import { View, StyleSheet } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
+import { TextInput, Button, Text, Snackbar } from 'react-native-paper';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../../../theme';
+import useShippingAddresses from '../../../hooks/useShippingAddresses';
 
 export default function AddAddress() {
     const [street, setStreet] = useState('');
     const [houseNumber, setHouseNumber] = useState('');
     const [postalCode, setPostalCode] = useState('');
     const [neighborhood, setNeighborhood] = useState('');
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
+    // const [snackbar, setSnackbar] = useState({ visible: true, message: 'Probando mi snackbar' });
+    const { addShippingAddress, loading } = useShippingAddresses();
+
     const router = useRouter();
 
-    // Validation function
+    const limpiarCampos = () => {
+        setStreet('');
+        setHouseNumber('');
+        setPostalCode('');
+        setNeighborhood('');
+    }
+
+    // Validación
     const validateAddress = () => {
         if (!street || !houseNumber || !postalCode || !neighborhood) {
             return 'Todos los campos son requeridos';
@@ -22,34 +33,48 @@ export default function AddAddress() {
     };
 
     const handleAddAddress = async () => {
-        try {
-            const validationError = validateAddress();
-            if (validationError) {
-                setError(validationError);
-                return;
-            }
+        const validationError = validateAddress();
+        if (validationError) {
+            setError(validationError);
+            return;
+        }
 
-            setLoading(true);
-            setError('');
+        setError('');
 
-            // Llamar al hook de dirección aquí más adelante cuando esté listo
-            // await addAddress({ street, houseNumber, postalCode, neighborhood });
+        // verificar si son numeros los campos pertinentes
+        if (isNaN(houseNumber) || isNaN(postalCode)) {
+            setSnackbar({ visible: true, message: 'Los campos de número de casa y código postal deben ser números' });
+            return;
+        }
 
-            // Simulación de espera
+        const newAddress = await addShippingAddress({
+            street,
+            houseNumber,
+            postalCode,
+            neighborhood
+        });
+
+        // console.log(newAddress);
+
+        if (newAddress?.idLocation) {
+            setSnackbar({ visible: true, message: 'Dirección añadida correctamente' });
             setTimeout(() => {
-                // Redirige a la lista de direcciones o página anterior después de agregarla
-                router.back();
-            }, 1000);
-        } catch (error) {
-            setError('Error al agregar la dirección. Intenta nuevamente');
-        } finally {
-            setLoading(false);
+                router.push('/profile/address');
+            }, 1500);
+            // limpiar campos
+            limpiarCampos();
+
+        } else {
+            console.log(newAddress);
+            const errorMessage = newAddress?.error.map((err) => err.message).join(', ');
+            setSnackbar({ visible: true, message: errorMessage });
         }
     };
 
     const handleCancel = () => {
-        router.back();
-    };
+        limpiarCampos();
+        router.push('/profile/address');
+    }
 
     return (
         <View style={styles.container}>
@@ -99,14 +124,12 @@ export default function AddAddress() {
                 disabled={loading}
             />
 
-            {error ? <Text style={styles.error}>{error}</Text> : null}
-
             <Button
                 mode="contained"
                 onPress={handleAddAddress}
                 style={styles.button}
                 loading={loading}
-                disabled={loading || !street || !houseNumber || !postalCode || !neighborhood}
+                disabled={loading}
             >
                 Agregar Dirección
             </Button>
@@ -119,6 +142,17 @@ export default function AddAddress() {
             >
                 Cancelar
             </Button>
+            {/* Contenedor absoluto para el Snackbar */}
+            <View style={styles.snackbarContainer}>
+                <Snackbar
+                    visible={snackbar.visible}
+                    onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
+                    duration={5000}
+                    style={styles.snackbar}
+                >
+                    {snackbar.message}
+                </Snackbar>
+            </View>
         </View>
     );
 }
@@ -127,6 +161,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        paddingBottom: 80,
         backgroundColor: theme.colors.background,
     },
     title: {
@@ -148,5 +183,17 @@ const styles = StyleSheet.create({
         color: theme.colors.error,
         marginBottom: 10,
         textAlign: 'center',
+    },
+    snackbarContainer: {
+        position: 'absolute',
+        bottom: 80, // Ajusta según la altura del navbar
+        left: 0,
+        right: 0,
+        alignItems: 'center', // Centra el Snackbar
+    },
+    snackbar: {
+        width: '90%',
+        backgroundColor: theme.colors.primary,
+        borderRadius: 10,
     },
 });
