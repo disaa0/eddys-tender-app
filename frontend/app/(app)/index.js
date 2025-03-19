@@ -59,10 +59,10 @@ export default function Index() {
     }
   };
 
-  /*  useEffect(() => {
-     loadProducts();
-   }, [page]);
-  */
+  useEffect(() => {
+    loadProducts();
+  }, [page]);
+
   useFocusEffect(
     useCallback(() => {
       loadProducts();
