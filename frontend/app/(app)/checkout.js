@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Text, FlatList } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, FlatList, Linking } from 'react-native';
 import { Card, Button, RadioButton, List, Divider, TextInput } from 'react-native-paper';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -10,6 +10,8 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cart, setCart] = useState('');
+  const [subtotal, setSubtotal] = useState(0.00);
+  const [total, setTotal] = useState(0.00);
   const [purchaseSuccessfulDialogVisible, setPurchaseSuccessfulDialogVisible] = useState(false);
   const [purchaseErrorDialogVisible, setPurchaseErrorDialogVisible] = useState(false);
   const router = useRouter();
@@ -20,6 +22,7 @@ export default function Checkout() {
     colony: '',
     reference: '',
   });
+  const delivery = 35;
 
   useFocusEffect(
     useCallback(() => {
@@ -41,10 +44,25 @@ export default function Checkout() {
     }, [])
   );
 
-  // Datos de ejemplo - En producción vendrían de un estado global
-  const subtotal = 258; // 2 Tender Box
-  const delivery = 35;
-  const total = subtotal + delivery;
+  useFocusEffect(
+    useCallback(() => {
+      const getCartTotal = async () => {
+        try {
+          setLoading(true);
+          const data = await apiService.getCartTotal();
+          setSubtotal(data.totalAmount.totalAmount)
+          setTotal(subtotal + delivery)
+        } catch (err) {
+          setError('Error al crear orden');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      getCartTotal();
+    }, [])
+  );
 
   const handlePlaceOrder = () => {
     if (paymentMethod === 'card') {
