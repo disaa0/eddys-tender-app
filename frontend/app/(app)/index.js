@@ -11,6 +11,7 @@ import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated'
 import SortChips from '../components/SortChips';
 import AdminApiService from '../api/AdminApiService';
 import { useFocusEffect } from '@react-navigation/native';
+import apiService from '../api/ApiService';
 
 const logo = require('../../assets/eddys.png');
 
@@ -33,7 +34,7 @@ export default function Index() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const response = await AdminApiService.getProducts(page);
+      const response = await apiService.getProducts(page);
       setProducts(response.data.products);
       setTotalPages(response.data.totalPages);
     } catch (err) {
@@ -58,10 +59,10 @@ export default function Index() {
     }
   };
 
-  useEffect(() => {
-    loadProducts();
-  }, [page]);
-
+  /*  useEffect(() => {
+     loadProducts();
+   }, [page]);
+  */
   useFocusEffect(
     useCallback(() => {
       loadProducts();

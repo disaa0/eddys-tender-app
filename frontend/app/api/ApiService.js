@@ -24,6 +24,12 @@ class ApiService extends BaseApiService {
         return this.request('/auth/profile', 'DELETE');
     }
 
+    async getProducts(page = 1) {
+        return this.request('/products', 'GET', null, {
+            params: { page, limit: 6 }
+        });
+    }
+
     async getCartItems() {
         return this.request('/cart', 'GET');
     }
