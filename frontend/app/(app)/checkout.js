@@ -166,6 +166,9 @@ export default function Checkout() {
       <Button mode="contained" onPress={handlePlaceOrder} style={styles.confirmButton} disabled={loading}>
         {loading ? "Procesando..." : "Continuar"}
       </Button>
+      <Button mode="contained" onPress={() => { router.push('/cart') }} style={styles.confirmButton} disabled={loading}>
+        Volver al carrito
+      </Button>
 
       {/* Dialogs */}
       <ConfirmationDialog visible={purchaseSuccessfulDialogVisible} onDismiss={() => setPurchaseSuccessfulDialogVisible(false)} onConfirm={() => { setPurchaseSuccessfulDialogVisible(false); router.push('/orders'); }} title="Compra exitosa" message="Su orden se ha creado con éxito." confirmButtonLabel="Continuar" />

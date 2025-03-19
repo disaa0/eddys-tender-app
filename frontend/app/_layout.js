@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { theme } from './theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { StripeProvider } from "@stripe/stripe-react-native";
+import { StripeProvider } from '@stripe/stripe-react-native';
+
 
 
 // Combinar nuestro tema con el tema base de Paper
@@ -62,7 +63,7 @@ function AppContent() {
           <Stack.Screen name="(appAdmin)" options={{ headerShown: false, title: "Panel Administrador" }} />
         </Stack>
       </PaperProvider>
-    </StripeProvider>
+    //</StripeProvider>
   );
 }
 
