@@ -100,10 +100,17 @@ export default function AppLayout() {
             }}
           />
           <Tabs.Screen
-            name="profile/address"
+            name="profile/address/index"
             options={{
               href: null,
               title: 'Direcciones',
+            }}
+          />
+          <Tabs.Screen
+            name="profile/address/add-address"
+            options={{
+              href: null,
+              title: 'Agregar Dirección',
             }}
           />
         </Tabs>

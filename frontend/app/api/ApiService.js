@@ -48,6 +48,9 @@ class ApiService extends BaseApiService {
         return this.request('/shipping-address', 'GET');
     }
 
+    async addShippingAdresses(userId, addressData) {
+        return this.request('/shipping-address', 'POST', { userId, addressData });
+    }
 }
 
 const apiService = new ApiService();
