@@ -51,6 +51,14 @@ class ApiService extends BaseApiService {
     async addShippingAdresses(street, houseNumber, postalCode, neighborhood) {
         return this.request('/shipping-address', 'POST', { street, houseNumber, postalCode, neighborhood });
     }
+
+    async getShippingAddressById(id) {
+        return this.request(`/shipping-address/${id}`, 'GET');
+    }
+
+    async deleteShippingAddress(id) {
+        return this.request(`/shipping-address/${id}`, 'DELETE');
+    }
 }
 
 const apiService = new ApiService();

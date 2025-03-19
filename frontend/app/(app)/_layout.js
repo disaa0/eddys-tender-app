@@ -113,6 +113,13 @@ export default function AppLayout() {
               title: 'Agregar Dirección',
             }}
           />
+          <Tabs.Screen
+            name="profile/address/[id]"
+            options={{
+              href: null,
+              title: 'Direcciones',
+            }}
+          />
         </Tabs>
       </SafeAreaView>
     </SafeAreaProvider>

@@ -1,13 +1,14 @@
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import apiService from '../api/ApiService'; // Asegúrate de que este servicio tenga la función getShippingAddresses
+import apiService from '../api/ApiService';
 
 export default function useShippingAddresses() {
     const [addresses, setAddresses] = useState([]);
+    const [address, setAddress] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Función para obtener las direcciones
+    // Función para obtener todas las direcciones
     const fetchAddresses = async () => {
         try {
             setLoading(true);
@@ -16,7 +17,7 @@ export default function useShippingAddresses() {
             console.log(response);
 
             if (response.data && Array.isArray(response.data)) {
-                setAddresses(response.data); // Aseguramos que 'data' es un array
+                setAddresses(response.data);
             } else {
                 setAddresses([]);
             }
@@ -28,7 +29,27 @@ export default function useShippingAddresses() {
         }
     };
 
-    // Llamar fetchAddresses cuando la pantalla se enfoque
+    // Función para obtener una dirección por ID
+    const fetchAddressById = async (id) => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await apiService.getShippingAddressById(id);
+            console.log(response);
+
+            if (response.data) {
+                setAddress(response.data);
+            } else {
+                setAddress(null);
+            }
+        } catch (err) {
+            setError('Error al obtener la dirección');
+            console.error("Error al obtener la dirección", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useFocusEffect(
         useCallback(() => {
             fetchAddresses();
@@ -44,16 +65,12 @@ export default function useShippingAddresses() {
             const { street, houseNumber, postalCode, neighborhood } = addressData;
 
             const response = await apiService.addShippingAdresses(street, houseNumber, postalCode, neighborhood);
-            // console.log('Dirección agregada con éxito:', response);
             console.log(response);
 
             if (response.data) {
-                // Extrae la dirección dentro del objeto `data`
-                // setAddresses((prevAddresses) => [...prevAddresses, response.data]);
-                return response.data; // Retorna la dirección agregada
+                return response.data;
             }
         } catch (err) {
-            // console.log(err.response);
             console.error('Error al agregar la dirección', err);
             if (err?.response?.data?.error) return err.response.data;
         } finally {
@@ -66,9 +83,7 @@ export default function useShippingAddresses() {
         try {
             setLoading(true);
             await apiService.deleteShippingAddress(id);
-            setAddresses((prevAddresses) =>
-                prevAddresses.filter((address) => address.idLocation !== id)
-            );
+            setAddresses((prevAddresses) => prevAddresses.filter((address) => address.idLocation !== id));
         } catch (err) {
             console.error('Error al eliminar la dirección', err);
         } finally {
@@ -78,9 +93,11 @@ export default function useShippingAddresses() {
 
     return {
         addresses,
+        address,
         loading,
         error,
         fetchAddresses,
+        fetchAddressById,
         addShippingAddress,
         deleteAddress,
     };
