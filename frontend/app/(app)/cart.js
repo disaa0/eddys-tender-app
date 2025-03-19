@@ -1,121 +1,103 @@
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Card, Button, Text, List, IconButton, Divider } from 'react-native-paper';
 import { useRouter } from 'expo-router';
-
-// Datos de ejemplo - En producción vendrían de un estado global o contexto
-const CART_ITEMS = [
-  {
-    id: 1,
-    name: 'Tender Box',
-    price: 129,
-    quantity: 2,
-    sauce: 'BBQ',
-    notes: 'Extra salsa por favor',
-  },
-  // Más items...
-];
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import useCart from '../hooks/useCart';
 
 export default function Cart() {
   const router = useRouter();
+  const { cartItems, loading, error, updateQuantity, removeItem, refreshCart } = useCart();
 
-  const subtotal = CART_ITEMS.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const delivery = 35;
-  const total = subtotal + delivery;
+  useFocusEffect(
+    useCallback(() => {
+      refreshCart();
+    }, [])
+  );
+
+  const calculateTotals = (items) => {
+    const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    const delivery = 35;
+    const total = subtotal + delivery;
+    return { subtotal, delivery, total };
+  };
+
+  const { subtotal, delivery, total } = calculateTotals(cartItems);
 
   const handleCheckout = () => {
-    // Implementar lógica de checkout
     router.push('/checkout');
   };
 
-  const handleUpdateQuantity = (id, newQuantity) => {
-    // Implementar lógica para actualizar cantidad
-  };
+  if (loading) {
+    return <ActivityIndicator size="large" style={styles.loader} />;
+  }
 
-  const handleRemoveItem = (id) => {
-    // Implementar lógica para eliminar item
-  };
+  if (!loading && cartItems.length === 0) {
+    return <Text style={styles.error}>No hay productos en el carrito</Text>;
+  }
+
+  if (error && cartItems.length === 0) {
+    return <Text style={styles.error}>No hay productos en el carrito</Text>;
+  }
+
+  if (error) {
+    return <Text style={styles.error}>Error al cargar el carrito</Text>;
+  }
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.itemsList}>
-        {CART_ITEMS.map((item) => (
-          <Card key={item.id} style={styles.itemCard}>
+    <KeyboardAvoidingView
+      style={styles.flexContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <FlatList
+        data={cartItems}
+        keyExtractor={(item) => item.idItemCart.toString()}
+        contentContainerStyle={styles.listContainer}
+        renderItem={({ item }) => (
+          <Card style={styles.itemCard}>
             <Card.Content>
               <View style={styles.itemHeader}>
-                <Text variant="titleMedium">{item.name}</Text>
-                <IconButton
-                  icon="delete"
-                  size={20}
-                  onPress={() => handleRemoveItem(item.id)}
-                />
+                <Text variant="titleMedium">{item.product.name}</Text>
+                <IconButton icon="delete" size={20} onPress={() => removeItem(item.product.idProduct)} />
               </View>
-              
-              <Text variant="bodyMedium">Salsa: {item.sauce}</Text>
-              {item.notes && (
-                <Text variant="bodyMedium">Notas: {item.notes}</Text>
-              )}
-              
+              <Text variant="bodyMedium">Descripción: {item.product.description}</Text>
               <View style={styles.itemFooter}>
                 <View style={styles.quantity}>
-                  <IconButton
-                    icon="minus"
-                    size={20}
-                    onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                  />
+                  <IconButton icon="minus" size={20} onPress={() => updateQuantity(item.idItemCart, item.quantity - 1)} />
                   <Text>{item.quantity}</Text>
-                  <IconButton
-                    icon="plus"
-                    size={20}
-                    onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                  />
+                  <IconButton icon="plus" size={20} onPress={() => updateQuantity(item.idItemCart, item.quantity + 1)} />
                 </View>
-                <Text variant="titleMedium">
-                  ${(item.price * item.quantity).toFixed(2)}
-                </Text>
+                <Text variant="titleMedium">${(item.product.price * item.quantity).toFixed(2)}</Text>
               </View>
             </Card.Content>
           </Card>
-        ))}
-      </ScrollView>
-
-      <Card style={styles.summary}>
-        <Card.Content>
-          <List.Item
-            title="Subtotal"
-            right={() => <Text>${subtotal.toFixed(2)}</Text>}
-          />
-          <List.Item
-            title="Envío"
-            right={() => <Text>${delivery.toFixed(2)}</Text>}
-          />
-          <Divider style={styles.divider} />
-          <List.Item
-            title="Total"
-            titleStyle={styles.total}
-            right={() => (
-              <Text style={styles.total}>${total.toFixed(2)}</Text>
-            )}
-          />
-          
-          <Button
-            mode="contained"
-            onPress={handleCheckout}
-            style={styles.checkoutButton}
-          >
-            Proceder al Pago
-          </Button>
-        </Card.Content>
-      </Card>
-    </View>
+        )}
+        ListFooterComponent={
+          <View style={styles.footerContainer}>
+            <Card style={styles.summary}>
+              <Card.Content>
+                <List.Item title="Subtotal" right={() => <Text>${subtotal.toFixed(2)}</Text>} />
+                <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
+                <Divider style={styles.divider} />
+                <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} />
+                <Button mode="contained" onPress={handleCheckout} style={styles.checkoutButton}>
+                  Proceder al Pago
+                </Button>
+              </Card.Content>
+            </Card>
+          </View>
+        }
+      />
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flexContainer: {
     flex: 1,
   },
-  itemsList: {
-    flex: 1,
+  listContainer: {
+    paddingBottom: 100, // Espacio para que el footer no bloquee la lista
   },
   itemCard: {
     margin: 8,
@@ -135,8 +117,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  footerContainer: {
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+  },
   summary: {
-    margin: 8,
+    borderRadius: 10,
+    margin: 10,
   },
   divider: {
     marginVertical: 8,
@@ -147,4 +134,18 @@ const styles = StyleSheet.create({
   checkoutButton: {
     marginTop: 16,
   },
-}); 
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  error: {
+    flex: 1,
+    justifyContent: 'center !important',
+    alignItems: 'center',
+    textAlign: 'center',
+    color: 'red',
+    marginTop: "40vh",
+    fontSize: 16, // Ajustar el tamaño del texto
+  },
+});

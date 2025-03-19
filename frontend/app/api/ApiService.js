@@ -36,6 +36,14 @@ class ApiService extends BaseApiService {
         return this.request('/orders', 'POST', { idPaymentType, idShipmentType, idLocation })
     }
 
+    async viewCartItems() {
+        return this.request(`/cart`, 'GET')
+    }
+
+    async removeCartItem(idProduct) {
+        return this.request(`/cart/items/${idProduct}`, 'DELETE')
+    }
+
 }
 
 const apiService = new ApiService();
