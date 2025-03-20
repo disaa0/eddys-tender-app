@@ -1,7 +1,8 @@
 import { View, StyleSheet } from 'react-native';
 import { TextInput, Button, Text, Snackbar } from 'react-native-paper';
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { theme } from '../../../theme';
 import useShippingAddresses from '../../../hooks/useShippingAddresses';
 
@@ -13,27 +14,58 @@ export default function EditAddress() {
     const [neighborhood, setNeighborhood] = useState('');
     const [error, setError] = useState('');
     const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
-    const { fetchAddressById, updateShippingAddress, loading } = useShippingAddresses();
+    const [originalAddress, setOriginalAddress] = useState(null);
+    const [isModified, setIsModified] = useState(false);
 
+    const { fetchAddressById, updateShippingAddress, loading, address } = useShippingAddresses();
     const router = useRouter();
 
+    const limpiarFormulario = () => {
+        setStreet('');
+        setHouseNumber('');
+        setPostalCode('');
+        setNeighborhood('');
+        setError('');
+        setSnackbar({ visible: false, message: '' });
+    };
+
     useEffect(() => {
-        const fetchAddress = async () => {
-            if (!id) return;
-            const address = await fetchAddressById(id);
-            if (address) {
-                setStreet(address.street);
-                setHouseNumber(String(address.houseNumber));
-                setPostalCode(String(address.postalCode));
-                setNeighborhood(address.neighborhood);
-            }
-        };
-        fetchAddress();
+        if (id) {
+            (async () => {
+                const fetchedAddress = await fetchAddressById(id);
+                if (fetchedAddress) {
+                    setStreet(fetchedAddress.street || '');
+                    setHouseNumber(String(fetchedAddress.houseNumber || ''));
+                    setPostalCode(String(fetchedAddress.postalCode || ''));
+                    setNeighborhood(fetchedAddress.neighborhood || '');
+                    setOriginalAddress(fetchedAddress);
+                    setIsModified(false);
+                }
+            })();
+        }
     }, [id]);
+
+
+    useFocusEffect(
+        useCallback(() => {
+            if (!originalAddress) return;
+
+            const hasChanged =
+                street !== originalAddress.street ||
+                houseNumber !== String(originalAddress.houseNumber) ||
+                postalCode !== String(originalAddress.postalCode) ||
+                neighborhood !== originalAddress.neighborhood;
+
+            setIsModified(hasChanged);
+        }, [street, houseNumber, postalCode, neighborhood, originalAddress])
+    );
 
     const validateAddress = () => {
         if (!street || !houseNumber || !postalCode || !neighborhood) {
             return 'Todos los campos son requeridos';
+        }
+        if (isNaN(houseNumber) || isNaN(postalCode)) {
+            return 'Los campos de número de casa y código postal deben ser numéricos';
         }
         return null;
     };
@@ -41,35 +73,43 @@ export default function EditAddress() {
     const handleUpdateAddress = async () => {
         const validationError = validateAddress();
         if (validationError) {
-            setError(validationError);
-            return;
-        }
-        setError('');
-
-        if (isNaN(houseNumber) || isNaN(postalCode)) {
-            setSnackbar({ visible: true, message: 'Los campos de número de casa y código postal deben ser números' });
+            setSnackbar({ visible: true, message: validationError });
             return;
         }
 
-        const updatedAddress = await updateShippingAddress(id, {
-            street,
-            houseNumber,
-            postalCode,
-            neighborhood
-        });
+        try {
+            const updatedAddress = await updateShippingAddress(id, {
+                street,
+                houseNumber,
+                postalCode,
+                neighborhood,
+            });
 
-        if (updatedAddress?.idLocation) {
-            setSnackbar({ visible: true, message: 'Dirección actualizada correctamente' });
-            setTimeout(() => {
-                router.push('/profile/address');
-            }, 1500);
-        } else {
-            const errorMessage = updatedAddress?.error?.map(err => err.message).join(', ');
-            setSnackbar({ visible: true, message: errorMessage || 'Error al actualizar la dirección' });
+            if (updatedAddress?.idLocation) {
+                // limpiarFormulario();
+                setSnackbar({ visible: true, message: 'Dirección actualizada correctamente' });
+                setTimeout(() => {
+                    router.push('/profile/address');
+                }, 1500);
+            } else {
+                console.log(updatedAddress.error);
+
+                // Formatear errores para mostrar en el Snackbar
+                const errorMessage = updatedAddress.error
+                    .map((err) => `⚠️ ${err.path[0]}: ${err.message}`)
+                    .join('\n');
+
+                setSnackbar({ visible: true, message: errorMessage });
+            }
+        } catch (err) {
+            console.log(err.response);
+            setSnackbar({ visible: true, message: 'Error al actualizar la dirección' });
         }
     };
 
+
     const handleCancel = () => {
+        limpiarFormulario();
         router.push('/profile/address');
     };
 
@@ -113,7 +153,7 @@ export default function EditAddress() {
 
             <TextInput
                 mode="outlined"
-                label="Barrio"
+                label="Colonia"
                 value={neighborhood}
                 onChangeText={setNeighborhood}
                 style={styles.input}
@@ -124,9 +164,9 @@ export default function EditAddress() {
             <Button
                 mode="contained"
                 onPress={handleUpdateAddress}
-                style={styles.button}
+                style={[styles.button, !isModified && styles.disabledButton]}
                 loading={loading}
-                disabled={loading}
+                disabled={!isModified || loading}
             >
                 Guardar Cambios
             </Button>
@@ -172,6 +212,9 @@ const styles = StyleSheet.create({
     },
     button: {
         marginTop: 20,
+    },
+    disabledButton: {
+        backgroundColor: '#aaa',
     },
     cancelButton: {
         marginTop: 10,

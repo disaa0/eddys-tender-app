@@ -73,6 +73,10 @@ class ApiService extends BaseApiService {
     async deleteShippingAddress(id) {
         return this.request(`/shipping-address/${id}`, 'DELETE');
     }
+
+    async updateShippingAddress(id, street, houseNumber, postalCode, neighborhood) {
+        return this.request(`/shipping-address/${id}`, 'PUT', { street, houseNumber, postalCode, neighborhood });
+    }
 }
 
 const apiService = new ApiService();

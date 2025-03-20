@@ -116,7 +116,7 @@ export default function AddAddress() {
 
             <TextInput
                 mode="outlined"
-                label="Barrio"
+                label="Colonia"
                 value={neighborhood}
                 onChangeText={setNeighborhood}
                 style={styles.input}
