@@ -14,7 +14,7 @@ export default function useShippingAddresses() {
         setError(null);
         try {
             const response = await apiService.getShippingAdresses();
-            console.log(response);
+            // console.log(response);
 
             setAddresses(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
@@ -29,23 +29,31 @@ export default function useShippingAddresses() {
     const fetchAddressById = async (id) => {
         setLoading(true);
         setError(null);
+
         try {
+            console.log('Buscando dirección por ID:', id);
+            const response = await apiService.getShippingAdresses();
+            const fetchedAddresses = Array.isArray(response.data) ? response.data : [];
+            console.log(fetchedAddresses);
+            const foundAddress = fetchedAddresses.find((address) => address.idLocation == id);
 
-            console.log('buscando direcciones');
-            await fetchAddresses();
-            console.log(addresses);
-
-            console.log('buscando dirección por id');
-            const foundAddress = addresses.find((address) => address.idLocation == id);
-            // console.log(foundAddress);
-            setAddress(foundAddress);
+            if (foundAddress) {
+                return foundAddress; // Retornar en lugar de setear el estado
+            } else {
+                setError('Dirección no encontrada');
+                return null;
+            }
         } catch (err) {
             setError('Error al obtener la dirección');
             console.error("Error al obtener la dirección", err);
+            return null;
         } finally {
             setLoading(false);
         }
     };
+
+
+
 
     useFocusEffect(
         useCallback(() => {

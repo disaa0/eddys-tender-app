@@ -1,6 +1,6 @@
 import { View, StyleSheet } from 'react-native';
 import { TextInput, Button, Text, Snackbar } from 'react-native-paper';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { theme } from '../../../theme';
@@ -20,31 +20,31 @@ export default function EditAddress() {
     const { fetchAddressById, updateShippingAddress, loading, address } = useShippingAddresses();
     const router = useRouter();
 
-    const fetchAddress = useCallback(async () => {
-        if (!id) return;
+    const limpiarFormulario = () => {
+        setStreet('');
+        setHouseNumber('');
+        setPostalCode('');
+        setNeighborhood('');
+        setError('');
+        setSnackbar({ visible: false, message: '' });
+    };
 
-        try {
-            await fetchAddressById(id);
-            if (address) {
-                setStreet(address.street || '');
-                setHouseNumber(String(address.houseNumber || ''));
-                setPostalCode(String(address.postalCode || ''));
-                setNeighborhood(address.neighborhood || '');
-                setOriginalAddress(address);
-                setIsModified(false);
-            } else {
-                setError('Dirección no encontrada');
-            }
-        } catch (err) {
-            setError('Error al cargar la dirección');
+    useEffect(() => {
+        if (id) {
+            (async () => {
+                const fetchedAddress = await fetchAddressById(id);
+                if (fetchedAddress) {
+                    setStreet(fetchedAddress.street || '');
+                    setHouseNumber(String(fetchedAddress.houseNumber || ''));
+                    setPostalCode(String(fetchedAddress.postalCode || ''));
+                    setNeighborhood(fetchedAddress.neighborhood || '');
+                    setOriginalAddress(fetchedAddress);
+                    setIsModified(false);
+                }
+            })();
         }
     }, [id]);
 
-    useFocusEffect(
-        useCallback(() => {
-            fetchAddress();
-        }, [fetchAddress])
-    );
 
     useFocusEffect(
         useCallback(() => {
@@ -80,12 +80,13 @@ export default function EditAddress() {
         try {
             const updatedAddress = await updateShippingAddress(id, {
                 street,
-                houseNumber: Number(houseNumber),
-                postalCode: Number(postalCode),
+                houseNumber,
+                postalCode,
                 neighborhood,
             });
 
             if (updatedAddress?.idLocation) {
+                // limpiarFormulario();
                 setSnackbar({ visible: true, message: 'Dirección actualizada correctamente' });
                 setTimeout(() => {
                     router.push('/profile/address');
@@ -108,6 +109,7 @@ export default function EditAddress() {
 
 
     const handleCancel = () => {
+        limpiarFormulario();
         router.push('/profile/address');
     };
 
@@ -151,7 +153,7 @@ export default function EditAddress() {
 
             <TextInput
                 mode="outlined"
-                label="Barrio"
+                label="Colonia"
                 value={neighborhood}
                 onChangeText={setNeighborhood}
                 style={styles.input}
