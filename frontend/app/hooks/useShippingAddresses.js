@@ -10,17 +10,13 @@ export default function useShippingAddresses() {
 
     // Función para obtener todas las direcciones
     const fetchAddresses = async () => {
+        setLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            setError(null);
             const response = await apiService.getShippingAdresses();
             console.log(response);
 
-            if (response.data && Array.isArray(response.data)) {
-                setAddresses(response.data);
-            } else {
-                setAddresses([]);
-            }
+            setAddresses(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
             setError('Error al obtener direcciones');
             console.error("Error al obtener direcciones", err);
@@ -31,17 +27,18 @@ export default function useShippingAddresses() {
 
     // Función para obtener una dirección por ID
     const fetchAddressById = async (id) => {
+        setLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            setError(null);
-            const response = await apiService.getShippingAddressById(id);
-            console.log(response);
 
-            if (response.data) {
-                setAddress(response.data);
-            } else {
-                setAddress(null);
-            }
+            console.log('buscando direcciones');
+            await fetchAddresses();
+            console.log(addresses);
+
+            console.log('buscando dirección por id');
+            const foundAddress = addresses.find((address) => address.idLocation == id);
+            // console.log(foundAddress);
+            setAddress(foundAddress);
         } catch (err) {
             setError('Error al obtener la dirección');
             console.error("Error al obtener la dirección", err);
@@ -58,16 +55,15 @@ export default function useShippingAddresses() {
 
     // Función para agregar una nueva dirección
     const addShippingAddress = async (addressData) => {
+        setLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            setError(null);
-
             const { street, houseNumber, postalCode, neighborhood } = addressData;
-
             const response = await apiService.addShippingAdresses(street, houseNumber, postalCode, neighborhood);
             console.log(response);
 
             if (response.data) {
+                setAddresses(prev => [...prev, response.data]);
                 return response.data;
             }
         } catch (err) {
@@ -78,12 +74,32 @@ export default function useShippingAddresses() {
         }
     };
 
+    const updateShippingAddress = async (id, addressData) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { street, houseNumber, postalCode, neighborhood } = addressData;
+            const response = await apiService.updateShippingAddress(id, street, houseNumber, postalCode, neighborhood);
+            console.log(response);
+
+            if (response.data) {
+                setAddresses(prev => prev.map(address => address.idLocation === id ? response.data : address));
+                return response.data;
+            }
+        } catch (err) {
+            console.error('Error al actualizar la dirección', err);
+            if (err?.response?.data?.error) return err.response.data;
+        } finally {
+            setLoading(false);
+        }
+    }
+
     // Función para eliminar una dirección
     const deleteAddress = async (id) => {
+        setLoading(true);
         try {
-            setLoading(true);
             await apiService.deleteShippingAddress(id);
-            setAddresses((prevAddresses) => prevAddresses.filter((address) => address.idLocation !== id));
+            setAddresses(prevAddresses => prevAddresses.filter(address => address.idLocation !== id));
         } catch (err) {
             console.error('Error al eliminar la dirección', err);
         } finally {
@@ -100,5 +116,6 @@ export default function useShippingAddresses() {
         fetchAddressById,
         addShippingAddress,
         deleteAddress,
+        updateShippingAddress,
     };
 }
