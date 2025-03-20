@@ -1,7 +1,7 @@
 const express = require('express');
 
 const { authenticateToken, isAdmin } = require('../middlewares/auth.middleware');
-const { getAllProducts, getAllProductsPagination, addProduct, modifyProductDetails, getProduct, getProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts } = require('../controllers/product.controller');
+const { getProductPersonalizationsForUsers, getAllProducts, getAllProductsPagination, addProduct, modifyProductDetails, getProduct, getProductDetails, getProductPersonalizations, updateProductPersonalizationForUser, updateProductPersonalization, updatePersonalizationStatusForUser, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts } = require('../controllers/product.controller');
 const { validateCustomization, validateSearchQuery } = require('../middlewares/validateInput');
 
 
@@ -18,13 +18,21 @@ router.put('/admin/products/:id', authenticateToken, isAdmin, modifyProductDetai
 // New image route - public access without authentication
 router.get('/:id/image', getProductImage);
 
-// New personalization routes
+// New personalization routes admin
 router.get('/:id/personalizations', authenticateToken, isAdmin, getProductPersonalizations);
 router.put('/:id/personalization', authenticateToken, isAdmin, validateCustomization, updateProductPersonalization);
 router.patch('/:id/personalization/:personalizationId/status',
     authenticateToken,
     isAdmin,
     updatePersonalizationStatus
+);
+
+// New personalization routes user
+router.get('/:id/user/personalizations', authenticateToken, getProductPersonalizationsForUsers);
+router.put('/:id/user/personalization', authenticateToken, validateCustomization, updateProductPersonalizationForUser);
+router.patch('/:id/user/personalization/:personalizationId/status',
+    authenticateToken,
+    updatePersonalizationStatusForUser
 );
 
 // Add this route before other product routes
