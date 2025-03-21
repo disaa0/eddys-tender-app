@@ -1,5 +1,5 @@
 import { View, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { Text, Searchbar, ActivityIndicator } from 'react-native-paper';
+import { Text, Searchbar, ActivityIndicator, Button } from 'react-native-paper';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../theme';
@@ -33,6 +33,7 @@ export default function Index() {
 
   const loadProducts = async () => {
     try {
+      setError(null);
       setLoading(true);
       const response = await apiService.getProducts(page);
       setProducts(response.data.products);
@@ -136,6 +137,9 @@ export default function Index() {
     return (
       <View style={styles.centered}>
         <Text>Error: {error}</Text>
+        <Button mode="contained" onPress={loadProducts} style={{ marginTop: 10 }}>
+          Reintentar
+        </Button>
       </View>
     );
   }

@@ -75,6 +75,7 @@ export default function AppLayout() {
           <Tabs.Screen
             name="product/[id]"
             options={{
+              tabBarStyle: { display: 'none' },
               href: null,
             }}
           />

@@ -30,6 +30,14 @@ class ApiService extends BaseApiService {
         });
     }
 
+    async getProductById(id) {
+        return this.request(`/products/${id}`, 'GET');
+    }
+
+    async getProductImageById(id) {
+        return this.request(`/products/${id}/image`, 'GET');
+    }
+
     async getCartItems() {
         return this.request('/cart', 'GET');
     }

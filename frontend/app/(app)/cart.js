@@ -63,9 +63,9 @@ export default function Cart() {
               <Text variant="bodyMedium">Descripción: {item.product.description}</Text>
               <View style={styles.itemFooter}>
                 <View style={styles.quantity}>
-                  <IconButton icon="minus" size={20} onPress={() => updateQuantity(item.idItemCart, item.quantity - 1)} />
+                  <IconButton icon="minus" size={20} onPress={() => updateQuantity(item.idItemCart, item.quantity - 1, item.product.idProduct)} disabled={item.quantity === 1} />
                   <Text>{item.quantity}</Text>
-                  <IconButton icon="plus" size={20} onPress={() => updateQuantity(item.idItemCart, item.quantity + 1)} />
+                  <IconButton icon="plus" size={20} onPress={() => updateQuantity(item.idItemCart, item.quantity + 1, item.product.idProduct)} />
                 </View>
                 <Text variant="titleMedium">${(item.product.price * item.quantity).toFixed(2)}</Text>
               </View>
