@@ -1540,7 +1540,7 @@ Authorization: Bearer <token>
 
 ### 10.17 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
 
-**PUT /api/products/{idProduct}/user/personalization/{idProductPersonalization}/status**
+**PACTH /api/products/{idProduct}/user/personalization/{idProductPersonalization}/status**
 
 Cambia el estado de activo o inactivo de personalización para un producto específico.
 
