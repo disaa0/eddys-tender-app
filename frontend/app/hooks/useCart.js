@@ -34,12 +34,18 @@ export default function useCart() {
         }, [])
     );
 
-    const updateQuantity = (id, newQuantity) => {
+    const updateQuantity = async (id, newQuantity, idProduct) => {
         setCartItems((prevItems) =>
             prevItems.map((item) =>
                 item.idItemCart === id ? { ...item, quantity: Math.max(1, newQuantity) } : item
             )
         );
+        try {
+            const response = await apiService.addCartItem(idProduct, newQuantity);
+            console.log(response);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const removeItem = async (id) => {

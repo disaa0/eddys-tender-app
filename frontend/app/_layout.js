@@ -50,20 +50,20 @@ function AppContent() {
   useProtectedRoute(); // 🔥 Ahora se ejecuta después de que AuthProvider esté disponible
 
   return (
-    // <StripeProvider publishableKey='pk_test_51R3XvzPYqbdwcZgsiLzmHn61uapI3nXfSOQGjPvkBQoruDmU2ecV3magjG1mjOAYeShjXCmikEI6NNrxGLaMJWWm00IJuoSGR9'>
-    <PaperProvider theme={combinedTheme}>
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: theme.colors.primary },
-          headerTintColor: '#fff',
-        }}
-      >
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        <Stack.Screen name="(appAdmin)" options={{ headerShown: false, title: "Panel Administrador" }} />
-      </Stack>
-    </PaperProvider>
-    //</StripeProvider>
+    <StripeProvider publishableKey='pk_test_51R3XvzPYqbdwcZgsiLzmHn61uapI3nXfSOQGjPvkBQoruDmU2ecV3magjG1mjOAYeShjXCmikEI6NNrxGLaMJWWm00IJuoSGR9'>
+      <PaperProvider theme={combinedTheme}>
+        <Stack
+          screenOptions={{
+            headerStyle: { backgroundColor: theme.colors.primary },
+            headerTintColor: '#fff',
+          }}
+        >
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(app)" options={{ headerShown: false }} />
+          <Stack.Screen name="(appAdmin)" options={{ headerShown: false, title: "Panel Administrador" }} />
+        </Stack>
+      </PaperProvider>
+    // </StripeProvider>
   );
 }
 

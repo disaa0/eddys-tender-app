@@ -15,6 +15,26 @@ export default function ProductDetails() {
   const [productImage, setProductImage] = useState(defaultImage);
   const [loading, setLoading] = useState(true);
 
+  const addProductToCart = async (idprod, quantity) => {
+    try {
+      setLoading(true)
+      console.log(product.idProduct)
+      quantity = parseInt(quantity)
+      const response = await apiService.addCartItem(idprod, quantity);
+      console.log(response)
+      router.push('/cart')
+      // setProduct(null);
+      setProductImage(defaultImage);
+      setQuantity('1');
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false)
+    }
+
+  }
+
+
   const productId = parseInt(id, 10); // Asegurar que sea un número
 
   useEffect(() => {
@@ -48,6 +68,11 @@ export default function ProductDetails() {
   };
 
   const handleGoBack = () => {
+    // Devolver los valores a su estado inicial
+    // setProduct(null);
+    setProductImage(defaultImage);
+    setQuantity('1');
+    // Regresar a la pantalla anterior
     router.back();
   };
 
@@ -99,15 +124,15 @@ export default function ProductDetails() {
       </Card>
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.priceButton}>
-          <Text style={styles.priceText}>${product.price.toFixed(2)}</Text>
+          <Text style={styles.priceText}>${(product.price * parseInt(quantity || '1')).toFixed(2)}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.cartButton}
-          onPress={() => router.push('/cart')}
+          onPress={() => addProductToCart(productId, quantity)}
         >
           <Text style={styles.cartText}>
-            Agregar al Carrito - ${(product.price * parseInt(quantity || '1')).toFixed(2)}
+            Agregar al Carrito
           </Text>
         </TouchableOpacity>
       </View>
