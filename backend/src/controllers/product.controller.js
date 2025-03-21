@@ -178,6 +178,48 @@ async function getProductPersonalizations(req, res) {
     }
 }
 
+async function getProductPersonalizationsForUsers(req, res) {
+    try {
+        const productId = parseInt(req.params.id);
+        if (isNaN(productId)) {
+            return res.status(400).json({ message: "ID de producto inválido" });
+        }
+
+        const personalizations = await prisma.productPersonalization.findMany({
+            where: {
+                idProduct: productId,
+                status: true
+            },
+            select: {
+                idProductPersonalization: true,
+                idProduct: true,
+                status: true,
+                personalization: {
+                    select: {
+                        idPersonalization: true,
+                        name: true,
+                        createdAt: true
+                    }
+                }
+            }
+        });
+
+
+
+
+        res.json({
+            message: "Personalizaciones obtenidas correctamente",
+            data: { personalizations }
+        });
+    } catch (error) {
+        console.error('Error getting personalizations:', error);
+        res.status(500).json({
+            message: "Error al obtener personalizaciones",
+            error: error.message
+        });
+    }
+}
+
 async function updateProductPersonalization(req, res) {
     try {
         const productId = parseInt(req.params.id);
@@ -219,6 +261,52 @@ async function updateProductPersonalization(req, res) {
     }
 }
 
+async function updateProductPersonalizationForUser(req, res) {
+    try {
+        const productId = parseInt(req.params.id);
+        const { name, status } = req.body;
+        const userId = req.user.userId;
+
+        // Create or update personalization
+        const personalization = await prisma.personalization.create({
+            data: {
+                name,
+                status,
+                idUserAdded: userId,
+            }
+        });
+
+        // Link personalization to product
+        const productPersonalization = await prisma.productPersonalization.create({
+            data: {
+                idProduct: productId,
+                idPersonalization: personalization.idPersonalization,
+                idUserAdded: userId,
+                status: true
+            }
+        });
+
+        // Eliminar idUserAdded de los objetos antes de enviarlos en la respuesta
+        const Personalization = (({ idUserAdded, ...rest }) => rest)(personalization);
+        const ProductPersonalization = (({ idUserAdded, ...rest }) => rest)(productPersonalization);
+
+
+        res.json({
+            message: "Personalización actualizada exitosamente",
+            data: {
+                Personalization,
+                ProductPersonalization
+            }
+        });
+    } catch (error) {
+        console.error('Error updating personalization:', error);
+        res.status(400).json({
+            message: "Error al actualizar personalización",
+            error: error.message
+        });
+    }
+}
+
 async function updatePersonalizationStatus(req, res) {
     try {
         const productId = parseInt(req.params.id);
@@ -243,6 +331,46 @@ async function updatePersonalizationStatus(req, res) {
         res.json({
             message: "Estado de personalización actualizado correctamente",
             data: { personalization: updatedPersonalization }
+        });
+    } catch (error) {
+        console.error('Error updating personalization status:', error);
+        res.status(400).json({
+            message: "Error al actualizar estado de personalización",
+            error: error.message
+        });
+    }
+}
+
+async function updatePersonalizationStatusForUser(req, res) {
+    try {
+        const productId = parseInt(req.params.id);
+        const personalizationId = parseInt(req.params.personalizationId);
+        const { status } = req.body;
+
+        if (isNaN(productId) || isNaN(personalizationId)) {
+            return res.status(400).json({ message: "ID inválido" });
+        }
+
+        const updatedPersonalization = await prisma.productPersonalization.update({
+            where: {
+                idProductPersonalization: personalizationId,
+                idProduct: productId
+            },
+            data: { status },
+            include: {
+                personalization: true
+            }
+        });
+
+        // Eliminar idUserAdded de la personalización y su relación
+        const sanitizedPersonalization = (({ idUserAdded, ...rest }) => ({
+            ...rest,
+            personalization: (({ idUserAdded, ...innerRest }) => innerRest)(rest.personalization)
+        }))(updatedPersonalization);
+
+        res.json({
+            message: "Estado de personalización actualizado correctamente",
+            data: { personalization: sanitizedPersonalization }
         });
     } catch (error) {
         console.error('Error updating personalization status:', error);
@@ -441,4 +569,4 @@ async function getPopularProducts(req, res) {
     }
 }
 
-module.exports = { getAllProducts, getAllProductsPagination, getProduct, addProduct, modifyProductDetails, getProductPersonalizations, updateProductPersonalization, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts, getProductDetails };
+module.exports = { getAllProducts, getAllProductsPagination, getProduct, addProduct, modifyProductDetails, getProductPersonalizations, updateProductPersonalization, updateProductPersonalizationForUser, updatePersonalizationStatus, updatePersonalizationStatusForUser, getProductPersonalizationsForUsers, getProductImage, searchProducts, getPopularProducts, getProductDetails };

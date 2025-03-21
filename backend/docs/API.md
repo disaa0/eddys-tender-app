@@ -471,7 +471,7 @@ Authorization: Bearer <token>
 
 ### 8.2 Editar Personalización de Producto
 
-**PUT /api/admin/products/{id}/customization**
+**PUT /api/admin/products/{id}/personalization**
 
 Actualiza o crea una personalización para un producto específico.
 
@@ -530,7 +530,7 @@ Authorization: Bearer <token>
 
 ### 8.3 Obtner Personalizaciónes de Producto
 
-**GET /api/admin/products/{id}/customization**
+**GET /api/admin/products/{id}/personalizations**
 
 Obtiene los detalles las personalizaciónes para un producto específico.
 
@@ -608,7 +608,7 @@ Authorization: Bearer <token>
 
 ### 8.4 Cambiar status activo o inactivo de la Personalización de Producto
 
-**PUT /api/admin/products/{idProduct}/customization/{idProductPersonalization}**
+**PUT /api/admin/products/{idProduct}/personalization/{idProductPersonalization}**
 
 Cambia el estado de activo o inactivo de personalización para un producto específico.
 
@@ -1413,6 +1413,190 @@ Authorization: Bearer <token>
 - 404: No se encontro el producto
 - 500: Error del servidor
 
+### 10.15 Editar Personalización de Producto para usuarios
+
+**PUT /api/products/{id}/user/personalization**
+
+Actualiza o crea una personalización para un producto específico.
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Cuerpo de la Petición:**
+
+```json
+{
+  "name": "Nombre de la personalización",
+  "status": true
+}
+```
+
+**Validaciones:**
+
+- name: String no vacío
+- status: Boolean requerido
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Personalización actualizada exitosamente",
+  "data": {
+    "Personalization": {
+      "idPersonalization": 4,
+      "name": "Sin mayonesa",
+      "status": true,
+      "createdAt": "2025-03-20T23:42:04.590Z"
+    },
+    "ProductPersonalization": {
+      "idProductPersonalization": 7,
+      "idProduct": 1,
+      "idPersonalization": 4,
+      "status": true
+    }
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 400: Producto no encontrado
+- 400: Datos de personalización inválidos
+- 401: Token no proporcionado
+- 500: Error del servidor
+
+### 10.16 Obtner Personalizaciónes de Producto para usuarios
+
+**GET /api/products/{id}/user/personalizations**
+
+Obtiene los detalles de las personalizaciónes para un producto específico.
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Personalizaciones obtenidas correctamente",
+  "data": {
+    "personalizations": [
+      {
+        "idProductPersonalization": 1,
+        "idProduct": 1,
+        "status": true,
+        "personalization": {
+          "idPersonalization": 1,
+          "name": "Sin Cebolla",
+          "createdAt": "2025-03-20T23:40:57.273Z"
+        }
+      },
+      {
+        "idProductPersonalization": 2,
+        "idProduct": 1,
+        "status": true,
+        "personalization": {
+          "idPersonalization": 2,
+          "name": "Extra Queso",
+          "createdAt": "2025-03-20T23:40:57.273Z"
+        }
+      },
+      {
+        "idProductPersonalization": 3,
+        "idProduct": 1,
+        "status": true,
+        "personalization": {
+          "idPersonalization": 3,
+          "name": "Sin Gluten",
+          "createdAt": "2025-03-20T23:40:57.273Z"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 400: Producto no encontrado
+- 401: Token no proporcionado
+- 500: Error del servidor
+
+### 10.17 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
+
+**PACTH /api/products/{idProduct}/user/personalization/{idProductPersonalization}/status**
+
+Cambia el estado de activo o inactivo de personalización para un producto específico.
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| idProduct | number | ID del producto |
+| idProductPersonalization | number | ID de la personalizacion del producto |
+
+**Cuerpo de la Petición:**
+
+```json
+{
+  "status": true
+}
+```
+
+**Validaciones:**
+
+- status: Boolean requerido
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Estado de personalización actualizado correctamente",
+  "data": {
+    "personalization": {
+      "idProductPersonalization": 1,
+      "idProduct": 1,
+      "idPersonalization": 1,
+      "status": false,
+      "personalization": {
+        "idPersonalization": 1,
+        "name": "Sin Cebolla",
+        "status": true,
+        "createdAt": "2025-03-20T23:40:57.273Z"
+      }
+    }
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 400: Producto no encontrado
+- 400: Datos de personalización inválidos
+- 401: Token no proporcionado
+- 500: Error del servidor
+
 ## 11. ENDPOINTS DE DIRECCIONES
 
 ### 11.1 Agrega una nueva dirección
@@ -1659,11 +1843,13 @@ Para la documentación detallada sobre órdenes y pagos con Stripe, consulte:
 Crea un nuevo pedido a partir del carrito activo del usuario.
 
 **Encabezados Requeridos:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Cuerpo de la Solicitud:**
+
 ```
 {
   "idPaymentType": 2,   // 1=Efectivo, 2=Crédito, 3=Débito
@@ -1675,6 +1861,7 @@ Authorization: Bearer <token>
 **Respuesta (201 Creado):**
 
 Para pagos con tarjeta (tipos 2, 3):
+
 ```
 {
   "order": {
@@ -1697,6 +1884,7 @@ Para pagos con tarjeta (tipos 2, 3):
 ```
 
 Para pagos en efectivo (tipo 1):
+
 ```
 {
   "order": {
@@ -1713,6 +1901,7 @@ Para pagos en efectivo (tipo 1):
 ```
 
 **Respuestas de Error:**
+
 - 400: No hay productos en el carrito
 - 400: Se requieren tipo de pago y tipo de envío
 - 401: Token no proporcionado
@@ -1725,11 +1914,13 @@ Para pagos en efectivo (tipo 1):
 Recupera todos los pedidos para el usuario autenticado.
 
 **Encabezados Requeridos:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Respuesta (200 OK):**
+
 ```
 [
   {
@@ -1776,6 +1967,7 @@ Authorization: Bearer <token>
 ```
 
 **Respuestas de Error:**
+
 - 401: Token no proporcionado
 - 500: Error del servidor
 
@@ -1786,11 +1978,13 @@ Authorization: Bearer <token>
 Recupera información detallada sobre un pedido específico.
 
 **Encabezados Requeridos:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Respuesta (200 OK):**
+
 ```
 {
   "idOrder": 42,
@@ -1836,9 +2030,10 @@ Authorization: Bearer <token>
 ```
 
 **Respuestas de Error:**
+
 - 400: Orden no encontrada
 - 401: Token no proporcionado
-- 500: Error del servidor 
+- 500: Error del servidor
 
 ### 14.4 Buscar Pedidos con Filtros
 
@@ -1847,12 +2042,14 @@ Authorization: Bearer <token>
 Permite buscar y filtrar pedidos del usuario actualmente autenticado.
 
 **Encabezados Requeridos:**
-~~~
+
+```
 Authorization: Bearer <token>
-~~~
+```
 
 **Parámetros de Consulta:**
-~~~
+
+```
 startDate: Fecha inicial (formato ISO, ej: 2023-10-01)
 endDate: Fecha final (formato ISO, ej: 2023-10-31)
 orderStatus: ID del estado de la orden (1: Pendiente, 2: Procesando, etc.)
@@ -1863,17 +2060,18 @@ minPrice: Precio mínimo
 maxPrice: Precio máximo
 page: Número de página (default: 1)
 limit: Resultados por página (default: 10)
-~~~
+```
 
 **Respuesta (200 OK):**
-~~~json
+
+```json
 {
   "message": "Pedidos encontrados",
   "data": {
     "orders": [
       {
         "idOrder": 42,
-        "totalPrice": 258.00,
+        "totalPrice": 258.0,
         "paid": true,
         "paidAt": "2023-07-15T14:35:12Z",
         "createdAt": "2023-07-15T14:30:45Z",
@@ -1899,15 +2097,17 @@ limit: Resultados por página (default: 10)
     }
   }
 }
-~~~
+```
 
 **Notas:**
+
 - Los filtros son opcionales y se pueden combinar
 - El rango de fechas filtra por la fecha de creación del pedido
 - Los precios deben ser números positivos
 - Los pedidos se ordenan por fecha de creación (más recientes primero)
 
 **Errores Posibles:**
+
 - 400: Parámetros de filtro inválidos (formato de fecha, valores numéricos, etc.)
 - 401: Token no proporcionado
 - 500: Error del servidor
@@ -1919,15 +2119,16 @@ limit: Resultados por página (default: 10)
 Recibe y procesa eventos de webhook de Stripe relacionados con intenciones de pago.
 
 **Encabezados Requeridos:**
-~~~
+
+```
 Content-Type: application/json
 Stripe-Signature: <firma-generada-por-stripe>
-~~~
+```
 
 **Cuerpo de la Solicitud:**
 El cuerpo es un objeto de evento generado por Stripe. Aquí hay un ejemplo simplificado:
 
-~~~json
+```json
 {
   "id": "evt_1234567890",
   "object": "event",
@@ -1941,11 +2142,11 @@ El cuerpo es un objeto de evento generado por Stripe. Aquí hay un ejemplo simpl
     }
   }
 }
-~~~
+```
 
 **Respuesta (200 OK):**
 
-~~~json
+```json
 {
   "received": true,
   "type": "payment_intent.succeeded",
@@ -1960,26 +2161,28 @@ El cuerpo es un objeto de evento generado por Stripe. Aquí hay un ejemplo simpl
     }
   }
 }
-~~~
+```
 
 **Eventos Procesados:**
 
-| Tipo de Evento | Acción |
-|---|---|
-| `payment_intent.succeeded` | Marca la orden como pagada y actualiza su estado |
-| `payment_intent.payment_failed` | Marca la orden como fallida y crea notificación |
+| Tipo de Evento                  | Acción                                           |
+| ------------------------------- | ------------------------------------------------ |
+| `payment_intent.succeeded`      | Marca la orden como pagada y actualiza su estado |
+| `payment_intent.payment_failed` | Marca la orden como fallida y crea notificación  |
 
 **Errores Posibles:**
+
 - 400: Firma de webhook inválida
 - 400: Formato de evento inválido
 - 500: Error al procesar el evento
 
 **Notas:**
+
 1. No se requiere autenticación con token para este endpoint ya que Stripe envia su propia firma.
 2. El cuerpo de la petición debe estar en formato raw (no JSON parseado) para verificar la firma.
 3. Requiere una clave secreta de webhook configurada en el .env para mayor seguridad.
 
-~~~
+```
 
 ## 15. NOTAS TÉCNICAS ADICIONALES
 
@@ -2000,3 +2203,4 @@ El cuerpo es un objeto de evento generado por Stripe. Aquí hay un ejemplo simpl
 - Verificación de roles para endpoints administrativos
 - Validación de propiedad de recursos
 - Sanitización de datos de entrada
+```
