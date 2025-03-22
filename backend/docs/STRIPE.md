@@ -106,10 +106,13 @@ Después de que se procesa el pago (exitoso o fallido), Stripe envía un webhook
 
 **Para Pruebas Locales:**
 
-Utiliza Stripe CLI para reenviar eventos a tu entorno local:
+El webhook de Stripe ya está configurado en el entorno Docker, por lo que no es necesario utilizar Stripe CLI para reenviar eventos. El servidor backend está configurado para recibir y procesar automáticamente los eventos de Stripe.
 
-```bash
+Si deseas utilizar Stripe CLI de todas formas, puedes hacerlo con:
+
+~~~bash
 stripe listen --forward-to http://localhost:3000/api/webhook/stripe
+~~~
 ```
 
 ## Flujo de Estados de la Orden

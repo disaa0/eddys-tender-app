@@ -4,9 +4,8 @@ import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { theme } from './theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
-// import { StripeProvider } from '@stripe/stripe-react-native';
-
-
+import { StripeProvider } from '@stripe/stripe-react-native';
+import Constants from 'expo-constants';
 
 // Combinar nuestro tema con el tema base de Paper
 const combinedTheme = {
@@ -50,7 +49,7 @@ function AppContent() {
   useProtectedRoute(); // 🔥 Ahora se ejecuta después de que AuthProvider esté disponible
 
   return (
-    <StripeProvider publishableKey='pk_test_51R3XvzPYqbdwcZgsiLzmHn61uapI3nXfSOQGjPvkBQoruDmU2ecV3magjG1mjOAYeShjXCmikEI6NNrxGLaMJWWm00IJuoSGR9'>
+    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}>
       <PaperProvider theme={combinedTheme}>
         <Stack
           screenOptions={{
@@ -60,10 +59,13 @@ function AppContent() {
         >
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(app)" options={{ headerShown: false }} />
-          <Stack.Screen name="(appAdmin)" options={{ headerShown: false, title: "Panel Administrador" }} />
+          <Stack.Screen
+            name="(appAdmin)"
+            options={{ headerShown: false, title: 'Panel Administrador' }}
+          />
         </Stack>
       </PaperProvider>
-    // </StripeProvider>
+    </StripeProvider>
   );
 }
 

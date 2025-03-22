@@ -71,13 +71,12 @@ docker-compose up -d
 docker-compose ps
 ```
 
-4. **Iniciar frontend**:
+6. **Iniciar frontend**:
 ```bash
 cd frontend
 npm install
 npx expo start
 ```
-
 Para más detalles:
 - [Documentación del Backend](backend/README.md)
 - [Documentación del Frontend](frontend/docs/sprint1/DEVELOPER_GUIDE.md)
@@ -99,21 +98,17 @@ La aplicación utiliza Stripe como pasarela de pagos para procesar transacciones
 
 3. **Configurar en el proyecto**:
    - Añade la clave secreta a tu archivo `backend/.env`:
-     ```
+     ~~~
      STRIPE_SECRET_KEY=sk_test_your_test_key_here
-     ```
-   - Para el frontend, configura la clave publicable en su archivo de entorno
+     ~~~
+   - Para el frontend, copia el archivo `frontend/env.example` a `frontend/.env` y añade tu clave publicable:
+     ~~~
+     EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
+     ~~~
 
-4. **Configurar Webhook (opcional para desarrollo local)**:
-   - Para pruebas locales, puedes usar [Stripe CLI](https://stripe.com/docs/stripe-cli) para reenviar eventos
-   - Instalar Stripe CLI y ejecutar:
-     ```
-     stripe listen --forward-to http://localhost:3000/api/webhooks/stripe
-     ```
-   - Esto generará una clave de webhook temporal para usar en tu `.env`:
-     ```
-     STRIPE_WEBHOOK_SECRET=whsec_your_webhook_key_here
-     ```
+4. **Webhook para desarrollo local**:
+   - El webhook de Stripe ya está incluido en la configuración de Docker, por lo que no es necesario configurarlo manualmente
+   - El servidor recibirá automáticamente las notificaciones de eventos de Stripe
 
 ### Pruebas de Pagos
 
@@ -157,5 +152,40 @@ Para más información sobre la implementación de Stripe en el proyecto:
   - Scripts de inicialización en `mysql/init/`
 - **Timezone**: Configurado para América/Hermosillo
 - **Compatibilidad**: Funciona en Windows (WSL2), macOS y Linux
+
+## Configuración de API
+
+Para conectar el frontend con el backend, debes configurar correctamente la URL de la API:
+
+### Cómo encontrar tu dirección IP local
+
+Para probar en dispositivos físicos, necesitas usar la dirección IP local de tu computadora en lugar de localhost, ya que localhost se refiere al propio dispositivo.
+
+**Windows:**
+1. Abre la Línea de Comandos
+2. Escribe 'ipconfig' y presiona Enter
+3. Busca 'Dirección IPv4' en tu adaptador de red activo
+
+**macOS:**
+1. Abre Preferencias del Sistema > Red
+2. Selecciona tu conexión activa y verifica la dirección IP
+
+**Linux:**
+1. Abre Terminal
+2. Escribe 'ip addr show' o 'hostname -I' y presiona Enter
+3. Busca el valor inet de tu interfaz de red activa
+
+### Configuración del frontend
+
+En el archivo `frontend/app/config/index.js`, configura las URLs de API según corresponda:
+
+```javascript
+// URL de API para desarrollo (comenta/descomenta según necesites)
+// const DEV_API_URL = 'http://localhost:3000/api';  // Para emuladores
+const DEV_API_URL = 'http://192.168.0.138:3000/api'; // Para dispositivos físicos (usa tu IP)
+
+// URL de API para producción
+const PROD_API_URL = 'http://192.168.0.138:3000/api'; // Actualiza con tu URL de producción
+```
 
 Para más información, consultar la documentación específica en las carpetas `backend/docs/` y `frontend/docs/`.
