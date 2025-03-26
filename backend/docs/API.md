@@ -1687,7 +1687,43 @@ Authorization: Bearer <token>
 - 400: Usuario no autorizado o inactivo
 - 500: Error del servidor
 
-### 11.3 Obtener una dirección específica (compatibilidad)
+### 11.3 Obtener una dirección por ID
+
+**GET /api/shipping-address/:id**
+
+**Headers Requeridos:**
+
+~~~
+Authorization: Bearer <token>
+~~~
+
+**Parámetros URL:**
+- id: ID de la dirección a consultar
+
+**Respuesta Exitosa (200):**
+
+~~~json
+{
+  "message": "Dirección obtenida correctamente",
+  "data": {
+    "idLocation": 2,
+    "idUserInformation": 2,
+    "street": "Av. Luis Encinas Jhonson",
+    "houseNumber": "10",
+    "postalCode": "83000",
+    "neighborhood": "Centro",
+    "status": true
+  }
+}
+~~~
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Dirección no encontrada o no autorizada
+- 500: Error del servidor
+
+### 11.4 Obtener una dirección específica (compatibilidad)
 
 **GET /api/shipping-address/single**
 
