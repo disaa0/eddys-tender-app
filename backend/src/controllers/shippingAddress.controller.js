@@ -1,4 +1,6 @@
-const { addShippingAddress, getShippingAddress, getShippingAddresses, updateAddress, deleteAddress } = require("../services/shippingAddress.service.js");
+const { addShippingAddress, getShippingAddress, getShippingAddresses, updateAddress, deleteAddress, getShippingAddressById } = require("../services/shippingAddress.service.js");
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 async function createShippingAddress(req, res) {
     try {
@@ -75,10 +77,57 @@ async function deleteShippingAddress(req, res) {
     }
 }
 
+async function handleGetShippingAddressById(req, res) {
+    try {
+        const userId = req.user.userId;
+        const userType = req.user.userType;
+        const addressId = parseInt(req.params.id);
+
+        if (!userId || isNaN(addressId)) {
+            return res.status(400).json({ 
+                error: "Invalid user ID or address ID" 
+            });
+        }
+
+        // If user is not admin, verify they own the address
+        if (userType !== 1) { // Regular user
+            const address = await getShippingAddressById(userId, addressId);
+            return res.status(200).json({ 
+                message: "Dirección obtenida correctamente", 
+                data: address 
+            });
+        } else {
+            // For admin, get any address without user check
+            const address = await prisma.location.findFirst({
+                where: {
+                    idLocation: addressId,
+                    status: true
+                }
+            });
+
+            if (!address) {
+                return res.status(404).json({ 
+                    error: "Dirección no encontrada" 
+                });
+            }
+
+            return res.status(200).json({ 
+                message: "Dirección obtenida correctamente", 
+                data: address 
+            });
+        }
+    } catch (error) {
+        console.error('Error in getShippingAddressById:', error);
+        return res.status(400).json({ error: error.message });
+    }
+}
+
 module.exports = {
     createShippingAddress,
     getUserShippingAddress,
     getAllUserShippingAddresses,
     updateShippingAddress,
-    deleteShippingAddress
+    deleteShippingAddress,
+    handleGetShippingAddressById
 };
+

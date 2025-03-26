@@ -1,3 +1,4 @@
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -131,10 +132,37 @@ async function deleteAddress(userId, addressId) {
     });
 }
 
+async function getShippingAddressById(userId, addressId) {
+    const user = await prisma.userInformation.findFirst({
+        where: { idUserInformation: userId }
+    });
+
+    if (!user) {
+        throw new Error("Usuario no autorizado o inactivo.");
+    }
+
+    // Only return address if it belongs to the user
+    const address = await prisma.location.findFirst({
+        where: {
+            idLocation: addressId,
+            idUserInformation: user.idUserInformation,
+            status: true
+        }
+    });
+
+    if (!address) {
+        throw new Error("Dirección no encontrada o no autorizada.");
+    }
+
+    return address;
+}
+
 module.exports = {
     addShippingAddress,
     getShippingAddress,
     getShippingAddresses,
     updateAddress,
-    deleteAddress
+    deleteAddress,
+    getShippingAddressById
 };
+
