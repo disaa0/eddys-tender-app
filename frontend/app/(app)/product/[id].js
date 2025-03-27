@@ -1,13 +1,15 @@
-import { View, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, Image, TouchableOpacity, StatusBar } from 'react-native';
 import { Button, Card, Text, TextInput } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons'; // Importar iconos de Expo
 import apiService from '../../api/ApiService';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const defaultImage = require('../../../assets/products/tenders.png');
 
 export default function ProductDetails() {
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [quantity, setQuantity] = useState('1');
@@ -85,65 +87,74 @@ export default function ProductDetails() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Card>
-        {/* Contenedor de imagen con botón de regreso */}
-        <View style={styles.imageContainer}>
-          <Card.Cover source={typeof productImage === 'string' ? { uri: productImage } : productImage} style={styles.image} />
-          <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
+    <SafeAreaProvider>
+      <SafeAreaView style={[styles.safeArea, { paddingTop: 100 }]} edges={['top']}>
+        <ScrollView style={styles.container}>
+          <Card>
+            {/* Contenedor de imagen con botón de regreso */}
+            <View style={styles.imageContainer}>
+              <Card.Cover source={typeof productImage === 'string' ? { uri: productImage } : productImage} style={styles.image} />
+              <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
 
-        <Card.Content style={styles.content}>
-          <Text variant="headlineSmall">{product.name}</Text>
+            <Card.Content style={styles.content}>
+              <Text variant="headlineSmall">{product.name}</Text>
 
-          <View style={styles.descripcionContainer}>
-            <Text variant="bodyLarge" style={styles.description}>
-              {product.description}
-            </Text>
-          </View>
-          <View style={styles.quantityContainer}>
-            <TouchableOpacity
-              onPress={() => setQuantity(prev => Math.max(1, parseInt(prev) - 1))}
-              style={styles.quantityButton}
-            >
-              <Text style={styles.quantityText}>−</Text>
+              <View style={styles.descripcionContainer}>
+                <Text variant="bodyLarge" style={styles.description}>
+                  {product.description}
+                </Text>
+              </View>
+              <View style={styles.quantityContainer}>
+                <TouchableOpacity
+                  onPress={() => setQuantity(prev => Math.max(1, parseInt(prev) - 1))}
+                  style={styles.quantityButton}
+                >
+                  <Text style={styles.quantityText}>−</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.quantityNumber}>{quantity}</Text>
+
+                <TouchableOpacity
+                  onPress={() => setQuantity(prev => (parseInt(prev) + 1).toString())}
+                  style={styles.quantityButton}
+                >
+                  <Text style={styles.quantityText}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </Card.Content>
+          </Card>
+          <View style={styles.bottomContainer}>
+            <TouchableOpacity style={styles.priceButton}>
+              <Text style={styles.priceText}>${(product.price * parseInt(quantity || '1')).toFixed(2)}</Text>
             </TouchableOpacity>
 
-            <Text style={styles.quantityNumber}>{quantity}</Text>
-
             <TouchableOpacity
-              onPress={() => setQuantity(prev => (parseInt(prev) + 1).toString())}
-              style={styles.quantityButton}
+              style={styles.cartButton}
+              onPress={() => addProductToCart(productId, quantity)}
             >
-              <Text style={styles.quantityText}>+</Text>
+              <Text style={styles.cartText}>
+                Agregar al Carrito
+              </Text>
             </TouchableOpacity>
           </View>
-        </Card.Content>
-      </Card>
-      <View style={styles.bottomContainer}>
-        <TouchableOpacity style={styles.priceButton}>
-          <Text style={styles.priceText}>${(product.price * parseInt(quantity || '1')).toFixed(2)}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.cartButton}
-          onPress={() => addProductToCart(productId, quantity)}
-        >
-          <Text style={styles.cartText}>
-            Agregar al Carrito
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-    </ScrollView >
+        </ScrollView >
+      </SafeAreaView>
+    </SafeAreaProvider >
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex: 1,
+
+
   },
   imageContainer: {
     position: 'relative',

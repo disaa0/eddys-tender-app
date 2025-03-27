@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { ActivityIndicator } from 'react-native-paper';
 import { API_URL } from '../config';
 import { useRouter } from 'expo-router';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 export default function Login() {
   const { login, isAdmin } = useAuth();
@@ -15,6 +16,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [errors, setErrors] = useState({});
+  const [messageDialogVisible, setMessageDialogVisible] = useState(false);
+  const [messageDialogText, setMessageDialogText] = useState('');
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -33,11 +36,15 @@ export default function Login() {
         password,
       };
 
-      await login(credentials);
+      const resLogin = await login(credentials);
+      console.log('resLogin:', resLogin);
 
     } catch (error) {
       setError(error.message);
       console.error('Error en el login:', error);
+      // setMessageDialogText(error.message);
+      // setMessageDialogVisible(true);
+
     } finally {
       setLoading(false);
     }
@@ -125,6 +132,20 @@ export default function Login() {
           </Button>
         </Link>
       </View>
+
+
+      <ConfirmationDialog
+        visible={messageDialogVisible}
+        onDismiss={() => setMessageDialogVisible(false)}
+        title="Mensaje"
+        content={messageDialogText}
+        onConfirm={() => {
+          setMessageDialogVisible(false)
+          setMessageDialogText('')
+        }}
+        cancelButtonLabel=""
+        confirmButtonLabel="Cerrar"
+      />
     </KeyboardAvoidingView>
   );
 }

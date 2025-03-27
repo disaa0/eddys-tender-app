@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../../theme';
 import AdminApiService from '../../api/AdminApiService';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProductsList() {
     const [products, setProducts] = useState([]);
@@ -67,7 +68,7 @@ export default function ProductsList() {
 
     const renderProduct = ({ item }) => (
         <Card style={styles.productCard}>
-            <Card.Content>
+            <Card.Content style={styles.cardContainer}>
                 <View style={styles.cardHeader}>
                     <View>
                         <Text variant="titleMedium">{item.name}</Text>
@@ -124,39 +125,44 @@ export default function ProductsList() {
     }
 
     return (
-        <View style={styles.container}>
-            <Searchbar
-                placeholder="Buscar productos"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                style={styles.searchbar}
-            />
+        <SafeAreaProvider>
+            <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
+                <View style={styles.container}>
+                    <Searchbar
+                        placeholder="Buscar productos"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        style={styles.searchbar}
+                    />
 
-            <FlatList
-                data={products}
-                renderItem={renderProduct}
-                keyExtractor={(item) => item.idProduct.toString()}
-                contentContainerStyle={styles.productList}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={
-                    loading ? (
-                        <ActivityIndicator style={styles.loadingMore} color={theme.colors.primary} />
-                    ) : null
-                }
-                ListEmptyComponent={
-                    !loading ? (
-                        <Text style={styles.emptyText}>No hay productos disponibles</Text>
-                    ) : null
-                }
-            />
+                    <FlatList
+                        data={products}
+                        numColumns={2}
+                        renderItem={renderProduct}
+                        keyExtractor={(item) => item.idProduct.toString()}
+                        contentContainerStyle={styles.productList}
+                        onEndReached={handleLoadMore}
+                        onEndReachedThreshold={0.5}
+                        ListFooterComponent={
+                            loading ? (
+                                <ActivityIndicator style={styles.loadingMore} color={theme.colors.primary} />
+                            ) : null
+                        }
+                        ListEmptyComponent={
+                            !loading ? (
+                                <Text style={styles.emptyText}>No hay productos disponibles</Text>
+                            ) : null
+                        }
+                    />
 
-            <FAB
-                icon="plus"
-                style={styles.fab}
-                onPress={() => router.push('/products/add')}
-            />
-        </View>
+                    <FAB
+                        icon="plus"
+                        style={styles.fab}
+                        onPress={() => router.push('/products/add')}
+                    />
+                </View>
+            </SafeAreaView>
+        </SafeAreaProvider>
     );
 }
 
@@ -169,10 +175,16 @@ const styles = StyleSheet.create({
         margin: 16,
     },
     productList: {
-        padding: 16,
+        padding: 4,
+        paddingBottom: 85,
+        justifyContent: 'space-between',
     },
     productCard: {
-        marginBottom: 16,
+        flex: 1,
+        margin: 8,
+        minWidth: '48%', // Asegura que cada tarjeta tenga un tamaño similar
+        maxWidth: '48%',
+        alignSelf: 'stretch', // Hace que todas las tarjetas ocupen el mismo alto
     },
     cardHeader: {
         flexDirection: 'row',
@@ -221,5 +233,10 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         backgroundColor: theme.colors.primary,
+    },
+    cardContainer: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
     },
 }); 

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import * as ImagePicker from "expo-image-picker";
 import AdminApiService from '../api/AdminApiService';
 import { theme } from '../theme';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AddProduct() {
   const router = useRouter();
@@ -127,109 +128,113 @@ export default function AddProduct() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <IconButton
-          icon="arrow-left"
-          size={24}
-          onPress={() => router.back()}
-        />
-        <Text variant="titleLarge" style={styles.title}>Agregar Producto</Text>
-        <View style={{ width: 48 }} /> {/* Spacer */}
-      </View>
-
-      <ScrollView style={styles.scrollView}>
-        <Card style={styles.card}>
-          <Card.Content>
-            <Button
-              mode="contained"
-              onPress={pickImage}
-              style={styles.imageButton}
-              icon="camera"
-            >
-              Seleccionar Imagen
-            </Button>
-
-            {image && (
-              <Image
-                source={{ uri: image }}
-                style={styles.imagePreview}
-              />
-            )}
-
-            <TextInput
-              mode="outlined"
-              label="Nombre del producto *"
-              value={form.name}
-              onChangeText={(text) => handleChange("name", text)}
-              style={styles.input}
-              maxLength={50}
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <IconButton
+              icon="arrow-left"
+              size={24}
+              onPress={() => router.back()}
             />
+            <Text variant="titleLarge" style={styles.title}>Agregar Producto</Text>
+            <View style={{ width: 48 }} /> {/* Spacer */}
+          </View>
 
-            <TextInput
-              mode="outlined"
-              label="Precio *"
-              value={form.price}
-              onChangeText={(text) => handleChange("price", text)}
-              keyboardType="decimal-pad"
-              style={styles.input}
-              left={<TextInput.Affix text="$" />}
-            />
+          <ScrollView style={styles.scrollView}>
+            <Card style={styles.card}>
+              <Card.Content>
+                <Button
+                  mode="contained"
+                  onPress={pickImage}
+                  style={styles.imageButton}
+                  icon="camera"
+                >
+                  Seleccionar Imagen
+                </Button>
 
-            <TextInput
-              mode="outlined"
-              label="Descripción *"
-              value={form.description}
-              onChangeText={(text) => handleChange("description", text)}
-              multiline
-              numberOfLines={3}
-              style={styles.input}
-            />
+                {image && (
+                  <Image
+                    source={{ uri: image }}
+                    style={styles.imagePreview}
+                  />
+                )}
 
-            <View style={styles.pickerContainer}>
-              <Text style={styles.pickerLabel}>Tipo de Producto *</Text>
+                <TextInput
+                  mode="outlined"
+                  label="Nombre del producto *"
+                  value={form.name}
+                  onChangeText={(text) => handleChange("name", text)}
+                  style={styles.input}
+                  maxLength={50}
+                />
 
-              <Menu
-                visible={visible}
-                onDismiss={() => setVisible(false)}
-                anchor={
-                  <Button mode="outlined" onPress={() => setVisible(true)}>
-                    {selected || "Seleccione un tipo"}
-                  </Button>
-                }
-              >
-                <Menu.Item title="Comida" onPress={() => handleSelect("1", "Comida")} />
-                <Menu.Item title="Bebida" onPress={() => handleSelect("2", "Bebida")} />
-                <Menu.Item title="Extra" onPress={() => handleSelect("3", "Extra")} />
-              </Menu>
-            </View>
+                <TextInput
+                  mode="outlined"
+                  label="Precio *"
+                  value={form.price}
+                  onChangeText={(text) => handleChange("price", text)}
+                  keyboardType="decimal-pad"
+                  style={styles.input}
+                  left={<TextInput.Affix text="$" />}
+                />
 
-            {error ? (
-              <Text style={styles.errorText}>{error}</Text>
-            ) : null}
+                <TextInput
+                  mode="outlined"
+                  label="Descripción *"
+                  value={form.description}
+                  onChangeText={(text) => handleChange("description", text)}
+                  multiline
+                  numberOfLines={3}
+                  style={styles.input}
+                />
 
-            <Button
-              mode="contained"
-              onPress={handleAddProduct}
-              style={styles.addButton}
-              loading={loading}
-              disabled={loading}
-            >
-              Agregar Producto
-            </Button>
-          </Card.Content>
-        </Card>
-      </ScrollView>
+                <View style={styles.pickerContainer}>
+                  <Text style={styles.pickerLabel}>Tipo de Producto *</Text>
 
-      <Snackbar
-        visible={snackbar.visible}
-        onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
-        duration={1500}
-        style={styles.snackbar}
-      >
-        {snackbar.message}
-      </Snackbar>
-    </View>
+                  <Menu
+                    visible={visible}
+                    onDismiss={() => setVisible(false)}
+                    anchor={
+                      <Button mode="outlined" onPress={() => setVisible(true)}>
+                        {selected || "Seleccione un tipo"}
+                      </Button>
+                    }
+                  >
+                    <Menu.Item title="Comida" onPress={() => handleSelect("1", "Comida")} />
+                    <Menu.Item title="Bebida" onPress={() => handleSelect("2", "Bebida")} />
+                    <Menu.Item title="Extra" onPress={() => handleSelect("3", "Extra")} />
+                  </Menu>
+                </View>
+
+                {error ? (
+                  <Text style={styles.errorText}>{error}</Text>
+                ) : null}
+
+                <Button
+                  mode="contained"
+                  onPress={handleAddProduct}
+                  style={styles.addButton}
+                  loading={loading}
+                  disabled={loading}
+                >
+                  Agregar Producto
+                </Button>
+              </Card.Content>
+            </Card>
+          </ScrollView>
+
+          <Snackbar
+            visible={snackbar.visible}
+            onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
+            duration={1500}
+            style={styles.snackbar}
+          >
+            {snackbar.message}
+          </Snackbar>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
