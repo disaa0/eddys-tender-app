@@ -97,9 +97,6 @@ export default function Profile() {
             source={require('../../assets/profile.png')}
             style={[styles.avatar, styles.squareAvatar]}
           />
-          <Text variant="headlineSmall" style={styles.name}>
-            {userInfoH.userInformation.name + ' ' + userInfoH.userInformation.lastName}
-          </Text>
           <Text variant="bodyLarge" style={styles.memberSince}>
             Miembro desde {new Date(userInfoH.createdAt).getFullYear()}
           </Text>
@@ -109,6 +106,19 @@ export default function Profile() {
           <Text variant="titleMedium" style={styles.sectionTitle}>
             Información Personal
           </Text>
+          <List.Item
+            title="Nombre"
+            description={userInfoH.userInformation.name + ' ' + userInfoH.userInformation.lastName}
+            left={(props) => <List.Icon {...props} icon="account" />}
+          />
+          <Divider />
+          <List.Item
+            title="Cambiar Contraseña"
+            left={(props) => <List.Icon {...props} icon="form-textbox-password" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('./profile/editPassword')}
+          />
+          <Divider />
           <List.Item
             title="Correo"
             description={userInfoH.email}
@@ -182,7 +192,7 @@ export default function Profile() {
           </Surface>
         )}
 
-        <Surface style={[styles.infoSection, styles.dangerSection]} elevation={1}>
+        <Surface style={styles.infoSection} elevation={1}>
           <List.Item
             title="Eliminar Cuenta"
             description="Esta acción no se puede deshacer"
@@ -221,8 +231,8 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-    marginBottom: 90,
+    backgroundColor: theme.colors.surface,
+    paddingBottom: 80,
   },
   header: {
     alignItems: 'center',
@@ -268,10 +278,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     backgroundColor: theme.colors.error,
-  },
-  dangerSection: {
-    marginTop: 32,
-    marginBottom: 32,
   },
   adminSection: {
     marginTop: 16,
