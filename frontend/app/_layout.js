@@ -1,11 +1,11 @@
 import { Stack } from 'expo-router';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { theme } from './theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { StripeProvider } from '@stripe/stripe-react-native';
-import Constants from 'expo-constants';
+import ConfirmationDialog from './components/ConfirmationDialog';
 
 // Combinar nuestro tema con el tema base de Paper
 const combinedTheme = {
@@ -18,39 +18,65 @@ const combinedTheme = {
 };
 
 // Función para proteger rutas
-function useProtectedRoute() {
+function useProtectedRoute(setMostrarPopUpSessionExpirada) {
   const segments = useSegments();
   const router = useRouter();
-  const { isAuthenticated, isLoading, isAdmin } = useAuth();
-  // console.log(segments);
-  // console.log(isAuthenticated);
-  console.log(isAdmin);
+  const { isAuthenticated, isLoading, isAdmin, sessionExpired, checkifIsAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
+    checkifIsAuthenticated();
+
+    if (sessionExpired && !inAuthGroup) {
+      setMostrarPopUpSessionExpirada(true); // 🔹 Ahora el estado está en AppContent
+      return;
+    }
+
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/login');
     } else if (isAuthenticated && inAuthGroup) {
-      if (isAdmin) {
-        router.replace('/adminDashboard');
-        return;
-      } else {
-        router.replace('/');
-      }
+      router.replace(isAdmin ? '/adminDashboard' : '/');
     }
-  }, [isAuthenticated, segments, isLoading]);
+  }, [segments, isAuthenticated, isLoading]);
 }
 
 // 🔹 Nuevo componente para manejar la autenticación
 function AppContent() {
-  useProtectedRoute(); // 🔥 Ahora se ejecuta después de que AuthProvider esté disponible
+  const [mostrarPopUpSessionExpirada, setMostrarPopUpSessionExpirada] = useState(false);
+  const router = useRouter();
+
+  useProtectedRoute(setMostrarPopUpSessionExpirada); // 🔥 Pasamos el estado al hook
 
   return (
     <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}>
       <PaperProvider theme={combinedTheme}>
+
+        {mostrarPopUpSessionExpirada && (
+          <ConfirmationDialog
+            message="Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
+            onConfirm={() => {
+              setMostrarPopUpSessionExpirada(false); // 🔹 Primero cerramos el popup
+              setTimeout(() => {  // 🔹 Esperamos un poco para actualizar el estado antes de redirigir
+                router.replace('/login');
+              }, 100);
+            }}
+            onDismiss={() => {
+              setMostrarPopUpSessionExpirada(false);
+              setTimeout(() => {
+                router.replace('/login');
+              }, 100);
+            }}
+            visible={mostrarPopUpSessionExpirada}
+            title="Sesión Expirada"
+            cancelButtonLabel=""
+            confirmButtonLabel="Iniciar Sesión"
+          />
+        )}
+
+
         <Stack
           screenOptions={{
             headerStyle: { backgroundColor: theme.colors.primary },

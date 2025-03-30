@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AuthService from '../api/AuthService';
+import UserService from '../api/UserService';
+import { Alert } from 'react-native';
 
 const AuthContext = createContext();
 
@@ -8,6 +10,8 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [sessionExpired, setSessionExpired] = useState(false);
 
     useEffect(() => {
         loadStoredAuth();
@@ -31,11 +35,38 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const checkifIsAuthenticated = async () => {
+        try {
+            const userAuth = await UserService.getUserInfo();
+            console.log('Usuario autenticado:', userAuth);
+            setSessionExpired(false);
+            return true;
+        } catch (error) {
+            if (error.response?.status === 401) {
+                // inserta un popup o snackbar para mostrar el error
+
+
+                console.warn('Token inválido o expirado. Usuario no autenticado.');
+                setUserToken(null);
+                setUser(null);
+                setIsAuthenticated(false);
+                setIsAdmin(false);
+                setSessionExpired(true);
+                return false;
+            }
+            console.error('Error checking authentication:', error);
+            return false;
+        }
+    };
+
+
     const login = async (credentials) => {
         try {
             const response = await AuthService.login(credentials);
             setUserToken(response.token);
             setUser(response.user);
+            setSessionExpired(false);
+            setIsAuthenticated(true);
             response.user.idUserType === 1 ? setIsAdmin(true) : setIsAdmin(false);
             return true;
         } catch (error) {
@@ -64,6 +95,8 @@ export const AuthProvider = ({ children }) => {
                 logout,
                 isLoading,
                 isAdmin,
+                checkifIsAuthenticated,
+                sessionExpired,
             }}
         >
             {children}
