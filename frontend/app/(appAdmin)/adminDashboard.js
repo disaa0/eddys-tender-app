@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { theme } from '../theme';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 const logo = require('../../assets/eddys.png');
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import AdminApiService from '../api/AdminApiService';
@@ -155,85 +155,87 @@ export default function AdminDashboard() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
 
-        <View style={styles.logoContainer}>
-          <Image source={logo} style={styles.logo} />
-        </View>
+          <View style={styles.logoContainer}>
+            <Image source={logo} style={styles.logo} />
+          </View>
 
-        <View style={styles.searchContainer}>
-          <Searchbar
-            placeholder="Buscar"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            style={styles.searchbar}
-            inputStyle={styles.searchInput}
-            icon="magnify" // Ícono de lupa
-            placeholderTextColor="#666" // Color del texto de placeholder
-          />
-          <TouchableOpacity style={styles.sortButton} onPress={() => { setShowFilters(!showFilters); !showFilters ? setFilterIcon('X') : setFilterIcon('filter-list') }}
-          >{
-              (filterIcon == 'filter-list' || filterIcon == 'star')
-              && (<MaterialIcons name={filterIcon} size={24} color="#ffffff" />)
-              || (<Text style={{ color: theme.colors.background }} >{filterIcon}</Text>)
-            }
-
-          </TouchableOpacity>
-        </View>
-
-        {/* Animación de filtros */}
-        {(showFilters) && (
-          <Animated.View
-            entering={FadeIn.duration(300)}
-            exiting={FadeOut.duration(300)}
-            style={styles.filtersContainer}
-          >
-            <SortChips
-              categories={FILTERS}
-              selectedCategory={selectedFilter}
-              onSelect={handleSelectedFilter}
-              horizontal={false}
+          <View style={styles.searchContainer}>
+            <Searchbar
+              placeholder="Buscar"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={styles.searchbar}
+              inputStyle={styles.searchInput}
+              icon="magnify" // Ícono de lupa
+              placeholderTextColor="#666" // Color del texto de placeholder
             />
-          </Animated.View>
-        )}
+            <TouchableOpacity style={styles.sortButton} onPress={() => { setShowFilters(!showFilters); !showFilters ? setFilterIcon('X') : setFilterIcon('filter-list') }}
+            >{
+                (filterIcon == 'filter-list' || filterIcon == 'star')
+                && (<MaterialIcons name={filterIcon} size={24} color="#ffffff" />)
+                || (<Text style={{ color: theme.colors.background }} >{filterIcon}</Text>)
+              }
 
-        {/* Componente de categorías con animación */}
-        <View style={styles.categoriesContainer}>
-          <CategoryChips
-            categories={CATEGORIES}
-            selectedCategory={selectedCategory}
-            onSelect={setSelectedCategory}
-            horizontal={true}
-          />
-        </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Animación de filtros */}
+          {(showFilters) && (
+            <Animated.View
+              entering={FadeIn.duration(300)}
+              exiting={FadeOut.duration(300)}
+              style={styles.filtersContainer}
+            >
+              <SortChips
+                categories={FILTERS}
+                selectedCategory={selectedFilter}
+                onSelect={handleSelectedFilter}
+                horizontal={false}
+              />
+            </Animated.View>
+          )}
+
+          {/* Componente de categorías con animación */}
+          <View style={styles.categoriesContainer}>
+            <CategoryChips
+              categories={CATEGORIES}
+              selectedCategory={selectedCategory}
+              onSelect={setSelectedCategory}
+              horizontal={true}
+            />
+          </View>
 
 
 
-        <FlatList
-          data={getSortedProducts()} // Filtramos y sorteamos productos antes de renderizar
-          numColumns={2}
-          renderItem={renderAdminProduct}
-          keyExtractor={(item) => item.idProduct.toString()}
-          contentContainerStyle={styles.productList}
-          ListEmptyComponent={
-            !loading && (
-              <View style={styles.centered}>
-                <Text>No hay productos disponibles.</Text>
-              </View>
-            )
-          }
-          onEndReached={() => {
-            if (!loading && page < totalPages) {
-              setPage((prevPage) => prevPage + 1);
+          <FlatList
+            data={getSortedProducts()} // Filtramos y sorteamos productos antes de renderizar
+            numColumns={2}
+            renderItem={renderAdminProduct}
+            keyExtractor={(item) => item.idProduct.toString()}
+            contentContainerStyle={styles.productList}
+            ListEmptyComponent={
+              !loading && (
+                <View style={styles.centered}>
+                  <Text>No hay productos disponibles.</Text>
+                </View>
+              )
             }
-          }}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={loading && page > 1 ? <ActivityIndicator style={styles.loadingMore} /> : null}
-        />
+            onEndReached={() => {
+              if (!loading && page < totalPages) {
+                setPage((prevPage) => prevPage + 1);
+              }
+            }}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={loading && page > 1 ? <ActivityIndicator style={styles.loadingMore} /> : null}
+          />
 
-      </View>
-    </SafeAreaView>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -374,12 +376,11 @@ export const styles = StyleSheet.create({
   },
   productList: {
     width: '100%',
-    flex: 1,
+    minHeight: '100%', // Permite que crezca sin limitar el scroll
     padding: 4,
-    paddingBottom: 85, // Ajusta este valor según sea necesario
-    margin: 0,
-    flexDirection: 'row', // Esto permite que los items estén en una fila
-    flexWrap: 'wrap', // Esto permite que los productos se acomoden en varias líneas
-    justifyContent: 'space-between', // Asegura que haya espacio entre las columnas
+    paddingBottom: 120, // Asegura suficiente espacio para evitar que el navbar lo tape
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
 });

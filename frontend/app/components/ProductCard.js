@@ -4,17 +4,25 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import { useState } from 'react';
 import apiService from '../api/ApiService';
+import ConfirmationDialog from './ConfirmationDialog';
 
 export default function ProductCard({ product, onPress }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState('');
   const { name, price, description, imageSource } = product;
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState('');
   const onAddToCart = async (product) => {
     try {
       setLoading(true)
-      console.log(product.idProduct)
+      // console.log(product.idProduct)
       const response = await apiService.addCartItem(product.idProduct)
-      console.log(response)
+      console.log(response.cartId)
+
+      if (response.status === 200 || response?.cartId > 0) {
+        setDialogVisible(true);
+      }
+
     } catch (error) {
       setError('Error al agregar producto al carrito');
       console.error(error);
@@ -28,32 +36,46 @@ export default function ProductCard({ product, onPress }) {
     <Surface style={styles.card} elevation={1}>
       <TouchableRipple onPress={onPress} style={styles.touchable}>
         <View style={styles.cardContainer}>
-          {imageSource && (
-            <Image
-              source={imageSource}
-              style={styles.cardImage}
-              resizeMode="cover"
-            />
-          )}
-          <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>{name}</Text>
-            {description && <Text style={styles.cardDescription}>{description}</Text>}
-          </View>
-          {/* New container for price and cart button */}
-          <View style={styles.priceAndCartContainer}>
-            <Text style={styles.cardPrice}>${price.toFixed(2)}</Text>
-            <Pressable
-              style={styles.cartButton}
-              onPress={(e) => {
-                e.stopPropagation();
-                onAddToCart(product);
-              }}
-            >
-              <MaterialIcons name="add-shopping-cart" size={20} color="#fff" />
-            </Pressable>
+          {/* Wrap content in a View with overflow: 'hidden' */}
+          <View style={styles.cardContentWrapper}>
+            {imageSource && (
+              <Image
+                source={imageSource}
+                style={styles.cardImage}
+                resizeMode="cover"
+              />
+            )}
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>{name}</Text>
+              {description && <Text style={styles.cardDescription}>{description}</Text>}
+            </View>
+            {/* New container for price and cart button */}
+            <View style={styles.priceAndCartContainer}>
+              <Text style={styles.cardPrice}>${price.toFixed(2)}</Text>
+              <Pressable
+                style={styles.cartButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onAddToCart(product);
+                }}
+              >
+                <MaterialIcons name="add-shopping-cart" size={20} color="#fff" />
+              </Pressable>
+            </View>
           </View>
         </View>
       </TouchableRipple>
+
+      {/* Mostrar el diálogo de confirmación si dialogVisible es true */}
+      <ConfirmationDialog
+        visible={dialogVisible}
+        onDismiss={() => setDialogVisible(false)} // Cerrar el diálogo al presionar "OK"
+        title="Producto agregado"
+        message="El producto ha sido agregado al carrito."
+        onConfirm={() => setDialogVisible(false)} // Cerrar el diálogo
+        cancelButtonLabel=''
+        confirmButtonLabel='OK'
+      />
     </Surface>
   );
 }
@@ -112,5 +134,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  cardContentWrapper: {
+    flex: 1,
+    overflow: 'hidden',
   },
 });

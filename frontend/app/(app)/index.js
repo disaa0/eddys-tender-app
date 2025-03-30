@@ -26,18 +26,34 @@ export default function Index() {
   const [selectedFilter, setSelectedFilter] = useState('');
   const [filterIcon, setFilterIcon] = useState('filter-list');
   const [showFilters, setShowFilters] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
   const router = useRouter();
 
   const CATEGORIES = ['Todos', 'Comida', 'Bebida'];
   const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
 
+  const onRefreshFn = async () => {
+    setLoading(true);
+    setRefreshing(true);
+    setPage(1); // Reinicia la paginación
+    try {
+      await loadProducts(); // Vuelve a cargar los productos
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const loadProducts = async () => {
     try {
+      setProducts([]);
       setError(null);
       setLoading(true);
       const response = await apiService.getProducts(page);
-      setProducts(response.data.products);
-      setTotalPages(response.data.totalPages);
+      setProducts(response?.data?.products);
+      setTotalPages(response?.data?.totalPages);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -56,7 +72,7 @@ export default function Index() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -133,6 +149,14 @@ export default function Index() {
 
 
   if (loading && page === 1) {
+    // Verificar que products ya es un arreglo no vacio para no mostrar el loading
+    if (products.length > 0) {
+      setLoading(false);
+      setError(null);
+      console.log('se verifico que products ya es un arreglo no vacio para no mostrar el loading');
+    }
+
+
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
@@ -195,6 +219,8 @@ export default function Index() {
           keyExtractor={(item) => item.idProduct.toString()}
           contentContainerStyle={styles.productList}
           ListEmptyComponent={!loading && <View style={styles.centered}><Text>No hay productos disponibles.</Text></View>}
+          refreshing={refreshing}
+          onRefresh={onRefreshFn}
           onEndReached={() => {
             if (!loading && page < totalPages) {
               setPage((prevPage) => prevPage + 1);
