@@ -12,6 +12,7 @@ import AdminApiService from '../api/AdminApiService';
 import CategoryChips from '../components/CategoryChips';
 import SortChips from '../components/SortChips';
 import { MaterialIcons } from '@expo/vector-icons';
+import ProductCardAdmin from '../components/ProductCardAdmin';
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -33,6 +34,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       const response = await AdminApiService.getProducts(page);
+      console.log(response)
       setProducts(response.data.products);
       setTotalPages(response.data.totalPages);
     } catch (err) {
@@ -84,34 +86,6 @@ export default function AdminDashboard() {
     setShowFilters(false);
   };
 
-  const handleToggleStatus = async (id) => {
-    try {
-      await AdminApiService.toggleProductStatus(id);
-
-      setProducts(products.map(product =>
-        product.idProduct === id
-          ? { ...product, status: !product.status }
-          : product
-      ));
-
-      await loadProducts();
-    } catch (err) {
-      Alert.alert(
-        'Error',
-        'No se pudo cambiar el estado del producto. Por favor, intente nuevamente.',
-        [{ text: 'OK' }]
-      );
-      console.error('Error toggling product status:', err);
-    }
-  };
-
-  const handleEditProduct = (productId) => {
-    router.push({
-      pathname: '/(appAdmin)/product/[id]',
-      params: { id: productId }
-    });
-  };
-
   const getProductTypeLabel = (idProductType) => {
     switch (idProductType) {
       case 1:
@@ -150,49 +124,19 @@ export default function AdminDashboard() {
     });
   };
 
-  const renderProduct = ({ item }) => (
-    <Card
-      style={styles.productCard}
-      onPress={(e) => {
-        e.stopPropagation();
-        handleEditProduct(item.idProduct);
-      }}
-    >
-      <Image
-        source={require('../../assets/products/tenders.png')}
-        style={styles.cardImage}
-        resizeMode="cover"
+  const renderAdminProduct = ({ item, index }) => {
+    // console.log('Renderizando producto:', item.name);
+    const isLastItem = index === getSortedProducts().length - 1;
+    // console.log(isLastItem)
+    return (
+      <ProductCardAdmin
+        product={item}
+        isLastItem={isLastItem}
       />
-      <Card.Content>
+    );
+  }
 
-        <View style={styles.productHeader}>
-          <Text style={styles.cardTitle}>{item.name}</Text>
-        </View>
-        <Text style={styles.cardDescription}>
-          {item.description}
-        </Text>
-        <Text style={styles.cardPrice}>${item.price}</Text>
-        <Text variant="bodyMedium" style={item.status ? styles.activeStatus : styles.inactiveStatus}>
-          {item.status ? 'Activo' : 'Inactivo'}
-        </Text>
-        <View style={styles.productActions}>
-          <TouchableWithoutFeedback
-            onPress={(e) => {
-              e.stopPropagation();
-              handleToggleStatus(item.status);
-            }}
-          >
-            <View>
-              <Switch
-                value={item.status}
-                onValueChange={() => handleToggleStatus(item.idProduct)} // Llama la función toggle
-              />
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </Card.Content>
-    </Card>
-  );
+
 
   if (loading && page === 1) {
     return (
@@ -269,7 +213,7 @@ export default function AdminDashboard() {
         <FlatList
           data={getSortedProducts()} // Filtramos y sorteamos productos antes de renderizar
           numColumns={2}
-          renderItem={renderProduct}
+          renderItem={renderAdminProduct}
           keyExtractor={(item) => item.idProduct.toString()}
           contentContainerStyle={styles.productList}
           ListEmptyComponent={
@@ -367,10 +311,16 @@ export const styles = StyleSheet.create({
     right: 0,
   },
   productCard: {
-    flex: 1,
-    maxWidth: '50%',
+    width: '48%', // Ajusta el ancho para que haya espacio para 2 elementos en la fila
+    margin: 4, // Espacio entre los productos
     borderRadius: 12,
-    margin: 4,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
+  lastProductCard: {
+    width: '50%', // Ajusta el ancho para que haya espacio para 2 elementos en la fila
+    margin: 4, // Espacio entre los productos
+    borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#fff',
   },
@@ -423,8 +373,13 @@ export const styles = StyleSheet.create({
     color: theme.colors.error,
   },
   productList: {
+    width: '100%',
+    flex: 1,
     padding: 4,
     paddingBottom: 85, // Ajusta este valor según sea necesario
     margin: 0,
+    flexDirection: 'row', // Esto permite que los items estén en una fila
+    flexWrap: 'wrap', // Esto permite que los productos se acomoden en varias líneas
+    justifyContent: 'space-between', // Asegura que haya espacio entre las columnas
   },
 });

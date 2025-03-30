@@ -183,8 +183,8 @@ const styles = StyleSheet.create({
         flex: 1,
         margin: 8,
         minWidth: '48%', // Asegura que cada tarjeta tenga un tamaño similar
-        maxWidth: '48%',
-        alignSelf: 'stretch', // Hace que todas las tarjetas ocupen el mismo alto
+        maxWidth: '100%',
+        //alignSelf: 'stretch', // Hace que todas las tarjetas ocupen el mismo alto
     },
     cardHeader: {
         flexDirection: 'row',

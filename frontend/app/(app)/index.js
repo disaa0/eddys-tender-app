@@ -114,16 +114,23 @@ export default function Index() {
   };
 
   const renderProduct = ({ item, index }) => (
-    <Animated.View entering={FadeInDown.delay(index * 100).springify()} layout={Layout.springify()} style={styles.productContainer}>
-      <ProductCard
-        product={{
-          ...item,
-          imageSource: require('../../assets/products/tenders.png'), // Reemplázalo con la imagen real
-        }}
-        onPress={() => router.push(`/product/${item.idProduct}`)}
-      />
-    </Animated.View>
+    <View style={{ flex: 1, padding: 8 }}>
+      <Animated.View
+        entering={FadeInDown.delay(index * 100).springify()}
+        layout={Layout.springify()}
+        style={styles.productContainer}
+      >
+        <ProductCard
+          product={{
+            ...item,
+            imageSource: require('../../assets/products/tenders.png'), // Asegúrate de tener la imagen correcta
+          }}
+          onPress={() => router.push(`/product/${item.idProduct}`)}
+        />
+      </Animated.View>
+    </View>
   );
+
 
   if (loading && page === 1) {
     return (
@@ -258,7 +265,7 @@ const styles = StyleSheet.create({
   productContainer: {
     flex: 1, // Ocupa el espacio disponible
     padding: 0, // Margen entre productos
-    maxWidth: '50%', // Máximo 50% del ancho para 2 columnas
+    maxWidth: '100%', // Máximo 50% del ancho para 2 columnas
   },
   centered: {
     flex: 1,
