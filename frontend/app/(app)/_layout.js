@@ -87,6 +87,13 @@ export default function AppLayout() {
             }}
           />
           <Tabs.Screen
+            name="profile/editPassword"
+            options={{
+              href: null,
+              title: 'Editar contraseña',
+            }}
+          />
+          <Tabs.Screen
             name="support"
             options={{
               href: null,
