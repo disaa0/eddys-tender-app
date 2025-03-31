@@ -8,6 +8,12 @@ class UserService {
             // console.log(response);
             return response; // Deberías tener el endpoint adecuado para traer la información.
         } catch (error) {
+            if (error.response?.status === 401) {
+                // Maneja el error de autenticación aquí, si es necesario
+                console.warn('Token inválido o expirado. Usuario no autenticado.');
+                throw error
+            }
+
             console.error('Error obteniendo la información del usuario:', error);
             throw error; // O maneja el error de manera más adecuada
         }

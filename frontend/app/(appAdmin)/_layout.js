@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { theme } from '../theme';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
@@ -34,85 +34,87 @@ export default function AdminLayout() {
 
   return (
     <SafeAreaProvider>
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: '#ffffff',
-          tabBarInactiveTintColor: '#ffb3a7',
-          tabBarStyle: styles.tabBarStyle,
-          tabBarShowLabel: false,
-          headerShown: false,
-          animationEnabled: false,
-          swipeEnabled: false,
-          animation: 'fade',
-        }}
-      >
-        {/* Main Admin Routes */}
-        <Tabs.Screen
-          name="adminDashboard"
-          options={{
+      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+        <Tabs
+          screenOptions={{
+            tabBarActiveTintColor: '#ffffff',
+            tabBarInactiveTintColor: '#ffb3a7',
+            tabBarStyle: styles.tabBarStyle,
+            tabBarShowLabel: false,
             headerShown: false,
-            tabBarIcon: ({ color }) => (
-              <View style={styles.tabBarIconStyle}>
-                <MaterialIcons name="menu" size={28} color={color} />
-              </View>
-            ),
+            animationEnabled: false,
+            swipeEnabled: false,
+            animation: 'fade',
           }}
-        />
-        <Tabs.Screen
-          name="addProduct"
-          options={{
-            tabBarStyle: { display: 'none' },
-            tabBarIcon: () => (
-              <View style={styles.cartIconContainer}>
-                <MaterialIcons name="add" size={30} color="#fff" />
-              </View>
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            tabBarIcon: ({ color }) => (
-              <View style={styles.tabBarIconStyle}>
-                <MaterialIcons name="person-outline" size={28} color={color} />
-              </View>
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="products/index"
-          options={{
-            href: null,
-          }}
-        />
-        <Tabs.Screen
-          name="product/[id]"
-          options={{
-            tabBarStyle: { display: 'none' },
-            href: null,
-          }}
-        />
+        >
+          {/* Main Admin Routes */}
+          <Tabs.Screen
+            name="adminDashboard"
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ color }) => (
+                <View style={styles.tabBarIconStyle}>
+                  <MaterialIcons name="menu" size={28} color={color} />
+                </View>
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="addProduct"
+            options={{
+              tabBarStyle: { display: 'none' },
+              tabBarIcon: () => (
+                <View style={styles.cartIconContainer}>
+                  <MaterialIcons name="add" size={30} color="#fff" />
+                </View>
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="profile"
+            options={{
+              tabBarIcon: ({ color }) => (
+                <View style={styles.tabBarIconStyle}>
+                  <MaterialIcons name="person-outline" size={28} color={color} />
+                </View>
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="products/index"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
+            name="product/[id]"
+            options={{
+              tabBarStyle: { display: 'none' },
+              href: null,
+            }}
+          />
 
-        <Tabs.Screen
-          name="orders"
-          options={{
-            href: null,
-          }}
-        />
-        <Tabs.Screen
-          name="profile/editEmail"
-          options={{
-            href: null,
-          }}
-        />
-        <Tabs.Screen
-          name="profile/editPassword"
-          options={{
-            href: null,
-          }}
-        />
-      </Tabs>
-    </SafeAreaProvider>
+          <Tabs.Screen
+            name="orders"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
+            name="profile/editEmail"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
+            name="profile/editPassword"
+            options={{
+              href: null,
+            }}
+          />
+        </Tabs>
+      </SafeAreaView>
+    </SafeAreaProvider >
   );
 }
 

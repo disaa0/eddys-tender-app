@@ -7,6 +7,7 @@ import { useUserInfo } from '../hooks/useUserInfo';
 import { useState } from 'react';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 import AuthService from '../api/AuthService';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile() {
   const router = useRouter();
@@ -90,107 +91,83 @@ export default function Profile() {
   };
   return (
     <>
-      <ScrollView style={styles.container}>
-        <Surface style={styles.header} elevation={2}>
-          <Avatar.Image
-            size={120}
-            source={require('../../assets/profile.png')}
-            style={[styles.avatar, styles.squareAvatar]}
-          />
-          <Text variant="bodyLarge" style={styles.memberSince}>
-            Miembro desde {new Date(userInfoH.createdAt).getFullYear()}
-          </Text>
-        </Surface>
+      <SafeAreaProvider>
+        <SafeAreaView style={{ flex: 1 }}>
+          <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 80 }}>
+            <Surface style={styles.header} elevation={2}>
+              <Avatar.Image
+                size={120}
+                source={require('../../assets/profile.png')}
+                style={[styles.avatar, styles.squareAvatar]}
+              />
+              <Text variant="headlineSmall" style={styles.name}>
+                {userInfoH.userInformation.name + ' ' + userInfoH.userInformation.lastName}
+              </Text>
+              <Text variant="bodyLarge" style={styles.memberSince}>
+                Miembro desde {new Date(userInfoH.createdAt).getFullYear()}
+              </Text>
+            </Surface>
 
-        <Surface style={styles.infoSection} elevation={1}>
-          <Text variant="titleMedium" style={styles.sectionTitle}>
-            Información Personal
-          </Text>
-          <List.Item
-            title="Nombre"
-            description={userInfoH.userInformation.name + ' ' + userInfoH.userInformation.lastName}
-            left={(props) => <List.Icon {...props} icon="account" />}
-          />
-          <Divider />
-          <List.Item
-            title="Cambiar Contraseña"
-            left={(props) => <List.Icon {...props} icon="form-textbox-password" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push('./profile/editPassword')}
-          />
-          <Divider />
-          <List.Item
-            title="Correo"
-            description={userInfoH.email}
-            left={(props) => <List.Icon {...props} icon="email" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push('/profile/edit-email')}
-          />
-          <Divider />
-          <List.Item
-            title="Teléfono"
-            description={userInfoH.userInformation.phone}
-            left={(props) => <List.Icon {...props} icon="phone" />}
-          />
-          <Divider />
-          <List.Item
-            title="Dirección"
-            description={userInfoH.userInformation?.address || 'No especificada'}
-            left={(props) => <List.Icon {...props} icon="map-marker" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push('/profile/address')}
-          />
-        </Surface>
+            <Surface style={styles.infoSection} elevation={1}>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                Información Personal
+              </Text>
+              <List.Item
+                title="Correo"
+                description={userInfoH.email}
+                left={(props) => <List.Icon {...props} icon="email" />}
+                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+                onPress={() => router.push('/profile/edit-email')}
+              />
+              <Divider />
+              <List.Item
+                title="Teléfono"
+                description={userInfoH.userInformation.phone}
+                left={(props) => <List.Icon {...props} icon="phone" />}
+              />
+              <Divider />
+              <List.Item
+                title="Dirección"
+                description={userInfoH.userInformation?.address || 'No especificada'}
+                left={(props) => <List.Icon {...props} icon="map-marker" />}
+                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+                onPress={() => router.push('/profile/address')}
+              />
+            </Surface>
+            <Surface style={styles.infoSection} elevation={1}>
+              <List.Item
+                title="Historial de Pedidos"
+                left={(props) => <List.Icon {...props} icon="history" />}
+                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+                onPress={() => router.push('/orders')}
+              />
+              <Divider />
+              <List.Item
+                title="Métodos de Pago"
+                left={(props) => <List.Icon {...props} icon="credit-card" />}
+                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+                onPress={() => router.push('/profile/payment-methods')}
+              />
+              <Divider />
+              <List.Item
+                title="Cerrar Sesión"
+                left={(props) => (
+                  <List.Icon {...props} icon="logout" color={theme.colors.error} />
+                )}
+                titleStyle={{ color: theme.colors.error }}
+                onPress={() => setLogOutDialogVisible(true)}
+              />
+            </Surface>
 
-        <Surface style={styles.infoSection} elevation={1}>
-          <List.Item
-            title="Historial de Pedidos"
-            left={(props) => <List.Icon {...props} icon="history" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push('/orders')}
-          />
-          <Divider />
-          <List.Item
-            title="Métodos de Pago"
-            left={(props) => <List.Icon {...props} icon="credit-card" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push('/profile/payment-methods')}
-          />
-          <Divider />
-          <List.Item
-            title="Cerrar Sesión"
-            left={(props) => (
-              <List.Icon {...props} icon="logout" color={theme.colors.error} />
-            )}
-            titleStyle={{ color: theme.colors.error }}
-            onPress={() => setLogOutDialogVisible(true)}
-          />
-        </Surface>
-
-        <ConfirmationDialog
-          visible={logOutDialogVisible}
-          onDismiss={() => setLogOutDialogVisible(false)}
-          onConfirm={logout}
-          title="Cerrar Sesión"
-          message="¿Estás seguro que deseas cerrar sesión?"
-          confirmButtonLabel="Cerrar Sesión"
-          confirmButtonLoading={isDeleting}
-        />
-
-        {/* Add Admin Access section if user is admin */}
-        {user?.idUserType === 1 && (
-          <Surface style={styles.infoSection} elevation={1}>
-            <List.Item
-              title="Panel de Administrador"
-              description="Acceder al panel de control"
-              left={(props) => (
-                <List.Icon {...props} icon="shield-account" color={theme.colors.primary} />
-              )}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => router.push('/(appAdmin)/adminDashboard')}
+            <ConfirmationDialog
+              visible={logOutDialogVisible}
+              onDismiss={() => setLogOutDialogVisible(false)}
+              onConfirm={logout}
+              title="Cerrar Sesión"
+              message="¿Estás seguro que deseas cerrar sesión?"
+              confirmButtonLabel="Cerrar Sesión"
+              confirmButtonLoading={isDeleting}
             />
-          </Surface>
-        )}
 
         <Surface style={styles.infoSection} elevation={1}>
           <List.Item
@@ -199,31 +176,41 @@ export default function Profile() {
             left={(props) => (
               <List.Icon {...props} icon="delete" color={theme.colors.error} />
             )}
-            onPress={() => setDeleteDialogVisible(true)}
-            disabled={isDeleting}
-            titleStyle={{ color: theme.colors.error }}
-          />
-        </Surface>
 
-        <ConfirmationDialog
-          visible={deleteDialogVisible}
-          onDismiss={() => !isDeleting && setDeleteDialogVisible(false)}
-          onConfirm={handleDeleteAccount}
-          title="Eliminar Cuenta"
-          message="¿Estás seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer y perderás todo tu historial y datos."
-          confirmButtonDisabled={isDeleting}
-          confirmButtonLoading={isDeleting}
-        />
-      </ScrollView>
+            <Surface style={[styles.infoSection, styles.dangerSection]} elevation={1}>
+              <List.Item
+                title="Eliminar Cuenta"
+                description="Esta acción no se puede deshacer"
+                left={(props) => (
+                  <List.Icon {...props} icon="delete" color={theme.colors.error} />
+                )}
+                onPress={() => setDeleteDialogVisible(true)}
+                disabled={isDeleting}
+                titleStyle={{ color: theme.colors.error }}
+              />
+            </Surface>
 
-      <Snackbar
-        visible={snackbar.visible}
-        onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
-        duration={3000}
-        style={styles.snackbar}
-      >
-        {snackbar.message}
-      </Snackbar>
+            <ConfirmationDialog
+              visible={deleteDialogVisible}
+              onDismiss={() => !isDeleting && setDeleteDialogVisible(false)}
+              onConfirm={handleDeleteAccount}
+              title="Eliminar Cuenta"
+              message="¿Estás seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer y perderás todo tu historial y datos."
+              confirmButtonDisabled={isDeleting}
+              confirmButtonLoading={isDeleting}
+            />
+
+            <Snackbar
+              visible={snackbar.visible}
+              onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
+              duration={3000}
+              style={styles.snackbar}
+            >
+              {snackbar.message}
+            </Snackbar>
+          </ScrollView>
+        </SafeAreaView>
+      </SafeAreaProvider>
     </>
   );
 }
@@ -231,8 +218,8 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.surface,
-    paddingBottom: 80,
+    backgroundColor: theme.colors.surface, // O el que prefieras
+    paddingBottom: 80, // O comentar esta línea si no la necesitas
   },
   header: {
     alignItems: 'center',

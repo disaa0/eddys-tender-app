@@ -26,18 +26,34 @@ export default function Index() {
   const [selectedFilter, setSelectedFilter] = useState('');
   const [filterIcon, setFilterIcon] = useState('filter-list');
   const [showFilters, setShowFilters] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
   const router = useRouter();
 
   const CATEGORIES = ['Todos', 'Comida', 'Bebida'];
   const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
 
+  const onRefreshFn = async () => {
+    setLoading(true);
+    setRefreshing(true);
+    setPage(1); // Reinicia la paginación
+    try {
+      await loadProducts(); // Vuelve a cargar los productos
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const loadProducts = async () => {
     try {
+      setProducts([]);
       setError(null);
       setLoading(true);
       const response = await apiService.getProducts(page);
-      setProducts(response.data.products);
-      setTotalPages(response.data.totalPages);
+      setProducts(response?.data?.products);
+      setTotalPages(response?.data?.totalPages);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -56,7 +72,7 @@ export default function Index() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -114,18 +130,33 @@ export default function Index() {
   };
 
   const renderProduct = ({ item, index }) => (
-    <Animated.View entering={FadeInDown.delay(index * 100).springify()} layout={Layout.springify()} style={styles.productContainer}>
-      <ProductCard
-        product={{
-          ...item,
-          imageSource: require('../../assets/products/tenders.png'), // Reemplázalo con la imagen real
-        }}
-        onPress={() => router.push(`/product/${item.idProduct}`)}
-      />
-    </Animated.View>
+    <View style={{ flex: 1, padding: 8 }}>
+      <Animated.View
+        entering={FadeInDown.delay(index * 100).springify()}
+        layout={Layout.springify()}
+        style={styles.productContainer}
+      >
+        <ProductCard
+          product={{
+            ...item,
+            imageSource: require('../../assets/products/tenders.png'), // Asegúrate de tener la imagen correcta
+          }}
+          onPress={() => router.push(`/product/${item.idProduct}`)}
+        />
+      </Animated.View>
+    </View>
   );
 
+
   if (loading && page === 1) {
+    // Verificar que products ya es un arreglo no vacio para no mostrar el loading
+    if (products.length > 0) {
+      setLoading(false);
+      setError(null);
+      console.log('se verifico que products ya es un arreglo no vacio para no mostrar el loading');
+    }
+
+
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
@@ -188,6 +219,8 @@ export default function Index() {
           keyExtractor={(item) => item.idProduct.toString()}
           contentContainerStyle={styles.productList}
           ListEmptyComponent={!loading && <View style={styles.centered}><Text>No hay productos disponibles.</Text></View>}
+          refreshing={refreshing}
+          onRefresh={onRefreshFn}
           onEndReached={() => {
             if (!loading && page < totalPages) {
               setPage((prevPage) => prevPage + 1);
@@ -258,7 +291,7 @@ const styles = StyleSheet.create({
   productContainer: {
     flex: 1, // Ocupa el espacio disponible
     padding: 0, // Margen entre productos
-    maxWidth: '50%', // Máximo 50% del ancho para 2 columnas
+    maxWidth: '100%', // Máximo 50% del ancho para 2 columnas
   },
   centered: {
     flex: 1,

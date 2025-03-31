@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import AdminApiService from '../../api/AdminApiService';
 import { theme } from '../../theme';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 // Remove static data since we're using the API now
 export default function ProductDetails() {
@@ -303,60 +304,62 @@ export default function ProductDetails() {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Add header with back button */}
-      <View style={styles.header}>
-        <IconButton
-          icon="arrow-left"
-          size={24}
-          onPress={handleCancel}
-        />
-        <Text variant="titleLarge" style={styles.title}>Editar Producto</Text>
-      </View>
-
-      <ScrollView style={styles.scrollView}>
-        <Card style={styles.card}>
-          <Card.Content style={styles.content}>
-            <TextInput
-              mode="outlined"
-              label="Nombre del producto *"
-              value={form.name}
-              multiline
-              numberOfLines={1}
-              onChangeText={(text) => handleChange('name', text)}
-              style={[styles.input, { textAlignVertical: 'top', height: 100 }]}
-              placeholder="Ingrese el nombre del producto"
-              maxLength={50}
-              right={<TextInput.Affix text={`${form.name.length}/50`} />}
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
+        <View style={styles.container}>
+          {/* Add header with back button */}
+          <View style={styles.header}>
+            <IconButton
+              icon="arrow-left"
+              size={24}
+              onPress={handleCancel}
             />
+            <Text variant="titleLarge" style={styles.title}>Editar Producto</Text>
+          </View>
 
-            <TextInput
-              mode="outlined"
-              label="Precio *"
-              value={form.price}
-              onChangeText={(text) => handleChange('price', text)}
-              keyboardType="decimal-pad"
-              style={styles.input}
-              placeholder="0.00"
-              left={<TextInput.Affix text="$" />}
-              right={<TextInput.Affix text={form.price ? `$${parseFloat(form.price).toFixed(2)}` : '$0.00'} />}
-            />
+          <ScrollView style={styles.scrollView}>
+            <Card style={styles.card}>
+              <Card.Content style={styles.content}>
+                <TextInput
+                  mode="outlined"
+                  label="Nombre del producto *"
+                  value={form.name}
+                  multiline
+                  numberOfLines={1}
+                  onChangeText={(text) => handleChange('name', text)}
+                  style={[styles.input, { textAlignVertical: 'top', height: 100 }]}
+                  placeholder="Ingrese el nombre del producto"
+                  maxLength={50}
+                  right={<TextInput.Affix text={`${form.name.length}/50`} />}
+                />
 
-            <TextInput
-              mode="outlined"
-              label="Descripción *"
-              value={form.description}
-              onChangeText={(text) => handleChange('description', text)}
-              multiline
-              numberOfLines={3}
-              style={[styles.input, { textAlignVertical: 'center' }]}
-              placeholder="Describa el producto"
-              maxLength={500}
-              right={<TextInput.Affix text={`${form.description.length}/500`} />}
-            />
+                <TextInput
+                  mode="outlined"
+                  label="Precio *"
+                  value={form.price}
+                  onChangeText={(text) => handleChange('price', text)}
+                  keyboardType="decimal-pad"
+                  style={styles.input}
+                  placeholder="0.00"
+                  left={<TextInput.Affix text="$" />}
+                  right={<TextInput.Affix text={form.price ? `$${parseFloat(form.price).toFixed(2)}` : '$0.00'} />}
+                />
 
-            {/* CAMBIAR SI SE PIDE */}
-            {/* <View style={styles.switchContainer}>
+                <TextInput
+                  mode="outlined"
+                  label="Descripción *"
+                  value={form.description}
+                  onChangeText={(text) => handleChange('description', text)}
+                  multiline
+                  numberOfLines={3}
+                  style={[styles.input, { textAlignVertical: 'center' }]}
+                  placeholder="Describa el producto"
+                  maxLength={500}
+                  right={<TextInput.Affix text={`${form.description.length}/500`} />}
+                />
+
+                {/* CAMBIAR SI SE PIDE */}
+                {/* <View style={styles.switchContainer}>
               <Text>Estado del producto</Text>
               <Switch
                 value={form.status}
@@ -364,89 +367,91 @@ export default function ProductDetails() {
                 color={theme.colors.primary}
               />
             </View> */}
-          </Card.Content>
-        </Card>
+              </Card.Content>
+            </Card>
 
-        <Card style={styles.card}>
-          <Card.Title title="Personalizaciones" />
-          <Card.Content>
-            <Button
-              mode="contained"
-              onPress={() => setPersonalizationDialog(true)}
-              style={styles.button}
-              icon="plus"
-            >
-              Agregar Personalización
-            </Button>
+            <Card style={styles.card}>
+              <Card.Title title="Personalizaciones" />
+              <Card.Content>
+                <Button
+                  mode="contained"
+                  onPress={() => setPersonalizationDialog(true)}
+                  style={styles.button}
+                  icon="plus"
+                >
+                  Agregar Personalización
+                </Button>
 
-            {personalizations.map((item) => (
-              <List.Item
-                key={item.idProductPersonalization}
-                title={item.personalization.name}
-                right={(props) => (
-                  <Switch
-                    value={item.status}
-                    onValueChange={(value) => handleTogglePersonalization(item.idProductPersonalization, value)}
+                {personalizations.map((item) => (
+                  <List.Item
+                    key={item.idProductPersonalization}
+                    title={item.personalization.name}
+                    right={(props) => (
+                      <Switch
+                        value={item.status}
+                        onValueChange={(value) => handleTogglePersonalization(item.idProductPersonalization, value)}
+                      />
+                    )}
                   />
-                )}
-              />
-            ))}
-          </Card.Content>
-        </Card>
+                ))}
+              </Card.Content>
+            </Card>
 
-        <View style={styles.buttonContainer}>
-          <Button
-            mode="contained"
-            onPress={handleSave}
-            style={styles.button}
-            icon="content-save"
-          >
-            Guardar Cambios
-          </Button>
+            <View style={styles.buttonContainer}>
+              <Button
+                mode="contained"
+                onPress={handleSave}
+                style={styles.button}
+                icon="content-save"
+              >
+                Guardar Cambios
+              </Button>
 
-          <Button
-            mode="outlined"
-            onPress={handleCancel}
-            style={styles.button}
-            icon="close"
+              <Button
+                mode="outlined"
+                onPress={handleCancel}
+                style={styles.button}
+                icon="close"
+              >
+                Cancelar
+              </Button>
+            </View>
+          </ScrollView>
+
+          {/* Add Snackbar for messages */}
+          <Snackbar
+            visible={snackbar.visible}
+            onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
+            duration={2000}
+            style={styles.snackbar}
           >
-            Cancelar
-          </Button>
+            {snackbar.message}
+          </Snackbar>
+
+          <Portal>
+            <Dialog
+              visible={personalizationDialog}
+              onDismiss={() => setPersonalizationDialog(false)}
+            >
+              <Dialog.Title>Nueva Personalización</Dialog.Title>
+              <Dialog.Content>
+                <TextInput
+                  mode="outlined"
+                  label="Nombre"
+                  value={newPersonalization.name}
+                  onChangeText={(text) => setNewPersonalization({ ...newPersonalization, name: text })}
+                  style={styles.input}
+                />
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button onPress={() => setPersonalizationDialog(false)}>Cancelar</Button>
+                <Button onPress={handleUpdatePersonalization}>Guardar</Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
         </View>
-      </ScrollView>
-
-      {/* Add Snackbar for messages */}
-      <Snackbar
-        visible={snackbar.visible}
-        onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
-        duration={2000}
-        style={styles.snackbar}
-      >
-        {snackbar.message}
-      </Snackbar>
-
-      <Portal>
-        <Dialog
-          visible={personalizationDialog}
-          onDismiss={() => setPersonalizationDialog(false)}
-        >
-          <Dialog.Title>Nueva Personalización</Dialog.Title>
-          <Dialog.Content>
-            <TextInput
-              mode="outlined"
-              label="Nombre"
-              value={newPersonalization.name}
-              onChangeText={(text) => setNewPersonalization({ ...newPersonalization, name: text })}
-              style={styles.input}
-            />
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setPersonalizationDialog(false)}>Cancelar</Button>
-            <Button onPress={handleUpdatePersonalization}>Guardar</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
