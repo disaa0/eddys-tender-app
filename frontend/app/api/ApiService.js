@@ -50,6 +50,10 @@ class ApiService extends BaseApiService {
         return this.request(`/cart/items/${idProduct}`, 'PUT', { idProduct, quantity });
     }
 
+    async addOneToCartItem(idProduct) {
+        return this.request(`/cart/items/addOneItem/${idProduct}`, 'PUT');
+    }
+
     async createOrder(idPaymentType, idShipmentType, idLocation) {
         return this.request('/orders', 'POST', { idPaymentType, idShipmentType, idLocation });
     }
