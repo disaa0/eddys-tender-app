@@ -1,4 +1,4 @@
-const { addItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService } = require('../services/cart.service');
+const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService } = require('../services/cart.service');
 
 const addItemToCart = async (req, res) => {
     const { idProduct } = req.params;
@@ -37,6 +37,43 @@ const addItemToCart = async (req, res) => {
 
     }
 };
+
+const addOneItemToCart = async (req, res) => {
+    const { idProduct } = req.params;
+    const userId = req.user.userId; // Se obtiene del middleware de autenticación
+
+    try {
+        const result = await addOneItemToCartService(userId, idProduct);
+
+        return res.status(200).json({
+            message: "Cantidad del producto actualizada en el carrito",
+            cartId: result.cartId,
+            item: result.item
+        });
+    } catch (error) {
+        let status = 400;
+        let message = error.message;
+
+        // Customize error messages based on the error
+        switch (error.message) {
+            case 'Producto no encontrado':
+                status = 404;
+                message = 'Producto no encontrado';
+                break;
+            case 'El producto esta inactivo y no se puede agregar al carrito':
+                status = 403;
+                message = 'El producto esta inactivo y no se puede agregar al carrito';
+                break;
+            case 'cantidad maxima alcanzada':
+                status = 406;
+                message = 'No se puede agregar más de 100 unidades del mismo producto';
+                break;
+            default:
+                message = 'Error en la peticion';
+        }
+        return res.status(status).json({ message });
+    }
+}
 
 const softDeleteItemFromCart = async (req, res) => {
     const { idProduct } = req.params;
@@ -98,5 +135,5 @@ const getTotalAmountCart = async (req, res) => {
 }
 
 module.exports = {
-    addItemToCart, softDeleteItemFromCart, getItemsCart, getTotalAmountCart
+    addItemToCart, addOneItemToCart, softDeleteItemFromCart, getItemsCart, getTotalAmountCart
 };

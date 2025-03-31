@@ -995,7 +995,43 @@ Authorization: Bearer <token>
 - 404: Producto no encontrado
 - 500: Error del servidor
 
-### 10.6 Modificar cantidad de un producto en el carrito
+### 10.6 Agregar un solo un producto directamente al carrito
+
+**PUT /cart/items/addOneItem/{id}**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (201):**
+
+```json
+{
+  "message": "Cantidad del producto actualizada en el carrito",
+  "cartId": 1,
+  "item": {
+      "idItemCart": 1,
+      "idCart": 1,
+      "idProduct": 1,
+      "quantity": 1,
+      "individualPrice": 89,
+      "status": true
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Error de solicitud
+- 403: El producto esta inactivo y no se puede agregar al carrito
+- 404: Producto no encontrado
+- 406: No se puede agregar más de 100 unidades del mismo producto
+- 500: Error del servidor
+
+### 10.7 Modificar cantidad de un producto en el carrito
 
 **PUT /cart/items/{id}**
 
@@ -1033,7 +1069,7 @@ Authorization: Bearer <token>
 - 404: Producto no encontrado
 - 500: Error del servidor
 
-### 10.7 Eliminar un producto en el carrito
+### 10.8 Eliminar un producto en el carrito
 
 **DELETE /cart/items/{id}**
 
@@ -1071,7 +1107,7 @@ Authorization: Bearer <token>
 - 403: Esta producto ya ha sido desactivado en el carrito o este no existe en carrito.
 - 500: Error del servidor
 
-### 10.8 Ver productos en el carrito
+### 10.9 Ver productos en el carrito
 
 **GET /cart/**
 
@@ -1117,7 +1153,7 @@ Authorization: Bearer <token>
 - 400: Error de peticion
 - 500: Error del servidor
 
-### 10.9 Ver monto total de productos en el carrito
+### 10.10 Ver monto total de productos en el carrito
 
 **GET /cart/total**
 
@@ -1146,7 +1182,7 @@ Authorization: Bearer <token>
 - 400: Error de peticion
 - 500: Error del servidor
 
-### 10.10 Obtener imagen de un producto
+### 10.11 Obtener imagen de un producto
 
 **GET /api/products/:id/image**
 
@@ -1169,7 +1205,7 @@ Obtiene la imagen de un producto específico.
 - 404: Imagen no encontrada en el servidor
 - 500: Error al obtener la imagen del producto
 
-### 10.11 Subir imagen de un producto (Admin)
+### 10.12 Subir imagen de un producto (Admin)
 
 **POST /api/admin/products/:id/image**
 
@@ -1228,7 +1264,7 @@ Content-Type: multipart/form-data
 - 403: Usuario no es administrador
 - 500: Error al subir la imagen del producto
 
-### 10.12 Buscar productos
+### 10.13 Buscar productos
 
 **GET /api/products/search**
 
@@ -1302,7 +1338,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.13 Obtener Productos Populares
+### 10.14 Obtener Productos Populares
 
 **GET /api/products/popular**
 
@@ -1350,7 +1386,7 @@ limit: Número de productos a retornar (default: 5)
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.14 Obetner detalles del producto por ID
+### 10.15 Obetner detalles del producto por ID
 
 **GET /products/{id}**
 
@@ -1413,7 +1449,7 @@ Authorization: Bearer <token>
 - 404: No se encontro el producto
 - 500: Error del servidor
 
-### 10.15 Editar Personalización de Producto para usuarios
+### 10.16 Editar Personalización de Producto para usuarios
 
 **PUT /api/products/{id}/user/personalization**
 
@@ -1473,7 +1509,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.16 Obtner Personalizaciónes de Producto para usuarios
+### 10.17 Obtner Personalizaciónes de Producto para usuarios
 
 **GET /api/products/{id}/user/personalizations**
 
@@ -1538,7 +1574,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.17 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
+### 10.18 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
 
 **PACTH /api/products/{idProduct}/user/personalization/{idProductPersonalization}/status**
 

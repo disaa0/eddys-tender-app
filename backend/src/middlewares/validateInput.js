@@ -133,6 +133,25 @@ const validateAddItemToCart = (req, res, next) => {
     }
 };
 
+const validateAddOneItemToCart = (req, res, next) => {
+    const schema = z.object({
+        idProduct: z.string().regex(/^\d+$/, "El id del producto debe ser un número entero").transform(Number).refine(val => val > 0, {
+            message: "El id del producto debe ser un número entero mayor que 0"
+        }),
+    });
+
+    try {
+        const validatedData = schema.parse({
+            idProduct: req.params.idProduct,
+        });
+
+        req.validatedData = validatedData;
+        next();
+    } catch (error) {
+        return res.status(400).json({ message: "Error de validación", errors: error.errors });
+    }
+};
+
 const validateDeleteItemFromCart = (req, res, next) => {
     const schema = z.object({
         idProduct: z.number().int().positive("El ID del producto debe ser un número entero positivo"),
@@ -221,5 +240,5 @@ module.exports = {
     validateEmailUpdate,
     validateCustomization,
     productSchema, productDetailsSchema, validateAddItemToCart, validateDeleteItemFromCart,
-    validateSearchQuery, validateShippingAddress, validateIdParam
+    validateSearchQuery, validateShippingAddress, validateIdParam, validateAddOneItemToCart
 };

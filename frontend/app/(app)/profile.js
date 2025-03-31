@@ -134,7 +134,6 @@ export default function Profile() {
                 onPress={() => router.push('/profile/address')}
               />
             </Surface>
-
             <Surface style={styles.infoSection} elevation={1}>
               <List.Item
                 title="Historial de Pedidos"
@@ -170,19 +169,12 @@ export default function Profile() {
               confirmButtonLoading={isDeleting}
             />
 
-            {/* Add Admin Access section if user is admin */}
-            {user?.idUserType === 1 && (
-              <Surface style={styles.infoSection} elevation={1}>
-                <List.Item
-                  title="Panel de Administrador"
-                  description="Acceder al panel de control"
-                  left={(props) => (
-                    <List.Icon {...props} icon="shield-account" color={theme.colors.primary} />
-                  )}
-                  right={(props) => <List.Icon {...props} icon="chevron-right" />}
-                  onPress={() => router.push('/(appAdmin)/adminDashboard')}
-                />
-              </Surface>
+        <Surface style={styles.infoSection} elevation={1}>
+          <List.Item
+            title="Eliminar Cuenta"
+            description="Esta acción no se puede deshacer"
+            left={(props) => (
+              <List.Icon {...props} icon="delete" color={theme.colors.error} />
             )}
 
             <Surface style={[styles.infoSection, styles.dangerSection]} elevation={1}>
@@ -226,8 +218,8 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-    // paddingBottom: 500,
+    backgroundColor: theme.colors.surface, // O el que prefieras
+    paddingBottom: 80, // O comentar esta línea si no la necesitas
   },
   header: {
     alignItems: 'center',
@@ -273,10 +265,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     backgroundColor: theme.colors.error,
-  },
-  dangerSection: {
-    marginTop: 32,
-    marginBottom: 32,
   },
   adminSection: {
     marginTop: 16,
