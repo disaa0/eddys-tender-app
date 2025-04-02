@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons'; // Importar iconos de Expo
 import apiService from '../../api/ApiService';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import PersonalizationList from '../../components/PersonalizationList';
 
 const defaultImage = require('../../../assets/products/tenders.png');
 
@@ -15,6 +16,9 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState('1');
   const [product, setProduct] = useState(null);
   const [productImage, setProductImage] = useState(defaultImage);
+  const [personalizations, setPersonalizations] = useState([]);
+  const [showPersonalizations, setShowPersonalizations] = useState(false);
+  const [selectedPersonalizations, setSelectedPersonalizations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const addProductToCart = async (idprod, quantity) => {
@@ -42,6 +46,7 @@ export default function ProductDetails() {
   useEffect(() => {
     if (!isNaN(productId)) {
       loadProductDetails();
+      loadProductPersonalizations(productId);
     }
   }, [productId]);
 
@@ -69,6 +74,29 @@ export default function ProductDetails() {
     }
   };
 
+  const handleShowPersonalizations = () => {
+    if (personalizations.length > 0) {
+      console.log('Personalizaciones disponibles:', personalizations);
+      // Aquí puedes mostrar un modal o una pantalla con las personalizaciones disponibles
+      setShowPersonalizations(true);
+    } else {
+      console.log('No hay personalizaciones disponibles para este producto.');
+    }
+  }
+
+  const loadProductPersonalizations = async (productId) => {
+    try {
+      const response = await apiService.getProductPersonalizations(productId);
+      console.log('Personalizaciones:', response);
+
+      if (response?.data?.personalizations && response.data.personalizations.length > 0) {
+        setPersonalizations(response.data.personalizations);
+      }
+    } catch (error) {
+      console.error('Error al cargar personalizaciones:', error);
+    }
+  };
+
   const handleGoBack = () => {
     // Devolver los valores a su estado inicial
     // setProduct(null);
@@ -88,9 +116,10 @@ export default function ProductDetails() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={[styles.safeArea, { paddingTop: 100 }]} edges={['top']}>
-        <ScrollView style={styles.container}>
-          <Card>
+      <SafeAreaView style={[styles.safeArea,]} edges={['top']}>
+        <View style={styles.mainContainer}>
+          {/* <ScrollView style={styles.scrollContainer} > */}
+          <Card style={{ borderRadius: 20, overflow: 'hidden', flex: 1 }}>
             {/* Contenedor de imagen con botón de regreso */}
             <View style={styles.imageContainer}>
               <Card.Cover source={typeof productImage === 'string' ? { uri: productImage } : productImage} style={styles.image} />
@@ -107,23 +136,43 @@ export default function ProductDetails() {
                   {product.description}
                 </Text>
               </View>
-              <View style={styles.quantityContainer}>
-                <TouchableOpacity
-                  onPress={() => setQuantity(prev => Math.max(1, parseInt(prev) - 1))}
-                  style={styles.quantityButton}
-                >
-                  <Text style={styles.quantityText}>−</Text>
-                </TouchableOpacity>
+              {!showPersonalizations && (
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity
+                    onPress={() => setQuantity(prev => Math.max(1, parseInt(prev) - 1))}
+                    style={styles.quantityButton}
+                  >
+                    <Text style={styles.quantityText}>−</Text>
+                  </TouchableOpacity>
 
-                <Text style={styles.quantityNumber}>{quantity}</Text>
+                  <Text style={styles.quantityNumber}>{quantity}</Text>
 
-                <TouchableOpacity
-                  onPress={() => setQuantity(prev => (parseInt(prev) + 1).toString())}
-                  style={styles.quantityButton}
-                >
-                  <Text style={styles.quantityText}>+</Text>
-                </TouchableOpacity>
-              </View>
+                  <TouchableOpacity
+                    onPress={() => setQuantity(prev => (parseInt(prev) + 1).toString())}
+                    style={styles.quantityButton}
+                  >
+                    <Text style={styles.quantityText}>+</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.cartButton}
+                    onPress={() => { handleShowPersonalizations() }}
+                  >
+                    <Text style={styles.cartText}>
+                      Personalizar
+                    </Text>
+                  </TouchableOpacity>
+                </View>)}
+
+              {/* lista de personalizaciones con su respectivo check */}
+              {showPersonalizations && (
+                <PersonalizationList
+                  personalizations={personalizations}
+                  selectedPersonalizations={selectedPersonalizations}
+                  setSelectedPersonalizations={setSelectedPersonalizations}
+                  setShowPersonalizations={setShowPersonalizations}
+                />
+              )}
             </Card.Content>
           </Card>
           <View style={styles.bottomContainer}>
@@ -140,7 +189,8 @@ export default function ProductDetails() {
               </Text>
             </TouchableOpacity>
           </View>
-        </ScrollView >
+          {/* </ScrollView > */}
+        </View>
       </SafeAreaView>
     </SafeAreaProvider >
   );
@@ -151,10 +201,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  container: {
-    flex: 1,
+  mainContainer: {
+    flex: 1, // Para que ocupe toda la pantalla
+    backgroundColor: '#fff',
+    paddingTop: StatusBar.currentHeight,
+    paddingHorizontal: 10,
 
-
+  },
+  content: {
+    flexGrow: 1, // Para que el contenido crezca y ocupe el espacio disponible
+    justifyContent: 'space-between', // Distribuye los elementos en la pantalla
   },
   imageContainer: {
     position: 'relative',
@@ -174,21 +230,14 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-  content: {
-    padding: 16,
-    flexGrow: 1, // Permite que el contenido crezca sin afectar el footer
-  },
   bottomContainer: {
-    position: '',
-    bottom: 0,
-    width: '100%',
-    backgroundColor: 'white',
+    width: "100%",
+    backgroundColor: "white",
     padding: 16,
-    flexDirection: 'row', // Botones en fila
-    alignItems: 'center',
-    justifyContent: 'space-between', // Espacio entre los botones
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-
   priceButton: {
     backgroundColor: '#E74C3C', // Color rojo similar a la imagen
     paddingVertical: 10,
@@ -231,13 +280,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   quantityContainer: {
-    height: '35vh',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    // marginBottom: 16,
-  },
+    marginTop: 100,
+    marginBottom: 100,
 
+  },
   quantityButton: {
     backgroundColor: '#E74C3C', // Color rojo similar a la imagen
     paddingVertical: 10,

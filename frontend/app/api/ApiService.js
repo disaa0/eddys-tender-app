@@ -89,6 +89,10 @@ class ApiService extends BaseApiService {
     async updateShippingAddress(id, street, houseNumber, postalCode, neighborhood) {
         return this.request(`/shipping-address/${id}`, 'PUT', { street, houseNumber, postalCode, neighborhood });
     }
+
+    async getProductPersonalizations(idProduct) {
+        return this.request(`/products/${idProduct}/user/personalizations`, 'GET');
+    }
 }
 
 const apiService = new ApiService();
