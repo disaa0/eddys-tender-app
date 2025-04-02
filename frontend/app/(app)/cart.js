@@ -59,7 +59,19 @@ export default function Cart() {
 
 
   if (error) {
-    return <Text style={styles.error}>Error al cargar el carrito</Text>;
+    console.log(error);
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error al cargar el carrito</Text>
+        <Text style={styles.errorTextDescription}>{error.Error}</Text>
+        <TouchableOpacity
+          onPress={() => router.push('/')}
+          style={styles.goBackButton}
+        >
+          <Text style={styles.goBackButtonText}>Regresar</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   return (

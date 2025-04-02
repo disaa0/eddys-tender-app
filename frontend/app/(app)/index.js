@@ -12,18 +12,25 @@ import SortChips from '../components/SortChips';
 import AdminApiService from '../api/AdminApiService';
 import { useFocusEffect } from '@react-navigation/native';
 import apiService from '../api/ApiService';
+import useUserProducts from '../hooks/useUserProducts';
 
 const logo = require('../../assets/eddys.png');
 
 export default function Index() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const {
+    products,
+    loading,
+    error,
+    page,
+    totalPages,
+    setPage,
+    selectedFilter,
+    setSelectedFilter,
+    loadPopularProducts,
+    refreshProducts,
+  } = useUserProducts();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [selectedFilter, setSelectedFilter] = useState('');
   const [filterIcon, setFilterIcon] = useState('filter-list');
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -61,28 +68,13 @@ export default function Index() {
     }
   };
 
-  const loadPopularProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await AdminApiService.getPopularProducts();
-      console.log(response)
-      setProducts(response.data.products);
-      setTotalPages(response.data.totalPages);
-
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      // setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadProducts();
-  }, [page]);
+  // useEffect(() => {
+  //   loadProducts();
+  // }, [page]);
 
   useFocusEffect(
     useCallback(() => {
-      loadProducts();
+      refreshProducts();
     }, [])
   );
 
@@ -92,8 +84,8 @@ export default function Index() {
       setFilterIcon('filter-list');
     } else if (filter === 'Más pedidos') {
       setFilterIcon('star');
-      setSelectedFilter(filter)
-      loadPopularProducts()
+      setSelectedFilter(filter);
+      loadPopularProducts();
     } else {
       setSelectedFilter(filter);
       setFilterIcon(filter);
@@ -125,7 +117,7 @@ export default function Index() {
     return getFilteredProducts().sort((a, b) => {
       if (selectedFilter === 'A-Z') return a.name.localeCompare(b.name);
       if (selectedFilter === 'Z-A') return b.name.localeCompare(a.name);
-      return 0;
+      return a.name.localeCompare(b.name);
     });
   };
 
@@ -139,7 +131,7 @@ export default function Index() {
         <ProductCard
           product={{
             ...item,
-            imageSource: require('../../assets/products/tenders.png'), // Asegúrate de tener la imagen correcta
+            imageSource: require('../../assets/products/tenders.png'),
           }}
           onPress={() => router.push(`/product/${item.idProduct}`)}
         />
@@ -149,14 +141,6 @@ export default function Index() {
 
 
   if (loading && page === 1) {
-    // Verificar que products ya es un arreglo no vacio para no mostrar el loading
-    if (products.length > 0) {
-      setLoading(false);
-      setError(null);
-      console.log('se verifico que products ya es un arreglo no vacio para no mostrar el loading');
-    }
-
-
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
@@ -168,7 +152,7 @@ export default function Index() {
     return (
       <View style={styles.centered}>
         <Text>Error: {error}</Text>
-        <Button mode="contained" onPress={loadProducts} style={{ marginTop: 10 }}>
+        <Button mode="contained" onPress={refreshProducts} style={{ marginTop: 10 }}>
           Reintentar
         </Button>
       </View>
@@ -178,7 +162,6 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-
         <Animated.View entering={FadeInUp.duration(800)} style={styles.logoContainer}>
           <Image source={logo} style={styles.logo} />
         </Animated.View>
@@ -208,28 +191,34 @@ export default function Index() {
           </Animated.View>
         )}
 
-        <View style={styles.categoriesContainer}>
-          <CategoryChips categories={CATEGORIES} selectedCategory={selectedCategory} onSelect={setSelectedCategory} horizontal={true} />
-        </View>
-
         <FlatList
           data={getSortedProducts()}
           numColumns={2}
           renderItem={renderProduct}
           keyExtractor={(item) => item.idProduct.toString()}
           contentContainerStyle={styles.productList}
-          ListEmptyComponent={!loading && <View style={styles.centered}><Text>No hay productos disponibles.</Text></View>}
           refreshing={refreshing}
-          onRefresh={onRefreshFn}
+          ListEmptyComponent={
+            <View style={styles.centered}>
+              <Text>No hay productos disponibles</Text>
+            </View>
+          }
+          ListHeaderComponent={
+            <>
+              <CategoryChips categories={CATEGORIES} selectedCategory={selectedCategory} onSelect={setSelectedCategory} />
+              {loading && <ActivityIndicator size="large" />}
+            </>
+          }
+          ListHeaderComponentStyle={{ paddingHorizontal: 16, marginBottom: 10 }}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          stickyHeaderIndices={[0]}
+          onRefresh={refreshProducts}
           onEndReached={() => {
-            if (!loading && page < totalPages) {
-              setPage((prevPage) => prevPage + 1);
-            }
+            if (!loading && page < totalPages) setPage((prevPage) => prevPage + 1);
           }}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={loading && page > 1 ? <ActivityIndicator style={styles.loadingMore} /> : null}
         />
-
       </View>
     </SafeAreaView>
   );
