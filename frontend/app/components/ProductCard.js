@@ -21,6 +21,7 @@ export default function ProductCard({ product, onPress }) {
 
       if (response.status === 200 || response?.cartId > 0) {
         setDialogVisible(true);
+        setDialogMessage(response.message);
       }
 
     } catch (error) {
@@ -36,8 +37,8 @@ export default function ProductCard({ product, onPress }) {
     <Surface style={styles.card} elevation={1}>
       <TouchableRipple onPress={onPress} style={styles.touchable}>
         <View style={styles.cardContainer}>
-          {/* Wrap content in a View with overflow: 'hidden' */}
-          <View style={styles.cardContentWrapper}>
+          {/* Envolver el contenido en un View separado con overflow hidden */}
+          <View style={styles.contentWrapper}>
             {imageSource && (
               <Image
                 source={imageSource}
@@ -49,7 +50,6 @@ export default function ProductCard({ product, onPress }) {
               <Text style={styles.cardTitle}>{name}</Text>
               {description && <Text style={styles.cardDescription}>{description}</Text>}
             </View>
-            {/* New container for price and cart button */}
             <View style={styles.priceAndCartContainer}>
               <Text style={styles.cardPrice}>${price.toFixed(2)}</Text>
               <Pressable
@@ -66,17 +66,24 @@ export default function ProductCard({ product, onPress }) {
         </View>
       </TouchableRipple>
 
-      {/* Mostrar el diálogo de confirmación si dialogVisible es true */}
       <ConfirmationDialog
         visible={dialogVisible}
-        onDismiss={() => setDialogVisible(false)} // Cerrar el diálogo al presionar "OK"
+        onDismiss={() => setDialogVisible(false)}
         title="Producto agregado"
-        message="El producto ha sido agregado al carrito."
-        onConfirm={() => setDialogVisible(false)} // Cerrar el diálogo
+        message={dialogMessage || 'El producto ha sido agregado al carrito.'}
+        onConfirm={() => setDialogVisible(false)}
+        confirmButtonLabel="Aceptar"
         cancelButtonLabel=''
-        confirmButtonLabel='OK'
+        onCancel={() => setDialogVisible(false)}
+        loading={loading}
+        error={error}
+        onErrorDismiss={() => setError('')}
+        onLoadingDismiss={() => setLoading('')}
       />
     </Surface>
+
+
+
   );
 }
 
@@ -85,8 +92,11 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 4,
     borderRadius: 12,
-    overflow: 'hidden',
     backgroundColor: '#fff',
+  },
+  contentWrapper: {
+    overflow: 'hidden', // Mover overflow a este View
+    borderRadius: 12,
   },
   touchable: {
     flex: 1,
