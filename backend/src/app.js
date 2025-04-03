@@ -22,7 +22,7 @@ app.use(cors({
 // Rate limiting configuration
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 10000, // limit each IP to 100 requests per windowMs
   message: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo después de 15 minutos'
 });
 
@@ -32,7 +32,7 @@ app.use('/api/webhooks', webhookRoutes);
 
 // Middlewares básicos - applied to all routes EXCEPT webhooks
 app.use(express.json());
-app.use(limiter);
+// app.use(limiter);
 app.use(cors());
 
 // Serve static files from the 'uploads' directory
