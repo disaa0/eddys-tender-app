@@ -8,7 +8,7 @@ const { handleProductImageUpload } = require('../middlewares/upload.middleware')
 const { validateRegister } = require('../middlewares/validateInput');
 const { registerAdmin } = require('../controllers/auth.controller');
 const adminController = require('../controllers/admin.controller');
-const { getOrdersByDateRange } = require('../controllers/adminOrder.controller');
+const { getOrdersByDateRange, updateOrderStatus } = require('../controllers/adminOrder.controller');
 
 // Apply authentication middleware to all admin routes
 router.use(authenticateToken);
@@ -26,6 +26,7 @@ router.post('/register', isAdmin, validateRegister, registerAdmin);
 
 // Admin order routes
 router.get('/orders', isAdmin, getOrdersByDateRange);
+router.patch('/order/:id', isAdmin, updateOrderStatus);
 
 // New route for uploading product images
 router.post('/products/:id/image', isAdmin, handleProductImageUpload, uploadProductImage);
