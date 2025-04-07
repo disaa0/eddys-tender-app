@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Cart() {
   const router = useRouter();
-  const { cartItems, loading, error, updateQuantity, removeItem, refreshCart } = useCart();
+  const { cartItems, loading, error, personalizacion, updateQuantity, removeItem, refreshCart } = useCart();
 
   useFocusEffect(
     useCallback(() => {
@@ -73,6 +73,9 @@ export default function Cart() {
       </View>
     );
   }
+
+  console.log(cartItems);
+  console.log(personalizacion);
 
   return (
     <SafeAreaView style={styles.safeArea}>
