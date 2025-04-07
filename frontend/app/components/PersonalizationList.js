@@ -3,15 +3,31 @@ import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native
 import { Ionicons } from '@expo/vector-icons';
 import { Checkbox } from 'react-native-paper';
 import { theme } from '../theme';
+import apiService from '../api/ApiService';
 
-const PersonalizationList = ({ personalizations, selectedPersonalizations, setSelectedPersonalizations, setShowPersonalizations }) => {
-    const toggleSelection = (name) => {
-        if (selectedPersonalizations.includes(name)) {
-            setSelectedPersonalizations(selectedPersonalizations.filter(item => item !== name));
+const PersonalizationList = ({ personalizations, selectedPersonalizations, setSelectedPersonalizations, setShowPersonalizations, setError }) => {
+    const toggleSelection = async (idProduct, idPersonalization, estatus) => {
+        console.log(idProduct, idPersonalization, estatus)
+        try {
+            const res = await apiService.setProductPersonalizationsStatus(idProduct, idPersonalization, estatus)
+
+            console.log(res)
+
+        } catch (error) {
+            console.log(error.message)
+            setError(error.message)
+        }
+
+
+
+        if (selectedPersonalizations.includes(idPersonalization)) {
+            setSelectedPersonalizations(selectedPersonalizations.filter(item => item !== idPersonalization));
         } else {
-            setSelectedPersonalizations([...selectedPersonalizations, name]);
+            setSelectedPersonalizations([...selectedPersonalizations, idPersonalization]);
         }
     };
+
+    // console.log(personalizations)
 
     return (
         <View style={styles.container}>
@@ -29,9 +45,10 @@ const PersonalizationList = ({ personalizations, selectedPersonalizations, setSe
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={styles.personalizationItem}
-                        onPress={() => toggleSelection(item.personalization.name)}
+                        onPress={() => toggleSelection(item.idProduct, item.idProductPersonalization, selectedPersonalizations.includes(item.idProductPersonalization) ? false : true)}
                     >
-                        {selectedPersonalizations.includes(item.personalization.name) ? (
+                        {selectedPersonalizations.includes(item.idProductPersonalization) ? (
+                            // {selectedPersonalizations.includes(item.personalization.name) ? (
                             <Ionicons name="checkbox" size={24} color={theme.colors.primary} />
                         ) : (
                             <Ionicons name="square-outline" size={24} color="#aaa" />

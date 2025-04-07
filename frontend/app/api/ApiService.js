@@ -93,6 +93,10 @@ class ApiService extends BaseApiService {
     async getProductPersonalizations(idProduct) {
         return this.request(`/products/${idProduct}/user/personalizations`, 'GET');
     }
+
+    async setProductPersonalizationsStatus(idProduct, idProductPersonalization, estatus) {
+        return this.request(`/products/${idProduct}}/user/personalization/${idProductPersonalization}/status`, 'PATCH', { estatus });
+    }
 }
 
 const apiService = new ApiService();

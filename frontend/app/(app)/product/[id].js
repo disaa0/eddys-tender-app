@@ -21,6 +21,7 @@ export default function ProductDetails() {
   const [showPersonalizations, setShowPersonalizations] = useState(false);
   const [selectedPersonalizations, setSelectedPersonalizations] = useState([]);
   const [showPopUpPersonalizationsEmpty, setShowPopUpPersonalizationsEmpty] = useState(false);
+  const [errorPersonalization, setErrorPersonalization] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const addProductToCart = async (idprod, quantity) => {
@@ -177,6 +178,7 @@ export default function ProductDetails() {
                   selectedPersonalizations={selectedPersonalizations}
                   setSelectedPersonalizations={setSelectedPersonalizations}
                   setShowPersonalizations={setShowPersonalizations}
+                  setError={setErrorPersonalization}
                 />
               )}
             </Card.Content>
@@ -205,6 +207,17 @@ export default function ProductDetails() {
           message="No hay personalizaciones disponibles para este producto."
           cancelButtonLabel=''
           confirmButtonLabel=""
+          confirmButtonDisabled={false}
+          confirmButtonLoading={false}
+        />
+        <ConfirmationDialog
+          visible={errorPersonalization}
+          onDismiss={() => setErrorPersonalization(null)}
+          onConfirm={() => setErrorPersonalization(null)}
+          title="¡Ups!"
+          message={errorPersonalization}
+          cancelButtonLabel=''
+          confirmButtonLabel="Cerrar"
           confirmButtonDisabled={false}
           confirmButtonLoading={false}
         />
