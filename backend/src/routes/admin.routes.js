@@ -27,6 +27,9 @@ router.post('/register', isAdmin, validateRegister, registerAdmin);
 // Admin order routes
 router.get('/orders/history', isAdmin, getOrderHistory);
 router.get('/orders/current', isAdmin, getActiveOrders);
+router.get('/orders', isAdmin, getOrdersByDateRange);
+router.get('/orders/:id', isAdmin, getOrderById);
+router.patch('/order/:id', isAdmin, updateOrderStatus);
 
 // New route for uploading product images
 router.post('/products/:id/image', isAdmin, handleProductImageUpload, uploadProductImage);
