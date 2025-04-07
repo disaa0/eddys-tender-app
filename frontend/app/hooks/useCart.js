@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import apiService from '../api/ApiService';
@@ -7,6 +7,7 @@ export default function useCart() {
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [personalizacion, setPersonalizacion] = useState([]);
 
     const fetchCartItems = async () => {
         try {
@@ -28,6 +29,37 @@ export default function useCart() {
         }
     };
 
+    useEffect(() => {
+        const loadAllPersonalizations = async () => {
+            try {
+                if (cartItems.length > 0) {
+                    const allPersonalizations = [];
+
+                    for (const item of cartItems) {
+                        const response = await apiService.getProductPersonalizations(item.idProduct);
+                        if (response?.data?.personalizations) {
+                            // Añadir cada personalización y asociar el id del item
+                            const personalizationsWithItemId = response.data.personalizations.map(p => ({
+                                ...p,
+                                idItemCart: item.idItemCart,
+                            }));
+                            allPersonalizations.push(...personalizationsWithItemId);
+                        }
+                    }
+
+                    setPersonalizacion(allPersonalizations);
+                } else {
+                    setPersonalizacion([]);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        loadAllPersonalizations();
+    }, [cartItems]);
+
+
     useFocusEffect(
         useCallback(() => {
             fetchCartItems();
@@ -43,6 +75,16 @@ export default function useCart() {
         try {
             const response = await apiService.addCartItem(idProduct, newQuantity);
             console.log(response);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const loadPersonalizacion = async (id) => {
+        try {
+            const response = await apiService.getProductPersonalizations(id);
+            console.log(response);
+            setPersonalizacion(response?.data?.personalizations);
         } catch (err) {
             console.error(err);
         }
@@ -68,5 +110,6 @@ export default function useCart() {
         updateQuantity,
         removeItem,
         refreshCart: fetchCartItems,
+        personalizacion,
     };
 }
