@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Checkbox } from 'react-native-paper';
+import { theme } from '../theme';
 
 const PersonalizationList = ({ personalizations, selectedPersonalizations, setSelectedPersonalizations, setShowPersonalizations }) => {
     const toggleSelection = (name) => {
@@ -26,15 +27,20 @@ const PersonalizationList = ({ personalizations, selectedPersonalizations, setSe
                 data={personalizations}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
-                    <View style={styles.personalizationItem}>
-                        <Checkbox
-                            status={selectedPersonalizations.includes(item.personalization.name) ? "checked" : "unchecked"}
-                            onPress={() => toggleSelection(item.personalization.name)}
-                            color="#007bff"
-                        />
+                    <TouchableOpacity
+                        style={styles.personalizationItem}
+                        onPress={() => toggleSelection(item.personalization.name)}
+                    >
+                        {selectedPersonalizations.includes(item.personalization.name) ? (
+                            <Ionicons name="checkbox" size={24} color={theme.colors.primary} />
+                        ) : (
+                            <Ionicons name="square-outline" size={24} color="#aaa" />
+                        )}
                         <Text style={styles.personalizationText}>{item.personalization.name}</Text>
-                    </View>
+                    </TouchableOpacity>
+
                 )}
+
             />
         </View>
     );
@@ -46,6 +52,16 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 10,
         marginTop: 10,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        maxHeight: '80%',
     },
     closeButton: {
         alignSelf: 'flex-end',
@@ -58,7 +74,14 @@ const styles = StyleSheet.create({
     personalizationItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 8,
+        backgroundColor: '#fff',
+        padding: 8,
+        borderRadius: 8,
+        marginBottom: 5,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
     },
     personalizationText: {
         fontSize: 16,
