@@ -9,6 +9,7 @@ const { handleProductImageUpload } = require('../middlewares/upload.middleware')
 const { validateRegister } = require('../middlewares/validateInput');
 const { registerAdmin } = require('../controllers/auth.controller');
 const adminController = require('../controllers/admin.controller');
+const { getOrdersByDateRange, updateOrderStatus, getOrderById } = require('../controllers/adminOrder.controller');
 
 // Apply authentication middleware to all admin routes
 router.use(authenticateToken);

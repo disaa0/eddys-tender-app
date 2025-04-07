@@ -309,7 +309,279 @@ Authorization: Bearer <token>
 
 ## 8. ENDPOINTS DE ADMINISTRADOR
 
-### 8.1 Gestión de Productos
+### 8.1 Gestión de Órdenes
+
+**GET /api/admin/orders**
+
+Obtiene órdenes dentro de un rango de fechas específico.
+
+**Headers Requeridos:**
+
+~~~
+Authorization: Bearer <token>
+~~~
+
+**Parámetros de Query:**
+| Parámetro | Tipo | Descripción | Requerido |
+|-----------|------|-------------|-----------|
+| date_from | string | Fecha de inicio (formato YYYY-MM-DD) | Sí |
+| date_to | string | Fecha de fin (formato YYYY-MM-DD) | Sí |
+
+**Ejemplo de uso:**
+~~~
+/api/admin/orders?date_from=2024-07-22&date_to=2024-07-24
+~~~
+
+**Respuesta Exitosa (200):**
+
+~~~json
+{
+  "message": "Órdenes obtenidas correctamente",
+  "data": {
+    "orders": [
+      {
+        "idOrder": 42,
+        "idCart": 23,
+        "idPaymentType": 2,
+        "idShipmentType": 1,
+        "idOrderStatus": 2,
+        "totalPrice": 258.00,
+        "paid": true,
+        "paidAt": "2024-07-23T14:35:12Z",
+        "createdAt": "2024-07-23T14:30:45Z",
+        "cart": {
+          "idCart": 23,
+          "user": {
+            "email": "usuario@ejemplo.com",
+            "username": "usuario123",
+            "userInformation": {
+              "name": "JUAN",
+              "lastName": "PÉREZ",
+              "phone": "1234567890"
+            }
+          },
+          "itemsCart": [
+            {
+              "quantity": 2,
+              "individualPrice": 129,
+              "product": {
+                "idProduct": 12,
+                "name": "Tender Box",
+                "description": "Exquisito paquete..."
+              }
+            }
+          ]
+        },
+        "orderStatus": {
+          "idOrderStatus": 2,
+          "status": "Procesando"
+        },
+        "paymentType": {
+          "idPaymentType": 2,
+          "type": "Tarjeta de crédito"
+        },
+        "shipmentType": {
+          "idShipmentType": 1,
+          "type": "Envío a domicilio"
+        },
+        "location": {
+          "street": "Av. Luis Encinas",
+          "houseNumber": "10",
+          "postalCode": "83000",
+          "neighborhood": "Centro"
+        }
+      }
+    ],
+    "count": 1
+  }
+}
+~~~
+
+**Errores Posibles:**
+
+- 400: Parámetros de fecha faltantes o inválidos
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+**Notas:**
+
+- Este endpoint es exclusivo para administradores
+- La fecha final (date_to) se considera hasta el final del día (23:59:59)
+- Las órdenes se ordenan por fecha de creación (más recientes primero)
+- Se incluyen detalles completos: productos, usuario, estado, información de envío
+
+### 8.2 Obtener detalle de una orden específica
+
+**GET /api/admin/orders/:id**
+
+Obtiene información detallada de una orden específica por su ID.
+
+**Headers Requeridos:**
+
+~~~
+Authorization: Bearer <token>
+~~~
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción | Requerido |
+|-----------|------|-------------|-----------|
+| id | number | ID de la orden | Sí |
+
+**Respuesta Exitosa (200):**
+
+~~~json
+{
+  "message": "Orden obtenida correctamente",
+  "data": {
+    "idOrder": 42,
+    "idCart": 23,
+    "idPaymentType": 2,
+    "idShipmentType": 1,
+    "idOrderStatus": 2,
+    "totalPrice": 258.00,
+    "paid": true,
+    "paidAt": "2023-07-15T14:35:12Z",
+    "createdAt": "2023-07-15T14:30:45Z",
+    "deliveryAt": null,
+    "stripePaymentIntentId": "pi_3MkVnL2eZvKYlo2C1IFrG8oM",
+    "stripePaymentStatus": "succeeded",
+    "cart": {
+      "idCart": 23,
+      "user": {
+        "email": "usuario@ejemplo.com",
+        "username": "usuario123",
+        "userInformation": {
+          "name": "JUAN",
+          "lastName": "PÉREZ",
+          "secondLastName": null,
+          "phone": "1234567890"
+        }
+      },
+      "itemsCart": [
+        {
+          "quantity": 2,
+          "individualPrice": 129,
+          "product": {
+            "idProduct": 12,
+            "name": "Tender Box",
+            "description": "Exquisito paquete..."
+          }
+        }
+      ]
+    },
+    "orderStatus": {
+      "idOrderStatus": 2,
+      "status": "Procesando"
+    },
+    "paymentType": {
+      "idPaymentType": 2,
+      "type": "Tarjeta de crédito"
+    },
+    "shipmentType": {
+      "idShipmentType": 1,
+      "type": "Envío a domicilio"
+    },
+    "location": {
+      "street": "Av. Luis Encinas",
+      "houseNumber": "10",
+      "postalCode": "83000",
+      "neighborhood": "Centro"
+    }
+  }
+}
+~~~
+
+**Errores Posibles:**
+
+- 400: ID de orden inválido
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 404: Orden no encontrada
+- 500: Error del servidor
+
+**Notas:**
+
+- Este endpoint es exclusivo para administradores
+- Incluye detalles completos de la orden: información del cliente, productos, estado, pago y envío
+
+### 8.3 Actualizar Estado de Orden
+
+**PATCH /api/admin/order/:id**
+
+Permite a los administradores cambiar el estado de una orden específica.
+
+**Headers Requeridos:**
+
+~~~
+Authorization: Bearer <token>
+~~~
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción | Requerido |
+|-----------|------|-------------|-----------|
+| id | number | ID de la orden a actualizar | Sí |
+
+**Cuerpo de la Petición:**
+
+~~~json
+{
+  "idOrderStatus": 3
+}
+~~~
+
+**Validaciones:**
+
+- idOrderStatus: Debe ser un número entero válido que corresponda a un estado de orden existente
+
+**Respuesta Exitosa (200):**
+
+~~~json
+{
+  "message": "Estado de orden actualizado correctamente",
+  "data": {
+    "idOrder": 42,
+    "idCart": 23,
+    "idPaymentType": 2,
+    "idShipmentType": 1,
+    "idOrderStatus": 3,
+    "totalPrice": 258.00,
+    "paid": true,
+    "paidAt": "2024-07-23T14:35:12Z",
+    "createdAt": "2024-07-23T14:30:45Z",
+    "orderStatus": {
+      "idOrderStatus": 3,
+      "status": "En camino"
+    },
+    "paymentType": {
+      "idPaymentType": 2,
+      "type": "Tarjeta de crédito"
+    },
+    "shipmentType": {
+      "idShipmentType": 1,
+      "type": "Envío a domicilio"
+    }
+  }
+}
+~~~
+
+**Errores Posibles:**
+
+- 400: ID de orden inválido
+- 400: Se requiere un ID de estado de orden válido
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 404: Orden no encontrada
+- 404: Estado de orden no encontrado
+- 500: Error del servidor
+
+**Notas:**
+
+- Este endpoint es exclusivo para administradores
+- Si se actualiza a estado "Entregado" (idOrderStatus 5), automáticamente se actualizará el campo deliveryAt con la fecha actual
+- Los estados de orden posibles se definen en la tabla orderStatus
+
+### 8.2 Gestión de Productos
 
 **GET /api/admin/products**
 
