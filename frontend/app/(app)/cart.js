@@ -74,8 +74,8 @@ export default function Cart() {
     );
   }
 
-  console.log(cartItems);
-  console.log(personalizacion);
+  // console.log(cartItems);
+  // console.log(personalizacion);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -96,6 +96,20 @@ export default function Cart() {
                   <IconButton icon="delete" size={20} onPress={() => removeItem(item.product.idProduct)} />
                 </View>
                 <Text variant="bodyMedium">Descripción: {item.product.description}</Text>
+                {personalizacion &&
+                  personalizacion
+                    .filter(p => p.idProduct === item.idProduct)
+                    .length > 0 && (
+                    <View style={styles.personalizationsContainer}>
+                      <Text style={styles.personalizationsTitle}>Extras:</Text>
+                      {personalizacion
+                        .filter(p => p.idProduct === item.idProduct)
+                        .map((p, index) => (
+                          <Text key={index} style={styles.personalizationItem}>• {p.personalization.name}</Text>
+                        ))}
+                    </View>
+                  )}
+
                 <View style={styles.itemFooter}>
                   <View style={styles.quantity}>
                     <IconButton icon="minus" size={20} onPress={() => updateQuantity(item.idItemCart, item.quantity - 1, item.product.idProduct)} disabled={item.quantity === 1} />
@@ -225,4 +239,18 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  personalizationsContainer: {
+    marginTop: 8,
+    paddingLeft: 10,
+  },
+  personalizationsTitle: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  personalizationItem: {
+    fontSize: 14,
+    color: '#555',
+  },
+
 });

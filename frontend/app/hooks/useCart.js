@@ -30,19 +30,35 @@ export default function useCart() {
     };
 
     useEffect(() => {
-        try {
-            if (cartItems.length > 0) {
-                cartItems.forEach(async (item) => {
-                    await loadPersonalizacion(item.idProduct);
-                });
-            } else {
-                setPersonalizacion([]);
+        const loadAllPersonalizations = async () => {
+            try {
+                if (cartItems.length > 0) {
+                    const allPersonalizations = [];
+
+                    for (const item of cartItems) {
+                        const response = await apiService.getProductPersonalizations(item.idProduct);
+                        if (response?.data?.personalizations) {
+                            // Añadir cada personalización y asociar el id del item
+                            const personalizationsWithItemId = response.data.personalizations.map(p => ({
+                                ...p,
+                                idItemCart: item.idItemCart,
+                            }));
+                            allPersonalizations.push(...personalizationsWithItemId);
+                        }
+                    }
+
+                    setPersonalizacion(allPersonalizations);
+                } else {
+                    setPersonalizacion([]);
+                }
+            } catch (err) {
+                console.error(err);
             }
-        }
-        catch (err) {
-            console.error(err);
-        }
+        };
+
+        loadAllPersonalizations();
     }, [cartItems]);
+
 
     useFocusEffect(
         useCallback(() => {

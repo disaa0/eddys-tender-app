@@ -28,6 +28,7 @@ const PersonalizationList = ({ personalizations, selectedPersonalizations, setSe
     };
 
     // console.log(personalizations)
+    // console.log(selectedPersonalizations)
 
     return (
         <View style={styles.container}>

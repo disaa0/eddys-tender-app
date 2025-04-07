@@ -35,6 +35,11 @@ export default function ProductDetails() {
       // setProduct(null);
       setProductImage(defaultImage);
       setQuantity('1');
+      // setSelectedPersonalizations([]);
+      setShowPersonalizations(false);
+      setShowPopUpPersonalizationsEmpty(false);
+      setErrorPersonalization(null);
+      // setPersonalizations([]);
     } catch (error) {
       console.error(error);
     } finally {
@@ -80,6 +85,7 @@ export default function ProductDetails() {
   const handleShowPersonalizations = () => {
     if (personalizations.length > 0) {
       console.log('Personalizaciones disponibles:', personalizations);
+      console.log('Personalizaciones Seleccionadas', selectedPersonalizations);
       // Aquí puedes mostrar un modal o una pantalla con las personalizaciones disponibles
       setShowPersonalizations(true);
     } else {
@@ -98,6 +104,8 @@ export default function ProductDetails() {
 
       if (response?.data?.personalizations && response.data.personalizations.length > 0) {
         setPersonalizations(response.data.personalizations);
+
+        setSelectedPersonalizations(response.data.personalizations.filter((p) => p.status === true).map(p => p.idProductPersonalization));
       }
     } catch (error) {
       console.error('Error al cargar personalizaciones:', error);
@@ -107,6 +115,11 @@ export default function ProductDetails() {
   const handleGoBack = () => {
     // Devolver los valores a su estado inicial
     // setProduct(null);
+    // setPersonalizations([]);
+    setSelectedPersonalizations([]);
+    setShowPersonalizations(false);
+    setShowPopUpPersonalizationsEmpty(false);
+    setErrorPersonalization(null);
     setProductImage(defaultImage);
     setQuantity('1');
     // Regresar a la pantalla anterior
