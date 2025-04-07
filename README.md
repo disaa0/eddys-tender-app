@@ -106,9 +106,40 @@ La aplicación utiliza Stripe como pasarela de pagos para procesar transacciones
      EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
      ~~~
 
-4. **Webhook para desarrollo local**:
-   - El webhook de Stripe ya está incluido en la configuración de Docker, por lo que no es necesario configurarlo manualmente
-   - El servidor recibirá automáticamente las notificaciones de eventos de Stripe
+4. **Configurar Webhook de Stripe**:
+   - El webhook se configura automáticamente mediante el CLI de Stripe:
+     1. El contenedor stripe-cli ejecuta el comando `stripe listen` automáticamente al iniciar
+     2. Supervisa los logs del backend para ver el enlace de autenticación:
+        ```bash
+        docker-compose logs -f backend
+        ```
+     3. Verás un mensaje con un enlace para autenticarte con Stripe
+     4. Abre este enlace en tu navegador e inicia sesión en tu cuenta de Stripe
+     5. Una vez autorizado, el CLI generará y mostrará un webhook signing secret en los logs
+     6. Copia este signing secret que comienza con `whsec_`
+     7. Añade esta clave a tu archivo `backend/.env`:
+        ```
+        STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+        ```
+
+5. **Reiniciar el backend después de configurar el webhook**:
+   - Una vez que hayas añadido el webhook signing secret a tu archivo `.env`, reinicia el contenedor del backend:
+     ```bash
+     docker-compose restart backend
+     ```
+   - Esto permitirá que el backend cargue la nueva variable de entorno
+
+6. **Verificación del Webhook**:
+   - Para confirmar que el webhook está funcionando correctamente, supervisa los logs del contenedor stripe-cli:
+     ```bash
+     docker-compose logs -f stripe-cli
+     ```
+   - Deberías ver mensajes indicando que el webhook está escuchando y reenviando eventos al backend
+   - Para probar el webhook, puedes ejecutar:
+     ```bash
+     docker-compose exec stripe-cli stripe trigger payment_intent.succeeded
+     ```
+   - Esto simulará un evento de pago exitoso y deberías ver en los logs que fue reenviado a tu aplicación
 
 ### Pruebas de Pagos
 
