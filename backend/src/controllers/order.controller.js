@@ -166,10 +166,63 @@ async function searchOrders(req, res) {
     }
 }
 
+async function getActiveOrders(req, res) {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const filter = {
+            status: { notIn: [6, 7] }, // No entregado ni cancelado
+            page,
+            limit
+        };
+
+        const result = await orderService.getOrdersByStatus(filter);
+
+        return res.status(200).json({
+            message: "Órdenes en curso obtenidas correctamente",
+            data: result
+        });
+    } catch (error) {
+        console.error("Error al obtener órdenes activas:", error);
+        return res.status(500).json({ message: "Error al obtener órdenes activas" });
+    }
+}
+
+async function getOrderHistory(req, res) {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const filter = {
+            status: { in: [6, 7] }, // Solo entregado y cancelado
+            page,
+            limit
+        };
+
+        const result = await orderService.getOrdersByStatus(filter);
+
+        return res.status(200).json({
+            message: "Historial de órdenes obtenido correctamente",
+            data: result
+        });
+    } catch (error) {
+        console.error("Error al obtener historial de órdenes:", error);
+        return res.status(500).json({ message: "Error al obtener historial de órdenes" });
+    }
+}
+
+module.exports = {
+    getActiveOrders,
+    getOrderHistory
+};
+
 module.exports = {
     createOrder,
     getOrderDetails,
     getUserOrders,
     handleStripeWebhook,
-    searchOrders
+    searchOrders,
+    getActiveOrders,
+    getOrderHistory
 }; 
