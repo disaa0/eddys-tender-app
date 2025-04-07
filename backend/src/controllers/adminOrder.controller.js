@@ -83,6 +83,75 @@ async function getOrdersByDateRange(req, res) {
 }
 
 /**
+ * Get order details by ID (Admin only)
+ * @param {Object} req - Express request object 
+ * @param {Object} res - Express response object
+ */
+async function getOrderById(req, res) {
+    try {
+        const { id } = req.params;
+        
+        // Validate order ID
+        if (!id || isNaN(parseInt(id))) {
+            return res.status(400).json({
+                message: 'ID de orden inválido'
+            });
+        }
+        
+        // Query the order with all its details
+        const order = await prisma.order.findUnique({
+            where: { idOrder: parseInt(id) },
+            include: {
+                cart: {
+                    include: {
+                        user: {
+                            select: {
+                                email: true,
+                                username: true,
+                                userInformation: {
+                                    select: {
+                                        name: true,
+                                        lastName: true,
+                                        secondLastName: true,
+                                        phone: true
+                                    }
+                                }
+                            }
+                        },
+                        itemsCart: {
+                            where: { status: true },
+                            include: { product: true }
+                        }
+                    }
+                },
+                orderStatus: true,
+                paymentType: true,
+                shipmentType: true,
+                location: true
+            }
+        });
+        
+        if (!order) {
+            return res.status(404).json({
+                message: 'Orden no encontrada'
+            });
+        }
+        
+        return res.status(200).json({
+            message: 'Orden obtenida correctamente',
+            data: order
+        });
+        
+    } catch (error) {
+        console.error('Error fetching order by ID:', error);
+        return res.status(500).json({
+            message: 'Error al obtener la orden',
+            error: error.message
+        });
+    }
+}
+
+/**
  * Change the status of an order (Admin only)
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -165,5 +234,6 @@ async function updateOrderStatus(req, res) {
 
 module.exports = {
     getOrdersByDateRange,
+    getOrderById,
     updateOrderStatus
 };

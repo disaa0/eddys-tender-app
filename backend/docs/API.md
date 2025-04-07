@@ -411,7 +411,101 @@ Authorization: Bearer <token>
 - Las órdenes se ordenan por fecha de creación (más recientes primero)
 - Se incluyen detalles completos: productos, usuario, estado, información de envío
 
-### 8.2 Actualizar Estado de Orden
+### 8.2 Obtener detalle de una orden específica
+
+**GET /api/admin/orders/:id**
+
+Obtiene información detallada de una orden específica por su ID.
+
+**Headers Requeridos:**
+
+~~~
+Authorization: Bearer <token>
+~~~
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción | Requerido |
+|-----------|------|-------------|-----------|
+| id | number | ID de la orden | Sí |
+
+**Respuesta Exitosa (200):**
+
+~~~json
+{
+  "message": "Orden obtenida correctamente",
+  "data": {
+    "idOrder": 42,
+    "idCart": 23,
+    "idPaymentType": 2,
+    "idShipmentType": 1,
+    "idOrderStatus": 2,
+    "totalPrice": 258.00,
+    "paid": true,
+    "paidAt": "2023-07-15T14:35:12Z",
+    "createdAt": "2023-07-15T14:30:45Z",
+    "deliveryAt": null,
+    "stripePaymentIntentId": "pi_3MkVnL2eZvKYlo2C1IFrG8oM",
+    "stripePaymentStatus": "succeeded",
+    "cart": {
+      "idCart": 23,
+      "user": {
+        "email": "usuario@ejemplo.com",
+        "username": "usuario123",
+        "userInformation": {
+          "name": "JUAN",
+          "lastName": "PÉREZ",
+          "secondLastName": null,
+          "phone": "1234567890"
+        }
+      },
+      "itemsCart": [
+        {
+          "quantity": 2,
+          "individualPrice": 129,
+          "product": {
+            "idProduct": 12,
+            "name": "Tender Box",
+            "description": "Exquisito paquete..."
+          }
+        }
+      ]
+    },
+    "orderStatus": {
+      "idOrderStatus": 2,
+      "status": "Procesando"
+    },
+    "paymentType": {
+      "idPaymentType": 2,
+      "type": "Tarjeta de crédito"
+    },
+    "shipmentType": {
+      "idShipmentType": 1,
+      "type": "Envío a domicilio"
+    },
+    "location": {
+      "street": "Av. Luis Encinas",
+      "houseNumber": "10",
+      "postalCode": "83000",
+      "neighborhood": "Centro"
+    }
+  }
+}
+~~~
+
+**Errores Posibles:**
+
+- 400: ID de orden inválido
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 404: Orden no encontrada
+- 500: Error del servidor
+
+**Notas:**
+
+- Este endpoint es exclusivo para administradores
+- Incluye detalles completos de la orden: información del cliente, productos, estado, pago y envío
+
+### 8.3 Actualizar Estado de Orden
 
 **PATCH /api/admin/order/:id**
 
