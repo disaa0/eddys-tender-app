@@ -342,10 +342,57 @@ async function searchOrders(userId, filters) {
     };
 }
 
+
+// Get all active orders from all users for the admin panel (where order status could be set to multiple numbers from 1 to 7) with pagination
+async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const where = {
+        idOrderStatus: status
+    };
+
+    const totalCount = await prisma.order.count({ where });
+
+    const orders = await prisma.order.findMany({
+        where,
+        include: {
+            orderStatus: true,
+            paymentType: true,
+            shipmentType: true
+        },
+        skip,
+        take: parseInt(limit),
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+
+    // Sanitize the order data , removing stripe client secret, with the map function
+
+    const sanitizedOrders = orders.map(order => {
+        const { stripeClientSecret, ...rest } = order;
+        return rest;
+    }
+    );
+
+    // Return the sanitized orders
+    return {
+        orders: sanitizedOrders,
+        pagination: {
+            totalItems: totalCount,
+            totalPages: Math.ceil(totalCount / parseInt(limit)),
+            currentPage: parseInt(page),
+            itemsPerPage: parseInt(limit)
+        }
+    };
+
+
+}
+
 module.exports = {
     createOrder,
     getOrderDetails,
     getUserOrders,
     processStripeEvent,
-    searchOrders
+    searchOrders,
+    getOrdersByStatus
 }; 

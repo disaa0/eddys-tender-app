@@ -940,7 +940,182 @@ Authorization: Bearer <token>
 - 403: Usuario no es administrador
 - 500: Error del servidor
 
-### 8.5 Permisos de Administrador
+### 8.5 Obtner ordenes activas con paginacion
+**GET /api/admin/orders/current**
+
+Permite a administradores obtener pedidos activos de todos los usuarios con paginación.
+
+**Encabezados Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Consulta:**
+
+```
+page: Número de página (default: 1)
+limit: Resultados por página (default: 10)
+```
+
+**Respuesta (200 OK):**
+
+```json
+{
+    "message": "Órdenes en curso obtenidas correctamente",
+    "data": {
+        "orders": [
+            {
+                "idOrder": 4,
+                "idCart": 4,
+                "idPaymentType": 1,
+                "idShipmentType": 1,
+                "idOrderStatus": 1,
+                "idLocation": 1,
+                "createdAt": "2025-04-07T18:39:42.015Z",
+                "deliveryAt": null,
+                "totalPrice": 447,
+                "paid": false,
+                "paidAt": null,
+                "stripePaymentIntentId": null,
+                "stripePaymentStatus": null,
+                "orderStatus": {
+                    "idOrderStatus": 1,
+                    "status": "Pendiente"
+                },
+                "paymentType": {
+                    "idPaymentType": 1,
+                    "type": "Efectivo"
+                },
+                "shipmentType": {
+                    "idShipmentType": 1,
+                    "type": "Envío a domicilio"
+                }
+            },
+            {
+                "idOrder": 3,
+                "idCart": 3,
+                "idPaymentType": 1,
+                "idShipmentType": 1,
+                "idOrderStatus": 1,
+                "idLocation": 1,
+                "createdAt": "2025-04-07T18:39:32.319Z",
+                "deliveryAt": null,
+                "totalPrice": 447,
+                "paid": false,
+                "paidAt": null,
+                "stripePaymentIntentId": null,
+                "stripePaymentStatus": null,
+                "orderStatus": {
+                    "idOrderStatus": 1,
+                    "status": "Pendiente"
+                },
+                "paymentType": {
+                    "idPaymentType": 1,
+                    "type": "Efectivo"
+                },
+                "shipmentType": {
+                    "idShipmentType": 1,
+                    "type": "Envío a domicilio"
+                }
+            }
+        ],
+        "pagination": {
+            "totalItems": 4,
+            "totalPages": 2,
+            "currentPage": 1,
+            "itemsPerPage": 2
+        }
+    }
+}
+
+```
+
+**Notas:**
+
+- Los pedidos se ordenan por fecha de creación (más recientes primero)
+- Se consideran como ordenes activas, todas aquellas donde su "status" se diferente de "Entregado" o "Cancelado". 
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 500: Error del servidor
+
+### 8.6 Obtner historico de ordenes con paginacion
+**GET /api/admin/orders**
+
+Permite a administradores obtener pedidos historicos de todos los usuarios con paginación.
+
+**Encabezados Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Consulta:**
+
+```
+page: Número de página (default: 1)
+limit: Resultados por página (default: 10)
+```
+
+**Respuesta (200 OK):**
+
+```json
+{
+    "message": "Historial de órdenes obtenido correctamente",
+    "data": {
+        "orders": [
+            {
+                "idOrder": 5,
+                "idCart": 5,
+                "idPaymentType": 1,
+                "idShipmentType": 1,
+                "idOrderStatus": 7,
+                "idLocation": 1,
+                "createdAt": "2025-04-07T18:39:49.656Z",
+                "deliveryAt": null,
+                "totalPrice": 447,
+                "paid": false,
+                "paidAt": null,
+                "stripePaymentIntentId": null,
+                "stripePaymentStatus": null,
+                "orderStatus": {
+                    "idOrderStatus": 7,
+                    "status": "Cancelado"
+                },
+                "paymentType": {
+                    "idPaymentType": 1,
+                    "type": "Efectivo"
+                },
+                "shipmentType": {
+                    "idShipmentType": 1,
+                    "type": "Envío a domicilio"
+                }
+            }
+        ],
+        "pagination": {
+            "totalItems": 1,
+            "totalPages": 1,
+            "currentPage": 1,
+            "itemsPerPage": 5
+        }
+    }
+}
+
+```
+
+**Notas:**
+
+- Los pedidos se ordenan por fecha de creación (más recientes primero)
+- Se consideran como ordenes historicas, todas aquellas donde su "status" sea "Entregado" o "Cancelado".
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 500: Error del servidor
+
+### 8.7 Permisos de Administrador
 
 Para acceder a los endpoints de administrador, el usuario debe:
 
@@ -955,7 +1130,7 @@ Para acceder a los endpoints de administrador, el usuario debe:
 }
 ```
 
-### 8.6 Consideraciones Técnicas
+### 8.8 Consideraciones Técnicas
 
 1. **Transacciones:**
 
