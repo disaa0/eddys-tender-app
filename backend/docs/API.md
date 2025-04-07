@@ -669,7 +669,7 @@ Authorization: Bearer <token>
 - 500: Error del servidor
 
 ### 8.5 Obtner ordenes activas con paginacion
-**GET /api/admin/orders**
+**GET /api/admin/orders/current**
 
 Permite a administradores obtener pedidos activos de todos los usuarios con paginación.
 
