@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons'; // Importar iconos de Expo
 import apiService from '../../api/ApiService';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import PersonalizationList from '../../components/PersonalizationList';
+import ConfirmationDialog from '../../components/ConfirmationDialog';
 
 const defaultImage = require('../../../assets/products/tenders.png');
 
@@ -19,6 +20,7 @@ export default function ProductDetails() {
   const [personalizations, setPersonalizations] = useState([]);
   const [showPersonalizations, setShowPersonalizations] = useState(false);
   const [selectedPersonalizations, setSelectedPersonalizations] = useState([]);
+  const [showPopUpPersonalizationsEmpty, setShowPopUpPersonalizationsEmpty] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const addProductToCart = async (idprod, quantity) => {
@@ -81,6 +83,10 @@ export default function ProductDetails() {
       setShowPersonalizations(true);
     } else {
       console.log('No hay personalizaciones disponibles para este producto.');
+      setShowPopUpPersonalizationsEmpty(true);
+      setTimeout(() => {
+        setShowPopUpPersonalizationsEmpty(false);
+      }, 5000);
     }
   }
 
@@ -191,6 +197,18 @@ export default function ProductDetails() {
           </View>
           {/* </ScrollView > */}
         </View>
+
+        <ConfirmationDialog
+          visible={showPopUpPersonalizationsEmpty}
+          onDismiss={() => setShowPopUpPersonalizationsEmpty(false)}
+          title="¡Ups!"
+          message="No hay personalizaciones disponibles para este producto."
+          cancelButtonLabel=''
+          confirmButtonLabel=""
+          confirmButtonDisabled={false}
+          confirmButtonLoading={false}
+        />
+
       </SafeAreaView>
     </SafeAreaProvider >
   );
