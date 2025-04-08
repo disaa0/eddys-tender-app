@@ -317,9 +317,9 @@ Obtiene órdenes dentro de un rango de fechas específico.
 
 **Headers Requeridos:**
 
-~~~
+```
 Authorization: Bearer <token>
-~~~
+```
 
 **Parámetros de Query:**
 | Parámetro | Tipo | Descripción | Requerido |
@@ -328,13 +328,13 @@ Authorization: Bearer <token>
 | date_to | string | Fecha de fin (formato YYYY-MM-DD) | Sí |
 
 **Ejemplo de uso:**
-~~~
+```
 /api/admin/orders?date_from=2024-07-22&date_to=2024-07-24
-~~~
+```
 
 **Respuesta Exitosa (200):**
 
-~~~json
+```json
 {
   "message": "Órdenes obtenidas correctamente",
   "data": {
@@ -395,7 +395,7 @@ Authorization: Bearer <token>
     "count": 1
   }
 }
-~~~
+```
 
 **Errores Posibles:**
 
@@ -419,9 +419,9 @@ Obtiene información detallada de una orden específica por su ID.
 
 **Headers Requeridos:**
 
-~~~
+```
 Authorization: Bearer <token>
-~~~
+```
 
 **Parámetros URL:**
 | Parámetro | Tipo | Descripción | Requerido |
@@ -430,7 +430,7 @@ Authorization: Bearer <token>
 
 **Respuesta Exitosa (200):**
 
-~~~json
+```json
 {
   "message": "Orden obtenida correctamente",
   "data": {
@@ -490,7 +490,7 @@ Authorization: Bearer <token>
     }
   }
 }
-~~~
+```
 
 **Errores Posibles:**
 
@@ -513,9 +513,9 @@ Permite a los administradores cambiar el estado de una orden específica.
 
 **Headers Requeridos:**
 
-~~~
+```
 Authorization: Bearer <token>
-~~~
+```
 
 **Parámetros URL:**
 | Parámetro | Tipo | Descripción | Requerido |
@@ -524,11 +524,11 @@ Authorization: Bearer <token>
 
 **Cuerpo de la Petición:**
 
-~~~json
+```json
 {
   "idOrderStatus": 3
 }
-~~~
+```
 
 **Validaciones:**
 
@@ -536,7 +536,7 @@ Authorization: Bearer <token>
 
 **Respuesta Exitosa (200):**
 
-~~~json
+```json
 {
   "message": "Estado de orden actualizado correctamente",
   "data": {
@@ -563,7 +563,7 @@ Authorization: Bearer <token>
     }
   }
 }
-~~~
+```
 
 **Errores Posibles:**
 
@@ -1614,12 +1614,37 @@ Authorization: Bearer <token>
 
 ```json
 {
-    {
     "totalAmount": {
         "cartId": 1,
         "totalAmount": 416
     }
 }
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Error de peticion
+- 500: Error del servidor
+
+### 10.11 Ver cantidad total de productos en el carrito
+
+**GET /cart/quantity**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+    "totalQuantity": {
+        "cartId": 1,
+        "totalQuantity": 5
+    }
 }
 ```
 
@@ -2176,16 +2201,16 @@ Authorization: Bearer <token>
 
 **Headers Requeridos:**
 
-~~~
+```
 Authorization: Bearer <token>
-~~~
+```
 
 **Parámetros URL:**
 - id: ID de la dirección a consultar
 
 **Respuesta Exitosa (200):**
 
-~~~json
+```json
 {
   "message": "Dirección obtenida correctamente",
   "data": {
@@ -2198,7 +2223,7 @@ Authorization: Bearer <token>
     "status": true
   }
 }
-~~~
+```
 
 **Errores Posibles:**
 

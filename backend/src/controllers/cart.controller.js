@@ -1,4 +1,4 @@
-const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService } = require('../services/cart.service');
+const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService } = require('../services/cart.service');
 
 const addItemToCart = async (req, res) => {
     const { idProduct } = req.params;
@@ -132,8 +132,26 @@ const getTotalAmountCart = async (req, res) => {
     } catch (error) {
         return res.status(400).json({ message: error.message || "Error en la solicitud" });
     }
-}
+};
+
+const getItemsQuantityCart = async (req, res) => {
+    const userId = req.user.userId; // Obtenido del middleware de autenticación
+
+    try {
+        const result = await getItemsQuantityCartService(userId);
+
+        return res.status(200).json({ totalQuantity: result });
+
+    } catch (error) {
+        return res.status(400).json({ message: error.message || "Error en la solicitud" });
+    }
+};
 
 module.exports = {
-    addItemToCart, addOneItemToCart, softDeleteItemFromCart, getItemsCart, getTotalAmountCart
+    addItemToCart, 
+    addOneItemToCart, 
+    softDeleteItemFromCart, 
+    getItemsCart, 
+    getTotalAmountCart,
+    getItemsQuantityCart
 };

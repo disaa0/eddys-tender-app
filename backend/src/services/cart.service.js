@@ -256,6 +256,47 @@ const getTotalAmountCartService = async (userId) => {
     });
 };
 
+const getItemsQuantityCartService = async (userId) => {
+    return await prisma.$transaction(async (prisma) => {
+        // Buscar el carrito activo del usuario
+        const cart = await prisma.cart.findFirst({
+            where: {
+                idUser: userId,
+                status: true
+            }
+        });
+
+        if (!cart) {
+            throw new Error("No se encontró un carrito activo para el usuario.");
+        }
+
+        // Buscar los productos en el carrito y excluir los productos inactivos
+        const items = await prisma.itemCart.findMany({
+            where: {
+                idCart: cart.idCart,
+                status: true,
+                product: { status: true } // Solo productos activos
+            }
+        });
+
+        if (items.length === 0) {
+            return { cartId: cart.idCart, totalQuantity: 0 };
+        }
+
+        // Calcular la cantidad total de items en el carrito
+        const totalQuantity = items.reduce((total, item) => {
+            return total + item.quantity;
+        }, 0);
+
+        return { cartId: cart.idCart, totalQuantity };
+    });
+};
+
 module.exports = {
-    addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService
+    addItemToCartService, 
+    addOneItemToCartService, 
+    softDeleteItemFromCartService, 
+    getItemsCartService, 
+    getTotalAmountCartService,
+    getItemsQuantityCartService
 };
