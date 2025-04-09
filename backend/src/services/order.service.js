@@ -388,11 +388,131 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
 
 }
 
+async function reorderService(userId, orderId) {
+    return await prisma.$transaction(async (tx) => {
+        const userExists = await tx.user.findUnique({
+            where: { idUser: userId }
+        });
+        if (!userExists) {
+            throw new Error('Usuario no existe');
+        }
+
+        const order = await tx.order.findUnique({
+            where: { idOrder: orderId },
+            include: {
+                cart: {
+                    include: {
+                        itemsCart: {
+                            include: { product: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!order) {
+            throw new Error('Orden no encontrada');
+        }
+
+        if (order.cart.idUser !== userId) {
+            throw new Error('La orden no pertenece al usuario');
+        }
+
+        const items = order.cart.itemsCart.map(item => ({
+            idProduct: item.idProduct,
+            quantity: item.quantity
+        }));
+
+        const activeProducts = await tx.product.findMany({
+            where: {
+                idProduct: { in: items.map(item => item.idProduct) },
+                status: true
+            }
+        });
+
+        const itemsToAdd = activeProducts.map(product => {
+            const item = items.find(i => i.idProduct === product.idProduct);
+            return {
+                idProduct: product.idProduct,
+                quantity: item.quantity,
+                individualPrice: product.price,
+                status: true
+            };
+        });
+
+        // validate if itemsToAdd is empty
+        if (itemsToAdd.length === 0) {
+            throw new Error('Ninguno de los productos de la orden esta disponible actualmente');
+        }
+
+        let cart = await tx.cart.findFirst({
+            where: {
+                idUser: userId,
+                status: true
+            },
+            include: {
+                itemsCart: true
+            }
+        });
+
+        if (cart) {
+            const existingItems = cart.itemsCart.map(item => ({
+                idProduct: item.idProduct,
+                quantity: item.quantity
+            }));
+
+            const areSameItems =
+                existingItems.length === itemsToAdd.length &&
+                existingItems.every(existingItem =>
+                    itemsToAdd.some(newItem =>
+                        newItem.idProduct === existingItem.idProduct &&
+                        newItem.quantity === existingItem.quantity
+                    )
+                );
+
+            if (areSameItems) {
+                throw new Error('El carrito ya contiene los mismos productos');
+            }
+
+            await tx.cart.update({
+                where: { idCart: cart.idCart },
+                data: { status: false }
+            });
+        }
+
+        cart = await tx.cart.create({
+            data: {
+                idUser: userId,
+                status: true
+            }
+        });
+
+        const itemsWithCartId = itemsToAdd.map(item => ({
+            ...item,
+            idCart: cart.idCart
+        }));
+
+        const itemsCreated = await tx.itemCart.createMany({
+            data: itemsWithCartId
+        });
+
+        if (!itemsCreated) {
+            throw new Error('Error al agregar productos al carrito');
+        }
+
+        return {
+            cartId: cart.idCart,
+            items: itemsWithCartId
+        };
+    });
+}
+
 module.exports = {
     createOrder,
     getOrderDetails,
     getUserOrders,
     processStripeEvent,
     searchOrders,
-    getOrdersByStatus
+    getOrdersByStatus,
+    reorderService
 }; 

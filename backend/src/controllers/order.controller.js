@@ -212,12 +212,50 @@ async function getOrderHistory(req, res) {
     }
 }
 
-module.exports = {
-    getActiveOrders,
-    getOrderHistory
-};
+async function reoder(req, res) {
+    try {
+        const orderId = parseInt(req.params.orderId);
+        const userId = req.user.userId;
+
+        const result = await orderService.reorderService(userId, orderId);
+
+        return res.status(200).json({
+            message: "Pedido reordenado correctamente, productos agregados al carrito",
+            data: result
+        });
+    } catch (error) {
+        console.error("Error al reordenar:", error);
+        // Custom error handling
+        let message;
+        let status = 400;
+        switch (error.message) {
+            case 'Orden no encontrada':
+                status = 404;
+                message = 'El pedido no existe';
+                break;
+            case 'Ninguno de los productos de la orden esta disponible actualmente':
+                status = 404;
+                message = 'Ninungo de los productos de la orden se encuentran disponible actualmente';
+                break;
+            case 'La orden no pertenece al usuario':
+                status = 403;
+                message = 'No tienes permiso para reordenar este pedido, solo puedes reordenar tus propios pedidos';
+                break;
+            case 'El carrito ya contiene los mismos productos':
+                status = 409;
+                message = 'El carrito ya contiene los mismos productos';
+                break;
+            default:
+                message = 'Error al reordenar el pedido';
+        }
+        return res.status(status).json({ message });
+    }
+}
 
 module.exports = {
+    getActiveOrders,
+    getOrderHistory,
+    reoder,
     createOrder,
     getOrderDetails,
     getUserOrders,
