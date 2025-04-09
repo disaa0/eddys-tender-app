@@ -358,15 +358,6 @@ export default function ProductDetails() {
                   right={<TextInput.Affix text={`${form.description.length}/500`} />}
                 />
 
-                {/* CAMBIAR SI SE PIDE */}
-                {/* <View style={styles.switchContainer}>
-              <Text>Estado del producto</Text>
-              <Switch
-                value={form.status}
-                onValueChange={(value) => handleChange('status', value)}
-                color={theme.colors.primary}
-              />
-            </View> */}
               </Card.Content>
             </Card>
 
@@ -403,6 +394,13 @@ export default function ProductDetails() {
                 onPress={handleSave}
                 style={styles.button}
                 icon="content-save"
+                disabled={
+                  !product ||
+                  (form.name === product.name &&
+                    form.price === product.price.toString() &&
+                    form.description === product.description &&
+                    form.status === product.status)
+                }
               >
                 Guardar Cambios
               </Button>
@@ -418,7 +416,7 @@ export default function ProductDetails() {
             </View>
           </ScrollView>
 
-          {/* Add Snackbar for messages */}
+          {/* Add Snackbar for messages */}}
           <Snackbar
             visible={snackbar.visible}
             onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
