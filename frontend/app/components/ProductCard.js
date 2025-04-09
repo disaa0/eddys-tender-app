@@ -13,7 +13,8 @@ export default function ProductCard({ product, onPress }) {
   const { name, price, description, imageSource } = product;
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState('');
-  const { refreshCart } = useCartRefresh();
+  const { reloadCart } = useCartRefresh();
+
   const onAddToCart = async (product) => {
     try {
       setLoading(true)
@@ -22,7 +23,7 @@ export default function ProductCard({ product, onPress }) {
       console.log(response.cartId)
 
       if (response.status === 200 || response?.cartId > 0) {
-        refreshCart(); // Actualizar carrito
+        reloadCart(); // Actualizar carrito
         setDialogVisible(true);
         setDialogMessage(response.message);
       }

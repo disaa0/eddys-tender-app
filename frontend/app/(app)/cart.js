@@ -5,10 +5,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import useCart from '../hooks/useCart';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCartRefresh } from '../context/CartRefreshContext';
+
 
 export default function Cart() {
   const router = useRouter();
   const { cartItems, loading, error, personalizacion, updateQuantity, removeItem, refreshCart } = useCart();
+  const { reloadCart } = useCartRefresh();
 
   useFocusEffect(
     useCallback(() => {
@@ -93,7 +96,7 @@ export default function Cart() {
               <Card.Content>
                 <View style={styles.itemHeader}>
                   <Text variant="titleMedium">{item.product.name}</Text>
-                  <IconButton icon="delete" size={20} onPress={() => removeItem(item.product.idProduct)} />
+                  <IconButton icon="delete" size={20} onPress={() => { removeItem(item.product.idProduct); reloadCart() }} />
                 </View>
                 <Text variant="bodyMedium">Descripción: {item.product.description}</Text>
                 {personalizacion &&

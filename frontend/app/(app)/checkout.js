@@ -5,9 +5,8 @@ import { useCallback, useState } from 'react';
 import { theme } from '../theme';
 import apiService from '../api/ApiService';
 import ConfirmationDialog from '../components/ConfirmationDialog';
-import { useStripe } from '@stripe/stripe-react-native';
-import useCart from '../hooks/useCart';
 //import { useStripe } from '@stripe/stripe-react-native';
+import useCart from '../hooks/useCart';
 
 export default function Checkout() {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();

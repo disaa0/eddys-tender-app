@@ -1,11 +1,11 @@
 import { createContext, useContext } from 'react';
 
 const CartRefreshContext = createContext({
-    refreshCart: () => { },
+    reloadCart: () => { },
 });
 
-export const CartRefreshProvider = ({ refreshCart, children }) => (
-    <CartRefreshContext.Provider value={{ refreshCart }}>
+export const CartRefreshProvider = ({ reloadCart, children }) => (
+    <CartRefreshContext.Provider value={{ reloadCart }}>
         {children}
     </CartRefreshContext.Provider>
 );

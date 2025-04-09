@@ -5,16 +5,19 @@ import { StyleSheet, View, Text } from 'react-native';
 import { useEffect, useState, useCallback } from 'react';
 import { theme } from '../theme';
 import { CartRefreshProvider } from '../context/CartRefreshContext';
+import apiService from '../api/ApiService';
 
 
 
 export default function AppLayout() {
-  const [cartCount, setCartCount] = useState(Math.floor(Math.random() * 10));
+  const [cartCount, setCartCount] = useState(0);
 
   const fetchCartCount = useCallback(async () => {
     try {
-      //const response = await apiService.getCartCount(); // LLamada API
-      setCartCount(Math.floor(Math.random() * 10)); // Actualizacion basado en respuesta
+      response = await apiService.getCartQuantity(); // LLamada API
+      if (response.totalQuantity.totalQuantity > 0) {
+        setCartCount(response.totalQuantity.totalQuantity)
+      }
     } catch (err) {
       console.error('Error fetching cart count:', err);
     }
@@ -23,8 +26,9 @@ export default function AppLayout() {
   useEffect(() => {
     fetchCartCount(); // Fetch inicial
   }, [fetchCartCount]);
+
   return (
-    <CartRefreshProvider refreshCart={fetchCartCount}>
+    <CartRefreshProvider reloadCart={fetchCartCount}>
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
           <Tabs
