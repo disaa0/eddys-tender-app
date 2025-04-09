@@ -416,7 +416,7 @@ export default function ProductDetails() {
             </View>
           </ScrollView>
 
-          {/* Add Snackbar for messages */}}
+          {/* Add Snackbar for messages */}
           <Snackbar
             visible={snackbar.visible}
             onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
