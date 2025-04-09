@@ -5,6 +5,8 @@ import { useCallback, useState } from 'react';
 import { theme } from '../theme';
 import apiService from '../api/ApiService';
 import ConfirmationDialog from '../components/ConfirmationDialog';
+import { useStripe } from '@stripe/stripe-react-native';
+import useCart from '../hooks/useCart';
 //import { useStripe } from '@stripe/stripe-react-native';
 
 export default function Checkout() {
@@ -25,23 +27,24 @@ export default function Checkout() {
     reference: '',
   });
   const delivery = 35;
+  const { cartItems, personalizacion } = useCart();
 
-  useFocusEffect(
-    useCallback(() => {
-      const getCartItems = async () => {
-        try {
-          setLoading(true);
-          const cartData = await apiService.getCartItems();
-          setCart(cartData.items.items);
-        } catch (err) {
-          setError('Error al obtener el carrito');
-        } finally {
-          setLoading(false);
-        }
-      };
-      getCartItems();
-    }, [])
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const getCartItems = async () => {
+  //       try {
+  //         setLoading(true);
+  //         const cartData = await apiService.getCartItems();
+  //         setCart(cartData.items.items);
+  //       } catch (err) {
+  //         setError('Error al obtener el carrito');
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
+  //     getCartItems();
+  //   }, [])
+  // );
 
   useFocusEffect(
     useCallback(() => {
@@ -118,12 +121,36 @@ export default function Checkout() {
     }
   };
 
-  const renderProduct = ({ item }) => (
-    <List.Item
-      title={`${item.quantity} ${item.product.name}`}
-      right={() => <Text>${(item.quantity * item.product.price).toFixed(2)}</Text>}
-    />
-  );
+  // const renderProduct = ({ item }) => (
+  //   <List.Item
+  //     title={`${item.quantity} ${item.product.name}`}
+  //     right={() => <Text>${(item.quantity * item.product.price).toFixed(2)}</Text>}
+  //   />
+  // );
+
+
+  const renderProduct = ({ item }) => {
+    // Filtrar personalizaciones para este item
+    const extras = personalizacion.filter(p => p.idProduct === item.idProduct);
+
+    return (
+      <List.Item
+        title={`${item.quantity} ${item.product.name}`}
+        description={() =>
+          extras.length > 0 && (
+            <View>
+              <Text style={{ fontWeight: 'bold' }}>Extras:</Text>
+              {extras.map((p, index) => (
+                <Text key={index}>• {p.personalization.name}</Text>
+              ))}
+            </View>
+          )
+        }
+        right={() => <Text>${(item.quantity * item.product.price).toFixed(2)}</Text>}
+      />
+    );
+  };
+
 
   return (
     <ScrollView style={styles.container}>
@@ -153,7 +180,7 @@ export default function Checkout() {
       <Card style={styles.card}>
         <Card.Title title="Resumen del Pedido" />
         <Card.Content>
-          <FlatList data={cart} renderItem={renderProduct} keyExtractor={(item, index) => index.toString()} contentContainerStyle={styles.productList} />
+          <FlatList data={cartItems} renderItem={renderProduct} keyExtractor={(item, index) => index.toString()} contentContainerStyle={styles.productList} />
           <Divider style={styles.divider} />
           <List.Item title="Subtotal" right={() => <Text>${subtotal.toFixed(2)}</Text>} />
           <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
