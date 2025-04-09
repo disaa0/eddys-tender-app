@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { theme } from './theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { StripeProvider } from '@stripe/stripe-react-native';
+//import { StripeProvider } from '@stripe/stripe-react-native';
 import ConfirmationDialog from './components/ConfirmationDialog';
+
 
 // Combinar nuestro tema con el tema base de Paper
 const combinedTheme = {
@@ -51,47 +52,47 @@ function AppContent() {
   useProtectedRoute(setMostrarPopUpSessionExpirada); // 🔥 Pasamos el estado al hook
 
   return (
-    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}>
-      <PaperProvider theme={combinedTheme}>
+    //<StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}>
+    <PaperProvider theme={combinedTheme}>
 
-        {mostrarPopUpSessionExpirada && (
-          <ConfirmationDialog
-            message="Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
-            onConfirm={() => {
-              setMostrarPopUpSessionExpirada(false); // 🔹 Primero cerramos el popup
-              setTimeout(() => {  // 🔹 Esperamos un poco para actualizar el estado antes de redirigir
-                router.replace('/login');
-              }, 100);
-            }}
-            onDismiss={() => {
-              setMostrarPopUpSessionExpirada(false);
-              setTimeout(() => {
-                router.replace('/login');
-              }, 100);
-            }}
-            visible={mostrarPopUpSessionExpirada}
-            title="Sesión Expirada"
-            cancelButtonLabel=""
-            confirmButtonLabel="Iniciar Sesión"
-          />
-        )}
-
-
-        <Stack
-          screenOptions={{
-            headerStyle: { backgroundColor: theme.colors.primary },
-            headerTintColor: '#fff',
+      {mostrarPopUpSessionExpirada && (
+        <ConfirmationDialog
+          message="Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
+          onConfirm={() => {
+            setMostrarPopUpSessionExpirada(false); // 🔹 Primero cerramos el popup
+            setTimeout(() => {  // 🔹 Esperamos un poco para actualizar el estado antes de redirigir
+              router.replace('/login');
+            }, 100);
           }}
-        >
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(app)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(appAdmin)"
-            options={{ headerShown: false, title: 'Panel Administrador' }}
-          />
-        </Stack>
-      </PaperProvider>
-    </StripeProvider>
+          onDismiss={() => {
+            setMostrarPopUpSessionExpirada(false);
+            setTimeout(() => {
+              router.replace('/login');
+            }, 100);
+          }}
+          visible={mostrarPopUpSessionExpirada}
+          title="Sesión Expirada"
+          cancelButtonLabel=""
+          confirmButtonLabel="Iniciar Sesión"
+        />
+      )}
+
+
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: theme.colors.primary },
+          headerTintColor: '#fff',
+        }}
+      >
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(appAdmin)"
+          options={{ headerShown: false, title: 'Panel Administrador' }}
+        />
+      </Stack>
+    </PaperProvider>
+    //</StripeProvider>
   );
 }
 
