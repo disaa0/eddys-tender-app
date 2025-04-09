@@ -1554,6 +1554,10 @@ Authorization: Bearer <token>
 - 403: Esta producto ya ha sido desactivado en el carrito o este no existe en carrito.
 - 500: Error del servidor
 
+**Notas***
+
+- El campo `quantity` es fijado en 0 despues de la eliminacion logica.
+
 ### 10.9 Ver productos en el carrito
 
 **GET /cart/**
@@ -2656,7 +2660,55 @@ limit: Resultados por página (default: 10)
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 14.5 Webhook de Stripe
+## 14.5 Reodernar pedido
+**PUT /api/orders/:idOrder**
+
+Permite agregar productos de una orden ya existente al carrito de compras.
+
+**Encabezados Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+**Parámetros URL:**
+
+- idOrder: ID de pedido existente a reodenar
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+    "message": "Pedido reordenado correctamente, productos agregados al carrito",
+    "data": {
+        "cartId": 2,
+        "items": [
+            {
+                "idProduct": 2,
+                "quantity": 3,
+                "individualPrice": 149.99,
+                "status": true,
+                "idCart": 2
+            }
+        ]
+    }
+}
+
+```
+**Notas:**
+
+- Los productos existentes en el carrito de compras activo, son reemplados por los de los del pedido a reordenar.
+- Se valida que si lo productos a reordenar son los mismos a los ya existentes el carrito de compras, no se efectuen cambios.
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: ID inválido
+- 403: Orden no encontrada o sin permiso para eliminar
+- 409: El carrito ya contiene los mismos productos
+- 500: Error del servidor
+
+
+### 14.6 Webhook de Stripe
 
 **POST /api/webhooks/stripe**
 
