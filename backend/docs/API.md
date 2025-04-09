@@ -1554,6 +1554,10 @@ Authorization: Bearer <token>
 - 403: Esta producto ya ha sido desactivado en el carrito o este no existe en carrito.
 - 500: Error del servidor
 
+**Notas***
+
+- El campo `quantity` es fijado en 0 despues de la eliminacion logica.
+
 ### 10.9 Ver productos en el carrito
 
 **GET /cart/**

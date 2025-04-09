@@ -176,7 +176,7 @@ const softDeleteItemFromCartService = async (userId, idProduct) => {
         // Marcar el producto como inactivo (soft delete)
         const updatedItem = await prisma.itemCart.update({
             where: { idItemCart: itemCart.idItemCart },
-            data: { status: false }
+            data: { quantity: 0, status: false }
         });
 
         return { cartId: cart.idCart, item: updatedItem };
@@ -293,10 +293,10 @@ const getItemsQuantityCartService = async (userId) => {
 };
 
 module.exports = {
-    addItemToCartService, 
-    addOneItemToCartService, 
-    softDeleteItemFromCartService, 
-    getItemsCartService, 
+    addItemToCartService,
+    addOneItemToCartService,
+    softDeleteItemFromCartService,
+    getItemsCartService,
     getTotalAmountCartService,
     getItemsQuantityCartService
 };
