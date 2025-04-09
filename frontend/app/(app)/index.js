@@ -13,6 +13,7 @@ import AdminApiService from '../api/AdminApiService';
 import { useFocusEffect } from '@react-navigation/native';
 import apiService from '../api/ApiService';
 import useUserProducts from '../hooks/useUserProducts';
+import { useCartRefresh } from '../context/CartRefreshContext';
 
 const logo = require('../../assets/eddys.png');
 
@@ -34,6 +35,7 @@ export default function Index() {
   const [filterIcon, setFilterIcon] = useState('filter-list');
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const { reloadCart } = useCartRefresh();
 
   const router = useRouter();
 
@@ -75,6 +77,7 @@ export default function Index() {
   useFocusEffect(
     useCallback(() => {
       refreshProducts();
+      reloadCart();
     }, [])
   );
 

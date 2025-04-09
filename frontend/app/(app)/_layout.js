@@ -17,6 +17,7 @@ export default function AppLayout() {
       response = await apiService.getCartQuantity(); // LLamada API
       if (response.totalQuantity.totalQuantity > 0) {
         setCartCount(response.totalQuantity.totalQuantity)
+        console.log("Cantidad", response.totalQuantity.totalQuantity)
       }
     } catch (err) {
       console.error('Error fetching cart count:', err);

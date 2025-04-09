@@ -20,7 +20,7 @@ export default function ProductCard({ product, onPress }) {
       setLoading(true)
       // console.log(product.idProduct)
       const response = await apiService.addOneToCartItem(product.idProduct)
-      console.log(response.cartId)
+      console.log("CartID", response.cartId)
 
       if (response.status === 200 || response?.cartId > 0) {
         reloadCart(); // Actualizar carrito

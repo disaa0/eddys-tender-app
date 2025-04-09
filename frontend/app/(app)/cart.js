@@ -42,7 +42,7 @@ export default function Cart() {
         <Text style={styles.errorText}>El carrito esta vacio</Text>
         <Text style={styles.errorTextDescription}>Inicia agregando tus proximos productos.</Text>
         <TouchableOpacity
-          onPress={() => router.push('/')}
+          onPress={() => { router.push('/'); reloadCart() }}
           style={styles.goBackButton}
         >
           <Text style={styles.goBackButtonText}>Regresar</Text>
@@ -115,9 +115,9 @@ export default function Cart() {
 
                 <View style={styles.itemFooter}>
                   <View style={styles.quantity}>
-                    <IconButton icon="minus" size={20} onPress={() => updateQuantity(item.idItemCart, item.quantity - 1, item.product.idProduct)} disabled={item.quantity === 1} />
+                    <IconButton icon="minus" size={20} onPress={() => { updateQuantity(item.idItemCart, item.quantity - 1, item.product.idProduct); reloadCart() }} disabled={item.quantity === 1} />
                     <Text>{item.quantity}</Text>
-                    <IconButton icon="plus" size={20} onPress={() => updateQuantity(item.idItemCart, item.quantity + 1, item.product.idProduct)} />
+                    <IconButton icon="plus" size={20} onPress={() => { updateQuantity(item.idItemCart, item.quantity + 1, item.product.idProduct); reloadCart(); }} />
                   </View>
                   <Text variant="titleMedium">${(item.product.price * item.quantity).toFixed(2)}</Text>
                 </View>
