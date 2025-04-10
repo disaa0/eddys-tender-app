@@ -1,10 +1,11 @@
-import { View, StyleSheet, Image, ImageBackground, ScrollView } from 'react-native';
+import { View, StyleSheet, Image, ImageBackground, ScrollView, KeyboardAvoidingViewBase, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text, ActivityIndicator } from 'react-native-paper';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { theme } from '../theme';
 import { useRouter } from 'expo-router';
 import api from '../api/ApiService';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -60,130 +61,145 @@ export default function Register() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../../assets/eddys.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
-      <View style={styles.welcomeContainer}>
-        <Text variant="headlineMedium" style={styles.welcomeMessage}>
-          Registrate
-        </Text>
-      </View>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeAreaContainer}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView style={styles.container}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('../../assets/eddys.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
+            <View style={styles.welcomeContainer}>
+              <Text variant="headlineMedium" style={styles.welcomeMessage}>
+                Registrate
+              </Text>
+            </View>
 
-      {error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : null}
+            {error ? (
+              <Text style={styles.errorText}>{error}</Text>
+            ) : null}
 
-      <TextInput
-        mode="outlined"
-        label="Nombre"
-        value={name}
-        onChangeText={setName}
-        style={[styles.input, getFieldError('name') && styles.inputError]}
-        error={!!getFieldError('name')}
-      />
-      {getFieldError('name') && (
-        <Text style={styles.fieldError}>{getFieldError('name')}</Text>
-      )}
+            <TextInput
+              mode="outlined"
+              label="Nombre"
+              value={name}
+              onChangeText={setName}
+              style={[styles.input, getFieldError('name') && styles.inputError]}
+              error={!!getFieldError('name')}
+            />
+            {getFieldError('name') && (
+              <Text style={styles.fieldError}>{getFieldError('name')}</Text>
+            )}
 
-      <TextInput
-        mode="outlined"
-        label="Apellidos"
-        value={lastNames}
-        onChangeText={setLastNames}
-        style={[
-          styles.input,
-          (getFieldError('lastName') || getFieldError('secondLastName')) && styles.inputError
-        ]}
-        error={!!getFieldError('lastName') || !!getFieldError('secondLastName')}
-        placeholder="Apellido Paterno Apellido Materno (Opcional)"
-      />
-      {getFieldError('lastName') && (
-        <Text style={styles.fieldError}>{getFieldError('lastName')}</Text>
-      )}
-      {getFieldError('secondLastName') && (
-        <Text style={styles.fieldError}>{getFieldError('secondLastName')}</Text>
-      )}
+            <TextInput
+              mode="outlined"
+              label="Apellidos"
+              value={lastNames}
+              onChangeText={setLastNames}
+              style={[
+                styles.input,
+                (getFieldError('lastName') || getFieldError('secondLastName')) && styles.inputError
+              ]}
+              error={!!getFieldError('lastName') || !!getFieldError('secondLastName')}
+              placeholder="Apellido Paterno Apellido Materno (Opcional)"
+            />
+            {getFieldError('lastName') && (
+              <Text style={styles.fieldError}>{getFieldError('lastName')}</Text>
+            )}
+            {getFieldError('secondLastName') && (
+              <Text style={styles.fieldError}>{getFieldError('secondLastName')}</Text>
+            )}
 
-      <TextInput
-        mode="outlined"
-        label="Nombre de Usuario"
-        value={username}
-        onChangeText={setUsername}
-        style={[styles.input, getFieldError('username') && styles.inputError]}
-        error={!!getFieldError('username')}
-      />
-      {getFieldError('username') && (
-        <Text style={styles.fieldError}>{getFieldError('username')}</Text>
-      )}
+            <TextInput
+              mode="outlined"
+              label="Nombre de Usuario"
+              value={username}
+              onChangeText={setUsername}
+              style={[styles.input, getFieldError('username') && styles.inputError]}
+              error={!!getFieldError('username')}
+            />
+            {getFieldError('username') && (
+              <Text style={styles.fieldError}>{getFieldError('username')}</Text>
+            )}
 
-      <TextInput
-        mode="outlined"
-        label="Correo electrónico"
-        value={email}
-        onChangeText={setEmail}
-        style={[styles.input, getFieldError('email') && styles.inputError]}
-        error={!!getFieldError('email')}
-        keyboardType="email-address"
-      />
-      {getFieldError('email') && (
-        <Text style={styles.fieldError}>{getFieldError('email')}</Text>
-      )}
+            <TextInput
+              mode="outlined"
+              label="Correo electrónico"
+              value={email}
+              onChangeText={setEmail}
+              style={[styles.input, getFieldError('email') && styles.inputError]}
+              error={!!getFieldError('email')}
+              keyboardType="email-address"
+            />
+            {getFieldError('email') && (
+              <Text style={styles.fieldError}>{getFieldError('email')}</Text>
+            )}
 
-      <TextInput
-        mode="outlined"
-        label="Teléfono"
-        value={phone}
-        onChangeText={setPhone}
-        style={[styles.input, getFieldError('phone') && styles.inputError]}
-        error={!!getFieldError('phone')}
-        keyboardType="phone-pad"
-      />
-      {getFieldError('phone') && (
-        <Text style={styles.fieldError}>{getFieldError('phone')}</Text>
-      )}
+            <TextInput
+              mode="outlined"
+              label="Teléfono"
+              value={phone}
+              onChangeText={setPhone}
+              style={[styles.input, getFieldError('phone') && styles.inputError]}
+              error={!!getFieldError('phone')}
+              keyboardType="phone-pad"
+            />
+            {getFieldError('phone') && (
+              <Text style={styles.fieldError}>{getFieldError('phone')}</Text>
+            )}
 
-      <TextInput
-        mode="outlined"
-        label="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        style={[styles.input, getFieldError('password') && styles.inputError]}
-        error={!!getFieldError('password')}
-        secureTextEntry
-      />
-      {getFieldError('password') && (
-        <Text style={styles.fieldError}>{getFieldError('password')}</Text>
-      )}
+            <TextInput
+              mode="outlined"
+              label="Contraseña"
+              value={password}
+              onChangeText={setPassword}
+              style={[styles.input, getFieldError('password') && styles.inputError]}
+              error={!!getFieldError('password')}
+              secureTextEntry
+            />
+            {getFieldError('password') && (
+              <Text style={styles.fieldError}>{getFieldError('password')}</Text>
+            )}
 
-      <Button
-        mode="contained"
-        onPress={handleRegister}
-        style={styles.button}
-        buttonColor={theme.colors.primary}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color={theme.colors.surface} />
-        ) : (
-          'Crear cuenta'
-        )}
-      </Button>
+            <Button
+              mode="contained"
+              onPress={handleRegister}
+              style={styles.button}
+              buttonColor={theme.colors.primary}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={theme.colors.surface} />
+              ) : (
+                'Crear cuenta'
+              )}
+            </Button>
 
-      <Link style={styles.link} href="/login" asChild>
-        <Button mode="text" textColor={theme.colors.primary}>
-          ¿Ya tienes cuenta? Inicia sesión
-        </Button>
-      </Link>
-    </ScrollView>
+            <Link style={styles.link} href="/login" asChild>
+              <Button mode="text" textColor={theme.colors.primary}>
+                ¿Ya tienes cuenta? Inicia sesión
+              </Button>
+            </Link>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  safeAreaContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+  },
   container: {
     flex: 1,
     alignContent: 'center',
