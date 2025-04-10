@@ -158,7 +158,6 @@ async function getProductPersonalizations(req, res) {
         const personalizations = await prisma.productPersonalization.findMany({
             where: {
                 idProduct: productId,
-                status: true
             },
             include: {
                 personalization: true
@@ -291,7 +290,7 @@ async function updateProductPersonalizationForUser(req, res) {
 
 
         res.json({
-            message: "Personalización actualizada exitosamente",
+            message: "Personalizacion actualizada exitosamente",
             data: {
                 Personalization,
                 ProductPersonalization
