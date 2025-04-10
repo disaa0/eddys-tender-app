@@ -35,7 +35,6 @@ export default function Index() {
   const [filterIcon, setFilterIcon] = useState('filter-list');
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const { reloadCart } = useCartRefresh();
 
   const router = useRouter();
 
@@ -77,7 +76,6 @@ export default function Index() {
   useFocusEffect(
     useCallback(() => {
       refreshProducts();
-      reloadCart();
     }, [])
   );
 

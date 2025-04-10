@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import apiService from '../api/ApiService';
+import { useCartRefresh } from '../context/CartRefreshContext';
 
 export default function useCart() {
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [personalizacion, setPersonalizacion] = useState([]);
+    const { reloadCart } = useCartRefresh();
 
     const fetchCartItems = async () => {
         try {
@@ -75,6 +77,7 @@ export default function useCart() {
         try {
             const response = await apiService.addCartItem(idProduct, newQuantity);
             console.log(response);
+            reloadCart();
         } catch (err) {
             console.error(err);
         }
@@ -98,6 +101,7 @@ export default function useCart() {
             if (itemDeleted) {
                 setCartItems((prevItems) => prevItems.filter((item) => item.idItemCart !== itemDeleted?.item?.idItemCart));
             }
+            reloadCart();
         } catch (err) {
             console.log(err);
         }
