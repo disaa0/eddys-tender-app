@@ -187,8 +187,7 @@ async function getProductPersonalizationsForUsers(req, res) {
 
         const personalizations = await prisma.productPersonalization.findMany({
             where: {
-                idProduct: productId,
-                status: true
+                idProduct: productId
             },
             select: {
                 idProductPersonalization: true,
@@ -246,7 +245,7 @@ async function updateProductPersonalization(req, res) {
         });
 
         res.json({
-            message: "Personalización actualizada exitosamente",
+            message: "Personalizacion actualizada exitosamente",
             data: {
                 personalization,
                 productPersonalization
