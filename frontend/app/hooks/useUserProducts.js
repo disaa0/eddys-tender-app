@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiService from '../api/ApiService';
 import AdminApiService from '../api/AdminApiService';
+import { useCartRefresh } from '../context/CartRefreshContext';
 
 export default function useUserProducts() {
     const [products, setProducts] = useState([]);
@@ -9,6 +10,7 @@ export default function useUserProducts() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [selectedFilter, setSelectedFilter] = useState('');
+    const { reloadCart } = useCartRefresh();
 
     const loadProducts = async () => {
         try {
@@ -18,6 +20,7 @@ export default function useUserProducts() {
             console.log((response?.data));
             setProducts([...response?.data?.products || []]);
             setTotalPages(response?.data?.totalPages || 1);
+            reloadCart();
         } catch (err) {
             setError(err.message);
         } finally {

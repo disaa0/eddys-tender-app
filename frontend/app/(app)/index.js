@@ -13,6 +13,7 @@ import AdminApiService from '../api/AdminApiService';
 import { useFocusEffect } from '@react-navigation/native';
 import apiService from '../api/ApiService';
 import useUserProducts from '../hooks/useUserProducts';
+import { useCartRefresh } from '../context/CartRefreshContext';
 
 const logo = require('../../assets/eddys.png');
 

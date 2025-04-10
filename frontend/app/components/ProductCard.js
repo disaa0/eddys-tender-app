@@ -5,6 +5,7 @@ import { theme } from '../theme';
 import { useState } from 'react';
 import apiService from '../api/ApiService';
 import ConfirmationDialog from './ConfirmationDialog';
+import { useCartRefresh } from '../context/CartRefreshContext';
 
 export default function ProductCard({ product, onPress }) {
   const [error, setError] = useState('');
@@ -12,14 +13,17 @@ export default function ProductCard({ product, onPress }) {
   const { name, price, description, imageSource } = product;
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState('');
+  const { reloadCart } = useCartRefresh();
+
   const onAddToCart = async (product) => {
     try {
       setLoading(true)
       // console.log(product.idProduct)
       const response = await apiService.addOneToCartItem(product.idProduct)
-      console.log(response.cartId)
+      console.log("CartID", response.cartId)
 
       if (response.status === 200 || response?.cartId > 0) {
+        reloadCart(); // Actualizar carrito
         setDialogVisible(true);
         setDialogMessage(response.message);
       }
