@@ -94,7 +94,8 @@ export default function ProductCard({ product, onPress }) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    margin: 4,
+    marginTop: 0,
+    marginHorizontal: 5,
     borderRadius: 12,
     backgroundColor: '#fff',
   },

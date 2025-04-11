@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import useCart from '../hooks/useCart';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { theme } from '../theme';
 
 
 export default function Cart() {
@@ -80,65 +81,66 @@ export default function Cart() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-
-      <KeyboardAvoidingView
-        style={styles.flexContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <FlatList
-          data={cartItems}
-          keyExtractor={(item) => item.idItemCart.toString()}
-          contentContainerStyle={styles.listContainer}
-          renderItem={({ item }) => (
-            <Card style={styles.itemCard}>
-              <Card.Content>
-                <View style={styles.itemHeader}>
-                  <Text variant="titleMedium">{item.product.name}</Text>
-                  <IconButton icon="delete" size={20} onPress={() => { removeItem(item.product.idProduct); }} />
-                </View>
-                <Text variant="bodyMedium">Descripción: {item.product.description}</Text>
-                {personalizacion &&
-                  personalizacion
-                    .filter(p => p.idProduct === item.idProduct)
-                    .length > 0 && (
-                    <View style={styles.personalizationsContainer}>
-                      <Text style={styles.personalizationsTitle}>Extras:</Text>
-                      {personalizacion
-                        .filter(p => p.idProduct === item.idProduct)
-                        .map((p, index) => (
-                          <Text key={index} style={styles.personalizationItem}>• {p.personalization.name}</Text>
-                        ))}
-                    </View>
-                  )}
-
-                <View style={styles.itemFooter}>
-                  <View style={styles.quantity}>
-                    <IconButton icon="minus" size={20} onPress={() => { updateQuantity(item.idItemCart, item.quantity - 1, item.product.idProduct); }} disabled={item.quantity === 1} />
-                    <Text>{item.quantity}</Text>
-                    <IconButton icon="plus" size={20} onPress={() => { updateQuantity(item.idItemCart, item.quantity + 1, item.product.idProduct); }} />
-                  </View>
-                  <Text variant="titleMedium">${(item.product.price * item.quantity).toFixed(2)}</Text>
-                </View>
-              </Card.Content>
-            </Card>
-          )}
-          ListFooterComponent={
-            <View style={styles.footerContainer}>
-              <Card style={styles.summary}>
+      <View style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.flexContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <FlatList
+            data={cartItems}
+            keyExtractor={(item) => item.idItemCart.toString()}
+            contentContainerStyle={styles.listContainer}
+            renderItem={({ item }) => (
+              <Card style={styles.itemCard}>
                 <Card.Content>
-                  <List.Item title="Subtotal" right={() => <Text>${subtotal.toFixed(2)}</Text>} />
-                  <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
-                  <Divider style={styles.divider} />
-                  <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} />
-                  <Button mode="contained" onPress={handleCheckout} style={styles.checkoutButton}>
-                    Proceder al Pago
-                  </Button>
+                  <View style={styles.itemHeader}>
+                    <Text variant="titleMedium">{item.product.name}</Text>
+                    <IconButton icon="delete" size={20} onPress={() => { removeItem(item.product.idProduct); }} />
+                  </View>
+                  <Text variant="bodyMedium">Descripción: {item.product.description}</Text>
+                  {personalizacion &&
+                    personalizacion
+                      .filter(p => p.idProduct === item.idProduct)
+                      .length > 0 && (
+                      <View style={styles.personalizationsContainer}>
+                        <Text style={styles.personalizationsTitle}>Extras:</Text>
+                        {personalizacion
+                          .filter(p => p.idProduct === item.idProduct)
+                          .map((p, index) => (
+                            <Text key={index} style={styles.personalizationItem}>• {p.personalization.name}</Text>
+                          ))}
+                      </View>
+                    )}
+
+                  <View style={styles.itemFooter}>
+                    <View style={styles.quantity}>
+                      <IconButton icon="minus" size={20} onPress={() => { updateQuantity(item.idItemCart, item.quantity - 1, item.product.idProduct); }} disabled={item.quantity === 1} />
+                      <Text>{item.quantity}</Text>
+                      <IconButton icon="plus" size={20} onPress={() => { updateQuantity(item.idItemCart, item.quantity + 1, item.product.idProduct); }} />
+                    </View>
+                    <Text variant="titleMedium">${(item.product.price * item.quantity).toFixed(2)}</Text>
+                  </View>
                 </Card.Content>
               </Card>
-            </View>
-          }
-        />
-      </KeyboardAvoidingView>
+            )}
+            ListFooterComponent={
+              <View style={styles.footerContainer}>
+                <Card style={styles.summary}>
+                  <Card.Content>
+                    <List.Item title="Subtotal" right={() => <Text>${subtotal.toFixed(2)}</Text>} />
+                    <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
+                    <Divider style={styles.divider} />
+                    <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} />
+                    <Button mode="contained" onPress={handleCheckout} style={styles.checkoutButton}>
+                      Proceder al Pago
+                    </Button>
+                  </Card.Content>
+                </Card>
+              </View>
+            }
+          />
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -146,16 +148,21 @@ export default function Cart() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: theme.colors.primary,
+  },
+  container: {
+    flex: 1,
     backgroundColor: '#fff',
   },
   flexContainer: {
     flex: 1,
   },
   listContainer: {
-    paddingBottom: 100, // Espacio para que el footer no bloquee la lista
+    backgroundColor: theme.colors.surface,
   },
   itemCard: {
     margin: 8,
+    backgroundColor: theme.colors.surface,
   },
   itemHeader: {
     flexDirection: 'row',
@@ -174,11 +181,13 @@ const styles = StyleSheet.create({
   },
   footerContainer: {
     paddingVertical: 10,
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.surface,
+    marginBottom: '40',
   },
   summary: {
     borderRadius: 10,
     margin: 10,
+    backgroundColor: theme.colors.surface,
   },
   divider: {
     marginVertical: 8,
