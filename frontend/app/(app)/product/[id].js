@@ -105,7 +105,7 @@ export default function ProductDetails() {
       if (response?.data?.personalizations && response.data.personalizations.length > 0) {
         setPersonalizations(response.data.personalizations);
 
-        setSelectedPersonalizations(response.data.personalizations.filter((p) => p.status === true).map(p => p.idProductPersonalization));
+        // setSelectedPersonalizations(response.data.personalizations.filter((p) => p.status === true).map(p => p.idProductPersonalization));
       }
     } catch (error) {
       console.error('Error al cargar personalizaciones:', error);
