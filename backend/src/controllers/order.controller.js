@@ -4,7 +4,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // Create a new order
 async function createOrder(req, res) {
     try {
-        const { idPaymentType, idShipmentType, idLocation } = req.body;
+        const { idPaymentType, idShipmentType, idLocation, shipmentValue } = req.body;
         const userId = req.user.userId;
 
         // Validate required fields
@@ -20,11 +20,22 @@ async function createOrder(req, res) {
                 message: 'Se requiere una dirección de entrega para envíos a domicilio'
             });
         }
+        
+        // Validate shipment value if provided
+        if (shipmentValue !== undefined) {
+            const shipmentValueNumber = parseFloat(shipmentValue);
+            if (isNaN(shipmentValueNumber) || shipmentValueNumber < 0) {
+                return res.status(400).json({
+                    message: 'Valor de envío inválido'
+                });
+            }
+        }
 
         const result = await orderService.createOrder(userId, {
             idPaymentType: parseInt(idPaymentType),
             idShipmentType: parseInt(idShipmentType),
-            idLocation: idLocation ? parseInt(idLocation) : null
+            idLocation: idLocation ? parseInt(idLocation) : null,
+            shipmentValue: shipmentValue ? parseFloat(shipmentValue) : 0
         });
 
         res.status(201).json(result);

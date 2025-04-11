@@ -233,6 +233,7 @@ model Order{
   createdAt DateTime @default(now())
   deliveryAt DateTime?
   totalPrice Float
+  shipmentValue Float @default(0)
   paid Boolean
   paidAt DateTime?
   

@@ -9,7 +9,7 @@ const paymentService = require('./payment.service');
  * @returns {Object} - The created order with payment intent
  */
 async function createOrder(userId, orderData) {
-  const { idPaymentType, idShipmentType, idLocation } = orderData;
+  const { idPaymentType, idShipmentType, idLocation, shipmentValue = 0 } = orderData;
 
   // Double-check location requirement for delivery orders
   if (idShipmentType === 1 && !idLocation) {
@@ -41,9 +41,14 @@ async function createOrder(userId, orderData) {
     }
 
     // 2. Calculate total price from cart items
-    const totalPrice = cart.itemsCart.reduce((sum, item) => {
+    const itemsTotal = cart.itemsCart.reduce((sum, item) => {
       return sum + item.quantity * item.individualPrice;
     }, 0);
+    
+    // Add shipment value to total price (if it's a delivery order)
+    // For pickup orders, we'll set shipmentValue to 0 regardless of input
+    const finalShipmentValue = idShipmentType === 1 ? shipmentValue : 0;
+    const totalPrice = itemsTotal + finalShipmentValue;
 
     // 3. Create the order
     const order = await tx.order.create({
@@ -54,6 +59,7 @@ async function createOrder(userId, orderData) {
         idOrderStatus: 1, // Assuming 1 is 'Pendiente'
         idLocation: idLocation || null,
         totalPrice,
+        shipmentValue: finalShipmentValue,
         paid: false,
       },
     });
