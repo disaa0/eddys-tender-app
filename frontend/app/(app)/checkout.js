@@ -14,11 +14,11 @@ export default function Checkout() {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [cart, setCart] = useState([]);
+  //const [cart, setCart] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(0);
   const [shipmentType, setShipmentType] = useState(1);
-  const [cartId, setCartId] = useState(0);
+  //const [cartId, setCartId] = useState(0);
   const [subtotal, setSubtotal] = useState(0.00);
   const [total, setTotal] = useState(0.00);
   const [delivery, setDelivery] = useState(0.00);
@@ -29,9 +29,9 @@ export default function Checkout() {
   const { reloadCart } = useCartRefresh();
   const [address, setAddress] = useState({
     street: '',
-    number: '',
-    colony: '',
-    reference: '',
+    houseNumber: '',
+    neighborhood: '',
+    postalCode: '',
   });
   const { cartItems, personalizacion } = useCart();
 
@@ -59,17 +59,16 @@ export default function Checkout() {
           const data = await apiService.getShippingAdresses();
           setAddresses(data.data);
         } catch (err) {
-          console.log(err);
-          console.log("hay un error en las direcciones");
-          setError('Error al obtener direccioessssr');
+          setError('Error al obtener direcciones');
         } finally {
-          console.log('Direcciones', addresses)
           setLoading(false);
         }
       };
       getShippingAddresses();
       setSelectedAddressId(0);
       setDelivery(0.00);
+      setShipmentType(1);
+
     }, [])
   );
 
@@ -80,11 +79,10 @@ export default function Checkout() {
         try {
           setLoading(true);
           const data = await apiService.getCartTotal();
-          console.log('datos carrito', data)
           setSubtotal(data.totalAmount.totalAmount);
           setTotal(data.totalAmount.totalAmount + delivery);
         } catch (err) {
-          setError('Error al crear orden');
+          setError('Error al obtener total de la orden');
         } finally {
           setLoading(false);
         }
@@ -92,6 +90,20 @@ export default function Checkout() {
       getCartTotal();
     }, [])
   );
+  const createShippingAddress = async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.addShippingAdresses(address.street, address.houseNumber, address.postalCode, address.neighborhood);
+      console.log('nuevaDirección', data)
+    } catch (err) {
+      setError('Error al crear dirección');
+      console.log("Error al crear dirección", err)
+      setPurchaseErrorDialogVisible(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleOnValueChangeAddressId = (value) => {
     setSelectedAddressId(value);
     if (value == 0) {
@@ -103,6 +115,7 @@ export default function Checkout() {
     }
   }
   const handlePlaceOrder = () => {
+    createShippingAddress();
     if (paymentMethod === 'card') {
       handleStripePayment();
     } else {
@@ -143,7 +156,6 @@ export default function Checkout() {
       router.push('./orders.js')
     } catch (error) {
       setError(error.message || "Error en el pago");
-      console.log("Error de stripe", error)
       setPurchaseErrorDialogVisible(true);
     } finally {
       reloadCart();
@@ -244,9 +256,9 @@ export default function Checkout() {
             {selectedAddressId == (addresses.length + 1) && (
               <>
                 <TextInput mode="outlined" label="Calle" value={address.street} onChangeText={text => setAddress({ ...address, street: text })} style={styles.input} />
-                <TextInput mode="outlined" label="Número" value={address.number} onChangeText={text => setAddress({ ...address, number: text })} style={styles.input} keyboardType="number-pad" />
-                <TextInput mode="outlined" label="Colonia" value={address.colony} onChangeText={text => setAddress({ ...address, colony: text })} style={styles.input} />
-                <TextInput mode="outlined" label="Código Postal" value={address.reference} onChangeText={text => setAddress({ ...address, reference: text })} style={styles.input} multiline numberOfLines={2} />
+                <TextInput mode="outlined" label="Número" value={address.houseNumber} onChangeText={text => setAddress({ ...address, houseNumber: text })} style={styles.input} keyboardType="number-pad" />
+                <TextInput mode="outlined" label="Colonia" value={address.neighborhood} onChangeText={text => setAddress({ ...address, neighborhood: text })} style={styles.input} />
+                <TextInput mode="outlined" label="Código Postal" value={address.postalCode} onChangeText={text => setAddress({ ...address, postalCode: text })} style={styles.input} keyboardType="number-pad" />
               </>
             )}
           </Card.Content>
@@ -286,7 +298,7 @@ export default function Checkout() {
 
         {/* Dialogs */}
         <ConfirmationDialog visible={purchaseSuccessfulDialogVisible} onDismiss={() => setPurchaseSuccessfulDialogVisible(false)} onConfirm={() => { setPurchaseSuccessfulDialogVisible(false); router.push('/orders'); }} title="Compra exitosa" message="Su orden se ha creado con éxito." confirmButtonLabel="Continuar" />
-        <ConfirmationDialog visible={purchaseErrorDialogVisible} onDismiss={() => setPurchaseErrorDialogVisible(false)} title="Error en compra" message={"Ha ocurrido un error, favor de reintentar."} confirmButtonLabel="Reintentar" />
+        <ConfirmationDialog visible={purchaseErrorDialogVisible} onDismiss={() => setPurchaseErrorDialogVisible(false)} title="Error en compra" message={"Ha ocurrido un error, favor de reintentar. " + error} confirmButtonLabel="Reintentar" />
       </ScrollView>
     </SafeAreaView>
   );
