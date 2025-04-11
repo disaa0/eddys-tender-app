@@ -9,7 +9,12 @@ const paymentService = require('./payment.service');
  * @returns {Object} - The created order with payment intent
  */
 async function createOrder(userId, orderData) {
-  const { idPaymentType, idShipmentType, idLocation, shipmentValue = 0 } = orderData;
+  const {
+    idPaymentType,
+    idShipmentType,
+    idLocation,
+    shipmentValue = 0,
+  } = orderData;
 
   // Double-check location requirement for delivery orders
   if (idShipmentType === 1 && !idLocation) {
@@ -44,7 +49,7 @@ async function createOrder(userId, orderData) {
     const itemsTotal = cart.itemsCart.reduce((sum, item) => {
       return sum + item.quantity * item.individualPrice;
     }, 0);
-    
+
     // Add shipment value to total price (if it's a delivery order)
     // For pickup orders, we'll set shipmentValue to 0 regardless of input
     const finalShipmentValue = idShipmentType === 1 ? shipmentValue : 0;
@@ -179,6 +184,7 @@ async function handlePaymentSucceeded(paymentIntent) {
     // Find order by payment intent ID
     const order = await prisma.order.findUnique({
       where: { stripePaymentIntentId: paymentIntent.id },
+      include: { cart: true },
     });
 
     if (!order) {
@@ -187,28 +193,50 @@ async function handlePaymentSucceeded(paymentIntent) {
       );
     }
 
-    // Update order status to paid
-    const updatedOrder = await prisma.order.update({
-      where: { idOrder: order.idOrder },
-      data: {
-        paid: true,
-        paidAt: new Date(),
-        idOrderStatus: 2, // Assuming 2 is "Processing" or "Paid"
-        stripePaymentStatus: paymentIntent.status,
-      },
+    // Execute database operations in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Update order status to paid
+      const updatedOrder = await tx.order.update({
+        where: { idOrder: order.idOrder },
+        data: {
+          paid: true,
+          paidAt: new Date(),
+          idOrderStatus: 4, // 4 is "Listo para enviar"
+          stripePaymentStatus: paymentIntent.status,
+        },
+      });
+
+      // 2. Disable the cart associated with the order
+      await tx.cart.update({
+        where: { idCart: order.idCart },
+        data: { status: false },
+      });
+
+      // 3. Create a notification for the successful payment
+      const notification = await tx.notification.create({
+        data: {
+          idOrder: order.idOrder,
+          title: 'Pago recibido',
+          message: `El pago de $${order.totalPrice} ha sido procesado exitosamente.`,
+          status: true,
+        },
+      });
+
+      return {
+        updatedOrder,
+        notification,
+      };
     });
 
-    // Create a notification for the successful payment
-    await prisma.notification.create({
-      data: {
-        idOrder: order.idOrder,
-        title: 'Pago recibido',
-        message: `El pago de $${order.totalPrice} ha sido procesado exitosamente.`,
-        status: true,
-      },
-    });
+    console.log(
+      `Order ${order.idOrder} paid successfully and cart ${order.idCart} disabled`
+    );
 
-    return { success: true, order: updatedOrder };
+    return {
+      success: true,
+      order: result.updatedOrder,
+      cartDisabled: true,
+    };
   } catch (error) {
     console.error('Error handling payment success:', error);
     return { success: false, error: error.message };
