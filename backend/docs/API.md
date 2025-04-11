@@ -2428,26 +2428,26 @@ Crea un nuevo pedido a partir del carrito activo del usuario.
 
 **Encabezados Requeridos:**
 
-~~~
+```
 Authorization: Bearer <token>
-~~~
+```
 
 **Cuerpo de la Solicitud:**
 
-~~~json
+```json
 {
-  "idPaymentType": 2,   // 1=Efectivo, 2=Crédito, 3=Débito
-  "idShipmentType": 1,  // 1=Envío, 2=Recogida
-  "idLocation": 3,      // Opcional, requerido para envío
-  "shipmentValue": 50   // Valor del envío que se sumará al total
+  "idPaymentType": 2, // 1=Efectivo, 2=Crédito, 3=Débito
+  "idShipmentType": 1, // 1=Envío, 2=Recogida
+  "idLocation": 3, // Opcional, requerido para envío
+  "shipmentValue": 50 // Valor del envío que se sumará al total
 }
-~~~
+```
 
 **Respuesta (201 Creado):**
 
 Para pagos con tarjeta (tipos 2, 3):
 
-~~~json
+```json
 {
   "order": {
     "idOrder": 42,
@@ -2455,8 +2455,8 @@ Para pagos con tarjeta (tipos 2, 3):
     "idPaymentType": 2,
     "idShipmentType": 1,
     "idOrderStatus": 1,
-    "totalPrice": 308.00,    // Incluye el valor de los productos (258) + envío (50)
-    "shipmentValue": 50.00,  // Valor del envío
+    "totalPrice": 308.0, // Incluye el valor de los productos (258) + envío (50)
+    "shipmentValue": 50.0, // Valor del envío
     "paid": false,
     "createdAt": "2023-07-15T14:30:45Z",
     "stripePaymentIntentId": "pi_3MkVnL2eZvKYlo2C1IFrG8oM",
@@ -2467,11 +2467,11 @@ Para pagos con tarjeta (tipos 2, 3):
     "paymentIntentId": "pi_3MkVnL2eZvKYlo2C1IFrG8oM"
   }
 }
-~~~
+```
 
 Para pagos en efectivo (tipo 1):
 
-~~~json
+```json
 {
   "order": {
     "idOrder": 43,
@@ -2479,13 +2479,13 @@ Para pagos en efectivo (tipo 1):
     "idPaymentType": 1,
     "idShipmentType": 2,
     "idOrderStatus": 1,
-    "totalPrice": 129.00,    // No incluye valor de envío cuando es recogida
-    "shipmentValue": 0.00,   // Para recogida, el valor de envío es 0
+    "totalPrice": 129.0, // No incluye valor de envío cuando es recogida
+    "shipmentValue": 0.0, // Para recogida, el valor de envío es 0
     "paid": false,
     "createdAt": "2023-07-15T15:12:23Z"
   }
 }
-~~~
+```
 
 **Respuestas de Error:**
 
