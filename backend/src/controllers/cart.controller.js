@@ -1,4 +1,4 @@
-const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService, disableCartService, getCartByIdService } = require('../services/cart.service');
+const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService, disableCartService, getCartByIdService, getCartsByIdUserService } = require('../services/cart.service');
 
 const addItemToCart = async (req, res) => {
     const { idProduct } = req.params;
@@ -201,7 +201,44 @@ const getCartById = async (req, res) => {
     }
 };
 
+const getCartsByUser = async (req, res) => {
+    const userId = req.user.userId;
+    const userType = req.user.idUserType;
 
+    try {
+        const carts = await getCartsByIdUserService(userId, userId, userType);
+        return res.status(200).json({
+            message: "Carritos del usuario autenticado obtenidos correctamente",
+            data: carts
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        const status = error.statusCode || 500;
+        return res.status(status).json({ message: error.message || "Error del servidor" });
+    }
+};
+
+const getCartsByUserId = async (req, res) => {
+    const requestingUserId = req.user.userId;
+    const requestingUserType = req.user.userType;
+    const targetUserId = parseInt(req.params.userId);
+
+    if (isNaN(targetUserId) || targetUserId <= 0) {
+        return res.status(400).json({ message: "El ID del usuario debe ser un número entero positivo" });
+    }
+
+    try {
+        const carts = await getCartsByIdUserService(requestingUserId, targetUserId, requestingUserType);
+        return res.status(200).json({
+            message: `Carritos del usuario ${targetUserId} obtenidos correctamente`,
+            data: carts
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        const status = error.statusCode || 500;
+        return res.status(status).json({ message: error.message || "Error del servidor" });
+    }
+};
 module.exports = {
     addItemToCart,
     addOneItemToCart,
@@ -210,5 +247,8 @@ module.exports = {
     getTotalAmountCart,
     getItemsQuantityCart,
     disableCart,
-    getCartById
+    getCartById,
+    getCartsByUserId,
+    getCartsByUser
+
 };
