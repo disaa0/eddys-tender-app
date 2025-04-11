@@ -1693,7 +1693,66 @@ Authorization: Bearer <token>
 - Este endpoint permite desactivar un carrito completo, lo que puede ser útil cuando se completa una compra o se quiere iniciar un carrito nuevo
 - El carrito desactivado se mantiene en la base de datos pero no aparecerá en las consultas de carritos activos
 
-### 10.13 Obtener imagen de un producto
+### 10.13 Obtener productos del carrito por ID
+
+**GET /cart/{id}**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+
+- id: ID del producto a eliminar en el carrito
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Carrito obtenido correctamente",
+  "data": {
+    "idCart": 1,
+    "idUser": 1,
+    "status": true,
+    "items": [
+      {
+        "idItemCart": 1,
+        "idCart": 1,
+        "idProduct": 2,
+        "quantity": 2,
+        "individualPrice": 149,
+        "status": true,
+        "product": {
+          "idProduct": 2,
+          "idProductType": 1,
+          "idUserAdded": 1,
+          "name": "Pizza Pepperoni",
+          "description": "Pizza con pepperoni, queso y salsa de tomate",
+          "price": 149.99,
+          "status": true,
+          "createdAt": "2025-04-11T05:12:42.992Z"
+        }
+      }
+    ]
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Error de peticion
+- 403: No tienes permiso para ver este carrito
+- 500: Error del servidor
+
+**Notas:**
+
+- Los usuario administradores pueden consultar cualquier carrito por ID
+- Los usuario cliente puende consultar cualquier carrito por ID miestra les pernesca
+
+### 10.14 Obtener imagen de un producto
 
 **GET /api/products/:id/image**
 
@@ -1716,7 +1775,7 @@ Obtiene la imagen de un producto específico.
 - 404: Imagen no encontrada en el servidor
 - 500: Error al obtener la imagen del producto
 
-### 10.14 Subir imagen de un producto (Admin)
+### 10.15 Subir imagen de un producto (Admin)
 
 **POST /api/admin/products/:id/image**
 
@@ -1775,7 +1834,7 @@ Content-Type: multipart/form-data
 - 403: Usuario no es administrador
 - 500: Error al subir la imagen del producto
 
-### 10.15 Buscar productos
+### 10.16 Buscar productos
 
 **GET /api/products/search**
 
@@ -1849,7 +1908,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.16 Obtener Productos Populares
+### 10.17 Obtener Productos Populares
 
 **GET /api/products/popular**
 
@@ -1897,7 +1956,7 @@ limit: Número de productos a retornar (default: 5)
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.17 Obetner detalles del producto por ID
+### 10.18 Obetner detalles del producto por ID
 
 **GET /products/{id}**
 
@@ -1960,7 +2019,7 @@ Authorization: Bearer <token>
 - 404: No se encontro el producto
 - 500: Error del servidor
 
-### 10.18 Editar Personalización de Producto para usuarios
+### 10.19 Editar Personalización de Producto para usuarios
 
 **PUT /api/products/{id}/user/personalization**
 
@@ -2020,7 +2079,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.19 Obtner Personalizaciónes de Producto para usuarios
+### 10.20 Obtner Personalizaciónes de Producto para usuarios
 
 **GET /api/products/{id}/user/personalizations**
 
@@ -2085,7 +2144,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.20 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
+### 10.21 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
 
 **PACTH /api/products/{idProduct}/user/personalization/{idProductPersonalization}/status**
 

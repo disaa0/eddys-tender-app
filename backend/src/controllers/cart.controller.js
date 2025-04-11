@@ -1,4 +1,4 @@
-const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService, disableCartService } = require('../services/cart.service');
+const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService, disableCartService, getCartByIdService } = require('../services/cart.service');
 
 const addItemToCart = async (req, res) => {
     const { idProduct } = req.params;
@@ -175,12 +175,40 @@ const disableCart = async (req, res) => {
     }
 };
 
+const getCartById = async (req, res) => {
+    try {
+        // Validar que el id del carrito sea un número entero
+        if (isNaN(req.params.cartId) || parseInt(req.params.cartId) <= 0) {
+            return res.status(400).json({ message: "El id del carrito debe ser un número entero positivo" });
+        }
+        const cartId = parseInt(req.params.cartId);
+        const userId = req.user.userId;
+
+        const cartData = await getCartByIdService(userId, cartId);
+
+        return res.status(200).json({
+            message: "Carrito obtenido correctamente",
+            data: cartData
+        });
+
+    } catch (error) {
+        console.error("Error al obtener carrito:", error);
+
+        const status = error.statusCode || 500;
+        const message = error.message || "Error interno del servidor";
+
+        return res.status(status).json({ message });
+    }
+};
+
+
 module.exports = {
-    addItemToCart, 
-    addOneItemToCart, 
-    softDeleteItemFromCart, 
-    getItemsCart, 
+    addItemToCart,
+    addOneItemToCart,
+    softDeleteItemFromCart,
+    getItemsCart,
     getTotalAmountCart,
     getItemsQuantityCart,
-    disableCart
+    disableCart,
+    getCartById
 };
