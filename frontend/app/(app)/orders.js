@@ -4,6 +4,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useState, useCallback } from 'react';
 import apiService from '../api/ApiService';
 import { theme } from '../theme';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import ConfirmationDialog from '../components/ConfirmationDialog'
 
 // Datos de ejemplo - En producción vendrían de una API
 const ORDERS = [
@@ -55,6 +57,8 @@ export default function Orders() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [showError, setShowError] = useState(false);
+  const [error, setError] = useState('');
 
 
   useFocusEffect(
@@ -79,9 +83,18 @@ export default function Orders() {
     }, [])
   );
 
-  const handleReorder = (orderId) => {
+  const handleReorder = async (orderId) => {
     // Implementar lógica de reorden
-    router.push('/cart');
+    // router.push('/cart');
+
+    try {
+      const reorderResponse = await apiService.reorderUserOrder(orderId);
+      console.log(reorderResponse);
+    } catch (error) {
+      console.error('Error al reordenar:', error);
+      setError(error.message || 'Error al reordenar');
+      setShowError(true);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -96,39 +109,41 @@ export default function Orders() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Searchbar
-        placeholder="Buscar"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        style={styles.searchbar}
-        inputStyle={styles.searchInput}
-        icon="magnify"
-        placeholderTextColor="#666"
-      />
-      {orders.map((order) => (
-        <Card key={order.idOrder} style={styles.orderCard}>
-          <Card.Content>
-            {/* Encabezado del pedido */}
-            <View style={styles.orderHeader}>
-              <View>
-                <Text variant="titleMedium">Pedido #{order.idOrder}</Text>
-                <Text variant="bodySmall">{formatDate(order.createdAt)}</Text>
-              </View>
-              <Chip
-                style={[
-                  styles.statusChip,
-                  { backgroundColor: getStatusColor(order.orderStatus.idOrderStatus) }
-                ]}
-              >
-                <Text style={styles.statusText}>{order.orderStatus.status}</Text>
-              </Chip>
-            </View>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeAreaContainer}>
+        <ScrollView style={styles.container}>
+          <Searchbar
+            placeholder="Buscar"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={styles.searchbar}
+            inputStyle={styles.searchInput}
+            icon="magnify"
+            placeholderTextColor="#666"
+          />
+          {orders.map((order) => (
+            <Card key={order.idOrder} style={styles.orderCard}>
+              <Card.Content>
+                {/* Encabezado del pedido */}
+                <View style={styles.orderHeader}>
+                  <View>
+                    <Text variant="titleMedium">Pedido #{order.idOrder}</Text>
+                    <Text variant="bodySmall">{formatDate(order.createdAt)}</Text>
+                  </View>
+                  <Chip
+                    style={[
+                      styles.statusChip,
+                      { backgroundColor: getStatusColor(order.orderStatus.idOrderStatus) }
+                    ]}
+                  >
+                    <Text style={styles.statusText}>{order.orderStatus.status}</Text>
+                  </Chip>
+                </View>
 
-            {/* Lista de productos */}
-            <List.Section>
-              <List.Subheader>Productos</List.Subheader>
-              {/*order.items.map((item, index) => (
+                {/* Lista de productos */}
+                <List.Section>
+                  <List.Subheader>Productos</List.Subheader>
+                  {/*order.items.map((item, index) => (
                 <List.Item
                   key={index}
                   title={item.name}
@@ -136,42 +151,65 @@ export default function Orders() {
                   left={props => <List.Icon {...props} icon="food" />}
                 />
               ))*/}
-            </List.Section>
+                </List.Section>
 
-            {/* Detalles de entrega */}
-            <List.Item
-              title="Dirección de entrega"
-              description={order.idLocation}
-              left={props => <List.Icon {...props} icon="map-marker" />}
-            />
-
-            {/* Método de pago y total */}
-            <View style={styles.orderFooter}>
-              <View>
-                <Text variant="bodyMedium">Método de pago: {order.paymentType.type}</Text>
-                <Text variant="titleMedium" style={styles.total}>
-                  Total: ${order.totalPrice.toFixed(2)}
-                </Text>
-              </View>
-
-              {order.status === 'Entregado' && (
-                <IconButton
-                  icon="refresh"
-                  mode="contained"
-                  onPress={() => handleReorder(order.id)}
-                  iconColor="#fff"
-                  containerColor="#2196F3"
+                {/* Detalles de entrega */}
+                <List.Item
+                  title="Dirección de entrega"
+                  description={order.idLocation}
+                  left={props => <List.Icon {...props} icon="map-marker" />}
                 />
-              )}
-            </View>
-          </Card.Content>
-        </Card>
-      ))}
-    </ScrollView>
+
+                {/* Método de pago y total */}
+                <View style={styles.orderFooter}>
+                  <View>
+                    <Text variant="bodyMedium">Método de pago: {order.paymentType.type}</Text>
+                    <Text variant="titleMedium" style={styles.total}>
+                      Total: ${order.totalPrice.toFixed(2)}
+                    </Text>
+                  </View>
+
+                  {/* {order.status === 'Entregado' && ( */}
+                  {1 == 1 && (
+                    <IconButton
+                      icon="history" // este ícono se parece al de tu imagen
+                      mode="contained"
+                      onPress={() => handleReorder(order.idOrder)}
+                      iconColor="#ffffff"
+                      containerColor="#000000"
+                      size={24}
+                    />
+                  )}
+                </View>
+              </Card.Content>
+            </Card>
+          ))}
+        </ScrollView>
+
+        <ConfirmationDialog
+          message={error}
+          visible={showError}
+          onConfirm={() => {
+            setShowError(false);
+          }}
+          onDismiss={() => {
+            setShowError(false);
+          }
+          }
+          title={'Upps!'}
+          cancelButtonLabel={''}
+          confirmButtonLabel={'Cerrar'}
+
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  safeAreaContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.surface,
