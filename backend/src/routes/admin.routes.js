@@ -10,6 +10,7 @@ const { validateRegister } = require('../middlewares/validateInput');
 const { registerAdmin } = require('../controllers/auth.controller');
 const adminController = require('../controllers/admin.controller');
 const { getOrdersByDateRange, updateOrderStatus, getOrderById } = require('../controllers/adminOrder.controller');
+const { getCartsByUserId } = require('../controllers/cart.controller');
 
 // Apply authentication middleware to all admin routes
 router.use(authenticateToken);
@@ -21,6 +22,9 @@ router.post('/products', isAdmin, addProduct);
 router.put('/products/:id', isAdmin, modifyProductDetails);
 router.patch('/products/:id/status', isAdmin, toggleProductStatus);
 router.put('/products/:id/customization', isAdmin, updateProductCustomization);
+
+// Admin cart routes
+router.get('/cart/user/:userId', authenticateToken, isAdmin, getCartsByUserId);
 
 // Admin user routes
 router.post('/register', isAdmin, validateRegister, registerAdmin);

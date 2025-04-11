@@ -1752,7 +1752,130 @@ Authorization: Bearer <token>
 - Los usuario administradores pueden consultar cualquier carrito por ID
 - Los usuario cliente puende consultar cualquier carrito por ID miestra les pernesca
 
-### 10.14 Obtener imagen de un producto
+### 10.14 Obtener carritos de un usuario por ID
+
+- Permite obtener todos lo carrito existentes que pertenescan a un usuario especifico
+- Para usarios administradores
+
+**GET /api/admin/cart/user/{id}**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+
+- id: ID del usuario del cual se busca obtener sus carritos
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Carritos del usuario 2 obtenidos correctamente",
+  "data": [
+    {
+      "idCart": 2,
+      "idUser": 2,
+      "status": true,
+      "createdAt": "2025-04-11T17:24:39.685Z",
+      "itemsCart": [
+        {
+          "idItemCart": 3,
+          "idCart": 2,
+          "idProduct": 1,
+          "quantity": 1,
+          "individualPrice": 89,
+          "status": true,
+          "product": {
+            "idProduct": 1,
+            "idProductType": 1,
+            "idUserAdded": 1,
+            "name": "Hamburguesa Clásica",
+            "description": "Hamburguesa con carne, lechuga, tomate y queso",
+            "price": 89.99,
+            "status": true,
+            "createdAt": "2025-04-11T17:24:17.404Z"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Error de peticion
+- 403: Usuario no es adminstrador
+- 500: Error del servidor
+
+**Notas:**
+
+- Los usuario administradores pueden consultar cualquier listado de carritos por ID
+
+### 10.15 Obtener carritos pertenecientes a un usuario autenticado
+
+- Permite obtener todos lo carrito existentes que pertenescan a un usuario especifico
+- Para usarios administradores
+
+**GET /api/cart/user**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Carritos del usuario autenticado obtenidos correctamente",
+  "data": [
+    {
+      "idCart": 2,
+      "idUser": 2,
+      "status": true,
+      "createdAt": "2025-04-11T17:24:39.685Z",
+      "itemsCart": [
+        {
+          "idItemCart": 3,
+          "idCart": 2,
+          "idProduct": 1,
+          "quantity": 1,
+          "individualPrice": 89,
+          "status": true,
+          "product": {
+            "idProduct": 1,
+            "idProductType": 1,
+            "idUserAdded": 1,
+            "name": "Hamburguesa Clásica",
+            "description": "Hamburguesa con carne, lechuga, tomate y queso",
+            "price": 89.99,
+            "status": true,
+            "createdAt": "2025-04-11T17:24:17.404Z"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Error de peticion
+- 500: Error del servidor
+
+**Notas:**
+
+- Los usuario administradores pueden consultar cualquier listado de carritos por ID
+
+### 10.16 Obtener imagen de un producto
 
 **GET /api/products/:id/image**
 
@@ -1775,7 +1898,7 @@ Obtiene la imagen de un producto específico.
 - 404: Imagen no encontrada en el servidor
 - 500: Error al obtener la imagen del producto
 
-### 10.15 Subir imagen de un producto (Admin)
+### 10.17 Subir imagen de un producto (Admin)
 
 **POST /api/admin/products/:id/image**
 
@@ -1834,7 +1957,7 @@ Content-Type: multipart/form-data
 - 403: Usuario no es administrador
 - 500: Error al subir la imagen del producto
 
-### 10.16 Buscar productos
+### 10.18 Buscar productos
 
 **GET /api/products/search**
 
@@ -1908,7 +2031,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.17 Obtener Productos Populares
+### 10.19 Obtener Productos Populares
 
 **GET /api/products/popular**
 
@@ -1956,7 +2079,7 @@ limit: Número de productos a retornar (default: 5)
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.18 Obetner detalles del producto por ID
+### 10.20 Obetner detalles del producto por ID
 
 **GET /products/{id}**
 
@@ -2019,7 +2142,7 @@ Authorization: Bearer <token>
 - 404: No se encontro el producto
 - 500: Error del servidor
 
-### 10.19 Editar Personalización de Producto para usuarios
+### 10.21 Editar Personalización de Producto para usuarios
 
 **PUT /api/products/{id}/user/personalization**
 
@@ -2079,7 +2202,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.20 Obtner Personalizaciónes de Producto para usuarios
+### 10.22 Obtner Personalizaciónes de Producto para usuarios
 
 **GET /api/products/{id}/user/personalizations**
 
@@ -2144,7 +2267,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.21 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
+### 10.23 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
 
 **PACTH /api/products/{idProduct}/user/personalization/{idProductPersonalization}/status**
 
@@ -2487,26 +2610,26 @@ Crea un nuevo pedido a partir del carrito activo del usuario.
 
 **Encabezados Requeridos:**
 
-~~~
+```
 Authorization: Bearer <token>
-~~~
+```
 
 **Cuerpo de la Solicitud:**
 
-~~~json
+```json
 {
-  "idPaymentType": 2,   // 1=Efectivo, 2=Crédito, 3=Débito
-  "idShipmentType": 1,  // 1=Envío, 2=Recogida
-  "idLocation": 3,      // Opcional, requerido para envío
-  "shipmentValue": 50   // Valor del envío que se sumará al total
+  "idPaymentType": 2, // 1=Efectivo, 2=Crédito, 3=Débito
+  "idShipmentType": 1, // 1=Envío, 2=Recogida
+  "idLocation": 3, // Opcional, requerido para envío
+  "shipmentValue": 50 // Valor del envío que se sumará al total
 }
-~~~
+```
 
 **Respuesta (201 Creado):**
 
 Para pagos con tarjeta (tipos 2, 3):
 
-~~~json
+```json
 {
   "order": {
     "idOrder": 42,
@@ -2514,8 +2637,8 @@ Para pagos con tarjeta (tipos 2, 3):
     "idPaymentType": 2,
     "idShipmentType": 1,
     "idOrderStatus": 1,
-    "totalPrice": 308.00,    // Incluye el valor de los productos (258) + envío (50)
-    "shipmentValue": 50.00,  // Valor del envío
+    "totalPrice": 308.0, // Incluye el valor de los productos (258) + envío (50)
+    "shipmentValue": 50.0, // Valor del envío
     "paid": false,
     "createdAt": "2023-07-15T14:30:45Z",
     "stripePaymentIntentId": "pi_3MkVnL2eZvKYlo2C1IFrG8oM",
@@ -2526,11 +2649,11 @@ Para pagos con tarjeta (tipos 2, 3):
     "paymentIntentId": "pi_3MkVnL2eZvKYlo2C1IFrG8oM"
   }
 }
-~~~
+```
 
 Para pagos en efectivo (tipo 1):
 
-~~~json
+```json
 {
   "order": {
     "idOrder": 43,
@@ -2538,13 +2661,13 @@ Para pagos en efectivo (tipo 1):
     "idPaymentType": 1,
     "idShipmentType": 2,
     "idOrderStatus": 1,
-    "totalPrice": 129.00,    // No incluye valor de envío cuando es recogida
-    "shipmentValue": 0.00,   // Para recogida, el valor de envío es 0
+    "totalPrice": 129.0, // No incluye valor de envío cuando es recogida
+    "shipmentValue": 0.0, // Para recogida, el valor de envío es 0
     "paid": false,
     "createdAt": "2023-07-15T15:12:23Z"
   }
 }
-~~~
+```
 
 **Respuestas de Error:**
 

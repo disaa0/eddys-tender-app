@@ -329,7 +329,17 @@ const getCartByIdService = async (userId, cartId) => {
     }
 
     // Si no es admin, verificar propiedad del carrito
-    if (userId !== 1 && cart.idUser !== userId) {
+    // obtener userType desde prisma
+    const user = await prisma.user.findUnique({
+        where: { idUser: userId }
+    });
+    if (!user) {
+        const error = new Error("Usuario no encontrado");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (user.idUserType !== 1 && cart.idUser !== userId) {
         const error = new Error("No tienes permiso para ver este carrito");
         error.statusCode = 403;
         throw error;
@@ -355,6 +365,47 @@ const getCartByIdService = async (userId, cartId) => {
     };
 };
 
+const getCartsByIdUserService = async (requestingUserId, targetUserId, requestingUserType) => {
+    const user = await prisma.user.findUnique({
+        where: { idUser: targetUserId }
+    });
+
+    if (!user) {
+        const error = new Error("Usuario no encontrado");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (requestingUserType !== 1 && requestingUserId !== targetUserId) {
+        const error = new Error("No tienes permiso para ver estos carritos");
+        error.statusCode = 403;
+        throw error;
+    }
+
+    const carts = await prisma.cart.findMany({
+        where: { idUser: targetUserId },
+        include: {
+            itemsCart: {
+                where: {
+                    status: true,
+                    product: { status: true }
+                },
+                include: {
+                    product: true
+                }
+            }
+        }
+    });
+
+    if (carts.length === 0) {
+        const error = new Error("Carritos no encontrados");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    return carts;
+};
+
 
 module.exports = {
     addItemToCartService,
@@ -364,5 +415,6 @@ module.exports = {
     getTotalAmountCartService,
     getItemsQuantityCartService,
     disableCartService,
-    getCartByIdService
+    getCartByIdService,
+    getCartsByIdUserService
 };
