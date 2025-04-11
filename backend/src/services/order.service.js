@@ -9,84 +9,81 @@ const paymentService = require('./payment.service');
  * @returns {Object} - The created order with payment intent
  */
 async function createOrder(userId, orderData) {
-    const { idPaymentType, idShipmentType, idLocation } = orderData;
+  const { idPaymentType, idShipmentType, idLocation } = orderData;
 
-    // Double-check location requirement for delivery orders
-    if (idShipmentType === 1 && !idLocation) {
-        throw new Error('Se requiere una dirección de entrega para envíos a domicilio');
-    }
+  // Double-check location requirement for delivery orders
+  if (idShipmentType === 1 && !idLocation) {
+    throw new Error(
+      'Se requiere una dirección de entrega para envíos a domicilio'
+    );
+  }
 
-    let orderResult;
+  let orderResult;
 
-    // Execute the order creation in a transaction
-    await prisma.$transaction(async (tx) => {
-        // 1. Find user's active cart
-        const cart = await tx.cart.findFirst({
-            where: {
-                idUser: userId,
-                status: true
-            },
-            include: {
-                itemsCart: {
-                    where: { status: true },
-                    include: { product: true }
-                }
-            }
-        });
-
-        if (!cart || cart.itemsCart.length === 0) {
-            throw new Error('No hay productos en el carrito');
-        }
-
-        // 2. Calculate total price from cart items
-        const totalPrice = cart.itemsCart.reduce((sum, item) => {
-            return sum + (item.quantity * item.individualPrice);
-        }, 0);
-
-        // 3. Create the order
-        const order = await tx.order.create({
-            data: {
-                idCart: cart.idCart,
-                idPaymentType,
-                idShipmentType,
-                idOrderStatus: 1, // Assuming 1 is 'Pendiente'
-                idLocation: idLocation || null,
-                totalPrice,
-                paid: false
-            }
-        });
-
-        // 4. Mark cart as inactive (processed)
-        await tx.cart.update({
-            where: { idCart: cart.idCart },
-            data: { status: false }
-        });
-
-        // Store the created order to use after transaction completes
-        orderResult = order;
+  // Execute the order creation in a transaction
+  await prisma.$transaction(async (tx) => {
+    // 1. Find user's active cart
+    const cart = await tx.cart.findFirst({
+      where: {
+        idUser: userId,
+        status: true,
+      },
+      include: {
+        itemsCart: {
+          where: { status: true },
+          include: { product: true },
+        },
+      },
     });
 
-    // Now that the transaction has committed, the order is visible in the database
-
-    // 5. If it's a card payment (PaymentType 2 or 3), create payment intent
-    if (idPaymentType === 2 || idPaymentType === 3) { // Tarjeta de crédito o débito
-        const paymentIntent = await paymentService.createPaymentIntent(
-            orderResult.idOrder,
-            orderResult.totalPrice
-        );
-
-        // Use the updated order that includes Stripe fields
-        return {
-            order: paymentIntent.order, // Use this instead of orderResult
-            paymentDetails: {
-                clientSecret: paymentIntent.clientSecret,
-                paymentIntentId: paymentIntent.paymentIntentId
-            }
-        };
+    if (!cart || cart.itemsCart.length === 0) {
+      throw new Error('No hay productos en el carrito');
     }
 
-    // 6. For cash payments, just return the order
-    return { order: orderResult };
+    // 2. Calculate total price from cart items
+    const totalPrice = cart.itemsCart.reduce((sum, item) => {
+      return sum + item.quantity * item.individualPrice;
+    }, 0);
+
+    // 3. Create the order
+    const order = await tx.order.create({
+      data: {
+        idCart: cart.idCart,
+        idPaymentType,
+        idShipmentType,
+        idOrderStatus: 1, // Assuming 1 is 'Pendiente'
+        idLocation: idLocation || null,
+        totalPrice,
+        paid: false,
+      },
+    });
+
+    // Store the created order to use after transaction completes
+    orderResult = order;
+  });
+
+  // Now that the transaction has committed, the order is visible in the database
+
+  // 5. If it's a card payment (PaymentType 2 or 3), create payment intent
+  if (idPaymentType === 2 || idPaymentType === 3) {
+    // Tarjeta de crédito o débito
+    const paymentIntent = await paymentService.createPaymentIntent(
+      orderResult.idOrder,
+      orderResult.totalPrice
+    );
+
+    // Use the updated order that includes Stripe fields
+    return {
+      order: paymentIntent.order, // Use this instead of orderResult
+      paymentDetails: {
+        clientSecret: paymentIntent.clientSecret,
+        paymentIntentId: paymentIntent.paymentIntentId,
+      },
+    };
+  }
+
+  // 6. For cash payments, just return the order
+  return { order: orderResult };
 }
 
 /**
@@ -96,31 +93,31 @@ async function createOrder(userId, orderData) {
  * @returns {Object} - The order details with related information
  */
 async function getOrderDetails(orderId, userId) {
-    // Check if order exists and belongs to this user
-    const order = await prisma.order.findFirst({
-        where: {
-            idOrder: orderId,
-            cart: { idUser: userId }
-        },
+  // Check if order exists and belongs to this user
+  const order = await prisma.order.findFirst({
+    where: {
+      idOrder: orderId,
+      cart: { idUser: userId },
+    },
+    include: {
+      cart: {
         include: {
-            cart: {
-                include: {
-                    itemsCart: {
-                        include: { product: true }
-                    }
-                }
-            },
-            paymentType: true,
-            shipmentType: true,
-            orderStatus: true
-        }
-    });
+          itemsCart: {
+            include: { product: true },
+          },
+        },
+      },
+      paymentType: true,
+      shipmentType: true,
+      orderStatus: true,
+    },
+  });
 
-    if (!order) {
-        throw new Error('Orden no encontrada');
-    }
+  if (!order) {
+    throw new Error('Orden no encontrada');
+  }
 
-    return order;
+  return order;
 }
 
 /**
@@ -129,19 +126,19 @@ async function getOrderDetails(orderId, userId) {
  * @returns {Array} - List of user's orders
  */
 async function getUserOrders(userId) {
-    const orders = await prisma.order.findMany({
-        where: {
-            cart: { idUser: userId }
-        },
-        include: {
-            orderStatus: true,
-            shipmentType: true,
-            paymentType: true
-        },
-        orderBy: { createdAt: 'desc' }
-    });
+  const orders = await prisma.order.findMany({
+    where: {
+      cart: { idUser: userId },
+    },
+    include: {
+      orderStatus: true,
+      shipmentType: true,
+      paymentType: true,
+    },
+    orderBy: { createdAt: 'desc' },
+  });
 
-    return orders;
+  return orders;
 }
 
 /**
@@ -150,20 +147,20 @@ async function getUserOrders(userId) {
  * @returns {Object} - Processing result
  */
 async function processStripeEvent(event) {
-    const { type, data } = event;
+  const { type, data } = event;
 
-    // Handle different event types
-    switch (type) {
-        case 'payment_intent.succeeded':
-            return await handlePaymentSucceeded(data.object);
+  // Handle different event types
+  switch (type) {
+    case 'payment_intent.succeeded':
+      return await handlePaymentSucceeded(data.object);
 
-        case 'payment_intent.payment_failed':
-            return await handlePaymentFailed(data.object);
+    case 'payment_intent.payment_failed':
+      return await handlePaymentFailed(data.object);
 
-        // You can add more event types as needed
-        default:
-            return { handled: false, message: `Evento no procesado: ${type}` };
-    }
+    // You can add more event types as needed
+    default:
+      return { handled: false, message: `Evento no procesado: ${type}` };
+  }
 }
 
 /**
@@ -172,42 +169,44 @@ async function processStripeEvent(event) {
  * @returns {Object} - Updated order info
  */
 async function handlePaymentSucceeded(paymentIntent) {
-    try {
-        // Find order by payment intent ID
-        const order = await prisma.order.findUnique({
-            where: { stripePaymentIntentId: paymentIntent.id }
-        });
+  try {
+    // Find order by payment intent ID
+    const order = await prisma.order.findUnique({
+      where: { stripePaymentIntentId: paymentIntent.id },
+    });
 
-        if (!order) {
-            throw new Error(`No se encontró una orden con el pago ${paymentIntent.id}`);
-        }
-
-        // Update order status to paid
-        const updatedOrder = await prisma.order.update({
-            where: { idOrder: order.idOrder },
-            data: {
-                paid: true,
-                paidAt: new Date(),
-                idOrderStatus: 2, // Assuming 2 is "Processing" or "Paid"
-                stripePaymentStatus: paymentIntent.status
-            }
-        });
-
-        // Create a notification for the successful payment
-        await prisma.notification.create({
-            data: {
-                idOrder: order.idOrder,
-                title: 'Pago recibido',
-                message: `El pago de $${order.totalPrice} ha sido procesado exitosamente.`,
-                status: true
-            }
-        });
-
-        return { success: true, order: updatedOrder };
-    } catch (error) {
-        console.error('Error handling payment success:', error);
-        return { success: false, error: error.message };
+    if (!order) {
+      throw new Error(
+        `No se encontró una orden con el pago ${paymentIntent.id}`
+      );
     }
+
+    // Update order status to paid
+    const updatedOrder = await prisma.order.update({
+      where: { idOrder: order.idOrder },
+      data: {
+        paid: true,
+        paidAt: new Date(),
+        idOrderStatus: 2, // Assuming 2 is "Processing" or "Paid"
+        stripePaymentStatus: paymentIntent.status,
+      },
+    });
+
+    // Create a notification for the successful payment
+    await prisma.notification.create({
+      data: {
+        idOrder: order.idOrder,
+        title: 'Pago recibido',
+        message: `El pago de $${order.totalPrice} ha sido procesado exitosamente.`,
+        status: true,
+      },
+    });
+
+    return { success: true, order: updatedOrder };
+  } catch (error) {
+    console.error('Error handling payment success:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
@@ -216,40 +215,42 @@ async function handlePaymentSucceeded(paymentIntent) {
  * @returns {Object} - Updated order info
  */
 async function handlePaymentFailed(paymentIntent) {
-    try {
-        // Find order by payment intent ID
-        const order = await prisma.order.findUnique({
-            where: { stripePaymentIntentId: paymentIntent.id }
-        });
+  try {
+    // Find order by payment intent ID
+    const order = await prisma.order.findUnique({
+      where: { stripePaymentIntentId: paymentIntent.id },
+    });
 
-        if (!order) {
-            throw new Error(`No se encontró una orden con el pago ${paymentIntent.id}`);
-        }
-
-        // Update order to reflect failed payment
-        const updatedOrder = await prisma.order.update({
-            where: { idOrder: order.idOrder },
-            data: {
-                stripePaymentStatus: paymentIntent.status,
-                idOrderStatus: 6 // Assuming 6 is "Payment Failed"
-            }
-        });
-
-        // Create a notification for the failed payment
-        await prisma.notification.create({
-            data: {
-                idOrder: order.idOrder,
-                title: 'Pago rechazado',
-                message: `El pago de $${order.totalPrice} ha sido rechazado. Motivo: ${paymentIntent.last_payment_error?.message || 'Error de procesamiento'}`,
-                status: true
-            }
-        });
-
-        return { success: true, order: updatedOrder };
-    } catch (error) {
-        console.error('Error handling payment failure:', error);
-        return { success: false, error: error.message };
+    if (!order) {
+      throw new Error(
+        `No se encontró una orden con el pago ${paymentIntent.id}`
+      );
     }
+
+    // Update order to reflect failed payment
+    const updatedOrder = await prisma.order.update({
+      where: { idOrder: order.idOrder },
+      data: {
+        stripePaymentStatus: paymentIntent.status,
+        idOrderStatus: 6, // Assuming 6 is "Payment Failed"
+      },
+    });
+
+    // Create a notification for the failed payment
+    await prisma.notification.create({
+      data: {
+        idOrder: order.idOrder,
+        title: 'Pago rechazado',
+        message: `El pago de $${order.totalPrice} ha sido rechazado. Motivo: ${paymentIntent.last_payment_error?.message || 'Error de procesamiento'}`,
+        status: true,
+      },
+    });
+
+    return { success: true, order: updatedOrder };
+  } catch (error) {
+    console.error('Error handling payment failure:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
@@ -259,260 +260,259 @@ async function handlePaymentFailed(paymentIntent) {
  * @returns {Object} - Filtered orders with pagination info
  */
 async function searchOrders(userId, filters) {
-    const {
-        startDate,
-        endDate,
-        orderStatus,
-        paid,
-        paymentType,
-        shipmentType,
-        minPrice,
-        maxPrice,
-        page = 1,
-        limit = 10
-    } = filters;
+  const {
+    startDate,
+    endDate,
+    orderStatus,
+    paid,
+    paymentType,
+    shipmentType,
+    minPrice,
+    maxPrice,
+    page = 1,
+    limit = 10,
+  } = filters;
 
-    // Build where clause
-    const where = {
-        cart: { idUser: userId }
-    };
+  // Build where clause
+  const where = {
+    cart: { idUser: userId },
+  };
 
-    // Add date range filter
-    if (startDate || endDate) {
-        where.createdAt = {};
-        if (startDate) where.createdAt.gte = new Date(startDate);
-        if (endDate) where.createdAt.lte = new Date(endDate);
-    }
+  // Add date range filter
+  if (startDate || endDate) {
+    where.createdAt = {};
+    if (startDate) where.createdAt.gte = new Date(startDate);
+    if (endDate) where.createdAt.lte = new Date(endDate);
+  }
 
-    // Add order status filter
-    if (orderStatus) {
-        where.idOrderStatus = parseInt(orderStatus);
-    }
+  // Add order status filter
+  if (orderStatus) {
+    where.idOrderStatus = parseInt(orderStatus);
+  }
 
-    // Add payment status filter
-    if (paid !== undefined) {
-        where.paid = paid === 'true';
-    }
+  // Add payment status filter
+  if (paid !== undefined) {
+    where.paid = paid === 'true';
+  }
 
-    // Add payment type filter
-    if (paymentType) {
-        where.idPaymentType = parseInt(paymentType);
-    }
+  // Add payment type filter
+  if (paymentType) {
+    where.idPaymentType = parseInt(paymentType);
+  }
 
-    // Add shipment type filter
-    if (shipmentType) {
-        where.idShipmentType = parseInt(shipmentType);
-    }
+  // Add shipment type filter
+  if (shipmentType) {
+    where.idShipmentType = parseInt(shipmentType);
+  }
 
-    // Add price range filter
-    if (minPrice || maxPrice) {
-        where.totalPrice = {};
-        if (minPrice) where.totalPrice.gte = parseFloat(minPrice);
-        if (maxPrice) where.totalPrice.lte = parseFloat(maxPrice);
-    }
+  // Add price range filter
+  if (minPrice || maxPrice) {
+    where.totalPrice = {};
+    if (minPrice) where.totalPrice.gte = parseFloat(minPrice);
+    if (maxPrice) where.totalPrice.lte = parseFloat(maxPrice);
+  }
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+  const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    // Get total count for pagination
-    const totalCount = await prisma.order.count({ where });
+  // Get total count for pagination
+  const totalCount = await prisma.order.count({ where });
 
-    // Get orders with filters
-    const orders = await prisma.order.findMany({
-        where,
-        include: {
-            orderStatus: true,
-            paymentType: true,
-            shipmentType: true
-        },
-        skip,
-        take: parseInt(limit),
-        orderBy: {
-            createdAt: 'desc'
-        }
-    });
+  // Get orders with filters
+  const orders = await prisma.order.findMany({
+    where,
+    include: {
+      orderStatus: true,
+      paymentType: true,
+      shipmentType: true,
+    },
+    skip,
+    take: parseInt(limit),
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
 
-    return {
-        orders,
-        pagination: {
-            totalItems: totalCount,
-            totalPages: Math.ceil(totalCount / parseInt(limit)),
-            currentPage: parseInt(page),
-            itemsPerPage: parseInt(limit)
-        }
-    };
+  return {
+    orders,
+    pagination: {
+      totalItems: totalCount,
+      totalPages: Math.ceil(totalCount / parseInt(limit)),
+      currentPage: parseInt(page),
+      itemsPerPage: parseInt(limit),
+    },
+  };
 }
-
 
 // Get all active orders from all users for the admin panel (where order status could be set to multiple numbers from 1 to 7) with pagination
 async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const where = {
-        idOrderStatus: status
-    };
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const where = {
+    idOrderStatus: status,
+  };
 
-    const totalCount = await prisma.order.count({ where });
+  const totalCount = await prisma.order.count({ where });
 
-    const orders = await prisma.order.findMany({
-        where,
-        include: {
-            orderStatus: true,
-            paymentType: true,
-            shipmentType: true
-        },
-        skip,
-        take: parseInt(limit),
-        orderBy: {
-            createdAt: 'desc'
-        }
-    });
+  const orders = await prisma.order.findMany({
+    where,
+    include: {
+      orderStatus: true,
+      paymentType: true,
+      shipmentType: true,
+    },
+    skip,
+    take: parseInt(limit),
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
 
-    // Sanitize the order data , removing stripe client secret, with the map function
+  // Sanitize the order data , removing stripe client secret, with the map function
 
-    const sanitizedOrders = orders.map(order => {
-        const { stripeClientSecret, ...rest } = order;
-        return rest;
-    }
-    );
+  const sanitizedOrders = orders.map((order) => {
+    const { stripeClientSecret, ...rest } = order;
+    return rest;
+  });
 
-    // Return the sanitized orders
-    return {
-        orders: sanitizedOrders,
-        pagination: {
-            totalItems: totalCount,
-            totalPages: Math.ceil(totalCount / parseInt(limit)),
-            currentPage: parseInt(page),
-            itemsPerPage: parseInt(limit)
-        }
-    };
-
-
+  // Return the sanitized orders
+  return {
+    orders: sanitizedOrders,
+    pagination: {
+      totalItems: totalCount,
+      totalPages: Math.ceil(totalCount / parseInt(limit)),
+      currentPage: parseInt(page),
+      itemsPerPage: parseInt(limit),
+    },
+  };
 }
 
 async function reorderService(userId, orderId) {
-    return await prisma.$transaction(async (tx) => {
-        const userExists = await tx.user.findUnique({
-            where: { idUser: userId }
-        });
-        if (!userExists) {
-            throw new Error('Usuario no existe');
-        }
-
-        const order = await tx.order.findUnique({
-            where: { idOrder: orderId },
-            include: {
-                cart: {
-                    include: {
-                        itemsCart: {
-                            include: { product: true }
-                        }
-                    }
-                }
-            }
-        });
-
-        if (!order) {
-            throw new Error('Orden no encontrada');
-        }
-
-        if (order.cart.idUser !== userId) {
-            throw new Error('La orden no pertenece al usuario');
-        }
-
-        const items = order.cart.itemsCart.map(item => ({
-            idProduct: item.idProduct,
-            quantity: item.quantity
-        }));
-
-        const activeProducts = await tx.product.findMany({
-            where: {
-                idProduct: { in: items.map(item => item.idProduct) },
-                status: true
-            }
-        });
-
-        const itemsToAdd = activeProducts.map(product => {
-            const item = items.find(i => i.idProduct === product.idProduct);
-            return {
-                idProduct: product.idProduct,
-                quantity: item.quantity,
-                individualPrice: product.price,
-                status: true
-            };
-        });
-
-        // validate if itemsToAdd is empty
-        if (itemsToAdd.length === 0) {
-            throw new Error('Ninguno de los productos de la orden esta disponible actualmente');
-        }
-
-        let cart = await tx.cart.findFirst({
-            where: {
-                idUser: userId,
-                status: true
-            },
-            include: {
-                itemsCart: true
-            }
-        });
-
-        if (cart) {
-            const existingItems = cart.itemsCart.map(item => ({
-                idProduct: item.idProduct,
-                quantity: item.quantity
-            }));
-
-            const areSameItems =
-                existingItems.length === itemsToAdd.length &&
-                existingItems.every(existingItem =>
-                    itemsToAdd.some(newItem =>
-                        newItem.idProduct === existingItem.idProduct &&
-                        newItem.quantity === existingItem.quantity
-                    )
-                );
-
-            if (areSameItems) {
-                throw new Error('El carrito ya contiene los mismos productos');
-            }
-
-            await tx.cart.update({
-                where: { idCart: cart.idCart },
-                data: { status: false }
-            });
-        }
-
-        cart = await tx.cart.create({
-            data: {
-                idUser: userId,
-                status: true
-            }
-        });
-
-        const itemsWithCartId = itemsToAdd.map(item => ({
-            ...item,
-            idCart: cart.idCart
-        }));
-
-        const itemsCreated = await tx.itemCart.createMany({
-            data: itemsWithCartId
-        });
-
-        if (!itemsCreated) {
-            throw new Error('Error al agregar productos al carrito');
-        }
-
-        return {
-            cartId: cart.idCart,
-            items: itemsWithCartId
-        };
+  return await prisma.$transaction(async (tx) => {
+    const userExists = await tx.user.findUnique({
+      where: { idUser: userId },
     });
+    if (!userExists) {
+      throw new Error('Usuario no existe');
+    }
+
+    const order = await tx.order.findUnique({
+      where: { idOrder: orderId },
+      include: {
+        cart: {
+          include: {
+            itemsCart: {
+              include: { product: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new Error('Orden no encontrada');
+    }
+
+    if (order.cart.idUser !== userId) {
+      throw new Error('La orden no pertenece al usuario');
+    }
+
+    const items = order.cart.itemsCart.map((item) => ({
+      idProduct: item.idProduct,
+      quantity: item.quantity,
+    }));
+
+    const activeProducts = await tx.product.findMany({
+      where: {
+        idProduct: { in: items.map((item) => item.idProduct) },
+        status: true,
+      },
+    });
+
+    const itemsToAdd = activeProducts.map((product) => {
+      const item = items.find((i) => i.idProduct === product.idProduct);
+      return {
+        idProduct: product.idProduct,
+        quantity: item.quantity,
+        individualPrice: product.price,
+        status: true,
+      };
+    });
+
+    // validate if itemsToAdd is empty
+    if (itemsToAdd.length === 0) {
+      throw new Error(
+        'Ninguno de los productos de la orden esta disponible actualmente'
+      );
+    }
+
+    let cart = await tx.cart.findFirst({
+      where: {
+        idUser: userId,
+        status: true,
+      },
+      include: {
+        itemsCart: true,
+      },
+    });
+
+    if (cart) {
+      const existingItems = cart.itemsCart.map((item) => ({
+        idProduct: item.idProduct,
+        quantity: item.quantity,
+      }));
+
+      const areSameItems =
+        existingItems.length === itemsToAdd.length &&
+        existingItems.every((existingItem) =>
+          itemsToAdd.some(
+            (newItem) =>
+              newItem.idProduct === existingItem.idProduct &&
+              newItem.quantity === existingItem.quantity
+          )
+        );
+
+      if (areSameItems) {
+        throw new Error('El carrito ya contiene los mismos productos');
+      }
+
+      await tx.cart.update({
+        where: { idCart: cart.idCart },
+        data: { status: false },
+      });
+    }
+
+    cart = await tx.cart.create({
+      data: {
+        idUser: userId,
+        status: true,
+      },
+    });
+
+    const itemsWithCartId = itemsToAdd.map((item) => ({
+      ...item,
+      idCart: cart.idCart,
+    }));
+
+    const itemsCreated = await tx.itemCart.createMany({
+      data: itemsWithCartId,
+    });
+
+    if (!itemsCreated) {
+      throw new Error('Error al agregar productos al carrito');
+    }
+
+    return {
+      cartId: cart.idCart,
+      items: itemsWithCartId,
+    };
+  });
 }
 
 module.exports = {
-    createOrder,
-    getOrderDetails,
-    getUserOrders,
-    processStripeEvent,
-    searchOrders,
-    getOrdersByStatus,
-    reorderService
-}; 
+  createOrder,
+  getOrderDetails,
+  getUserOrders,
+  processStripeEvent,
+  searchOrders,
+  getOrdersByStatus,
+  reorderService,
+};

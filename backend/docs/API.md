@@ -328,6 +328,7 @@ Authorization: Bearer <token>
 | date_to | string | Fecha de fin (formato YYYY-MM-DD) | Sí |
 
 **Ejemplo de uso:**
+
 ```
 /api/admin/orders?date_from=2024-07-22&date_to=2024-07-24
 ```
@@ -345,7 +346,7 @@ Authorization: Bearer <token>
         "idPaymentType": 2,
         "idShipmentType": 1,
         "idOrderStatus": 2,
-        "totalPrice": 258.00,
+        "totalPrice": 258.0,
         "paid": true,
         "paidAt": "2024-07-23T14:35:12Z",
         "createdAt": "2024-07-23T14:30:45Z",
@@ -439,7 +440,7 @@ Authorization: Bearer <token>
     "idPaymentType": 2,
     "idShipmentType": 1,
     "idOrderStatus": 2,
-    "totalPrice": 258.00,
+    "totalPrice": 258.0,
     "paid": true,
     "paidAt": "2023-07-15T14:35:12Z",
     "createdAt": "2023-07-15T14:30:45Z",
@@ -545,7 +546,7 @@ Authorization: Bearer <token>
     "idPaymentType": 2,
     "idShipmentType": 1,
     "idOrderStatus": 3,
-    "totalPrice": 258.00,
+    "totalPrice": 258.0,
     "paid": true,
     "paidAt": "2024-07-23T14:35:12Z",
     "createdAt": "2024-07-23T14:30:45Z",
@@ -941,6 +942,7 @@ Authorization: Bearer <token>
 - 500: Error del servidor
 
 ### 8.5 Obtner ordenes activas con paginacion
+
 **GET /api/admin/orders/current**
 
 Permite a administradores obtener pedidos activos de todos los usuarios con paginación.
@@ -962,79 +964,78 @@ limit: Resultados por página (default: 10)
 
 ```json
 {
-    "message": "Órdenes en curso obtenidas correctamente",
-    "data": {
-        "orders": [
-            {
-                "idOrder": 4,
-                "idCart": 4,
-                "idPaymentType": 1,
-                "idShipmentType": 1,
-                "idOrderStatus": 1,
-                "idLocation": 1,
-                "createdAt": "2025-04-07T18:39:42.015Z",
-                "deliveryAt": null,
-                "totalPrice": 447,
-                "paid": false,
-                "paidAt": null,
-                "stripePaymentIntentId": null,
-                "stripePaymentStatus": null,
-                "orderStatus": {
-                    "idOrderStatus": 1,
-                    "status": "Pendiente"
-                },
-                "paymentType": {
-                    "idPaymentType": 1,
-                    "type": "Efectivo"
-                },
-                "shipmentType": {
-                    "idShipmentType": 1,
-                    "type": "Envío a domicilio"
-                }
-            },
-            {
-                "idOrder": 3,
-                "idCart": 3,
-                "idPaymentType": 1,
-                "idShipmentType": 1,
-                "idOrderStatus": 1,
-                "idLocation": 1,
-                "createdAt": "2025-04-07T18:39:32.319Z",
-                "deliveryAt": null,
-                "totalPrice": 447,
-                "paid": false,
-                "paidAt": null,
-                "stripePaymentIntentId": null,
-                "stripePaymentStatus": null,
-                "orderStatus": {
-                    "idOrderStatus": 1,
-                    "status": "Pendiente"
-                },
-                "paymentType": {
-                    "idPaymentType": 1,
-                    "type": "Efectivo"
-                },
-                "shipmentType": {
-                    "idShipmentType": 1,
-                    "type": "Envío a domicilio"
-                }
-            }
-        ],
-        "pagination": {
-            "totalItems": 4,
-            "totalPages": 2,
-            "currentPage": 1,
-            "itemsPerPage": 2
+  "message": "Órdenes en curso obtenidas correctamente",
+  "data": {
+    "orders": [
+      {
+        "idOrder": 4,
+        "idCart": 4,
+        "idPaymentType": 1,
+        "idShipmentType": 1,
+        "idOrderStatus": 1,
+        "idLocation": 1,
+        "createdAt": "2025-04-07T18:39:42.015Z",
+        "deliveryAt": null,
+        "totalPrice": 447,
+        "paid": false,
+        "paidAt": null,
+        "stripePaymentIntentId": null,
+        "stripePaymentStatus": null,
+        "orderStatus": {
+          "idOrderStatus": 1,
+          "status": "Pendiente"
+        },
+        "paymentType": {
+          "idPaymentType": 1,
+          "type": "Efectivo"
+        },
+        "shipmentType": {
+          "idShipmentType": 1,
+          "type": "Envío a domicilio"
         }
+      },
+      {
+        "idOrder": 3,
+        "idCart": 3,
+        "idPaymentType": 1,
+        "idShipmentType": 1,
+        "idOrderStatus": 1,
+        "idLocation": 1,
+        "createdAt": "2025-04-07T18:39:32.319Z",
+        "deliveryAt": null,
+        "totalPrice": 447,
+        "paid": false,
+        "paidAt": null,
+        "stripePaymentIntentId": null,
+        "stripePaymentStatus": null,
+        "orderStatus": {
+          "idOrderStatus": 1,
+          "status": "Pendiente"
+        },
+        "paymentType": {
+          "idPaymentType": 1,
+          "type": "Efectivo"
+        },
+        "shipmentType": {
+          "idShipmentType": 1,
+          "type": "Envío a domicilio"
+        }
+      }
+    ],
+    "pagination": {
+      "totalItems": 4,
+      "totalPages": 2,
+      "currentPage": 1,
+      "itemsPerPage": 2
     }
+  }
 }
-
 ```
 
 **Notas:**
 
 - Los pedidos se ordenan por fecha de creación (más recientes primero)
-- Se consideran como ordenes activas, todas aquellas donde su "status" se diferente de "Entregado" o "Cancelado". 
+- Se consideran como ordenes activas, todas aquellas donde su "status" se diferente de "Entregado" o "Cancelado".
 
 **Errores Posibles:**
 
@@ -1042,6 +1043,7 @@ limit: Resultados por página (default: 10)
 - 500: Error del servidor
 
 ### 8.6 Obtner historico de ordenes con paginacion
+
 **GET /api/admin/orders**
 
 Permite a administradores obtener pedidos historicos de todos los usuarios con paginación.
@@ -1063,46 +1065,45 @@ limit: Resultados por página (default: 10)
 
 ```json
 {
-    "message": "Historial de órdenes obtenido correctamente",
-    "data": {
-        "orders": [
-            {
-                "idOrder": 5,
-                "idCart": 5,
-                "idPaymentType": 1,
-                "idShipmentType": 1,
-                "idOrderStatus": 7,
-                "idLocation": 1,
-                "createdAt": "2025-04-07T18:39:49.656Z",
-                "deliveryAt": null,
-                "totalPrice": 447,
-                "paid": false,
-                "paidAt": null,
-                "stripePaymentIntentId": null,
-                "stripePaymentStatus": null,
-                "orderStatus": {
-                    "idOrderStatus": 7,
-                    "status": "Cancelado"
-                },
-                "paymentType": {
-                    "idPaymentType": 1,
-                    "type": "Efectivo"
-                },
-                "shipmentType": {
-                    "idShipmentType": 1,
-                    "type": "Envío a domicilio"
-                }
-            }
-        ],
-        "pagination": {
-            "totalItems": 1,
-            "totalPages": 1,
-            "currentPage": 1,
-            "itemsPerPage": 5
+  "message": "Historial de órdenes obtenido correctamente",
+  "data": {
+    "orders": [
+      {
+        "idOrder": 5,
+        "idCart": 5,
+        "idPaymentType": 1,
+        "idShipmentType": 1,
+        "idOrderStatus": 7,
+        "idLocation": 1,
+        "createdAt": "2025-04-07T18:39:49.656Z",
+        "deliveryAt": null,
+        "totalPrice": 447,
+        "paid": false,
+        "paidAt": null,
+        "stripePaymentIntentId": null,
+        "stripePaymentStatus": null,
+        "orderStatus": {
+          "idOrderStatus": 7,
+          "status": "Cancelado"
+        },
+        "paymentType": {
+          "idPaymentType": 1,
+          "type": "Efectivo"
+        },
+        "shipmentType": {
+          "idShipmentType": 1,
+          "type": "Envío a domicilio"
         }
+      }
+    ],
+    "pagination": {
+      "totalItems": 1,
+      "totalPages": 1,
+      "currentPage": 1,
+      "itemsPerPage": 5
     }
+  }
 }
-
 ```
 
 **Notas:**
@@ -1459,12 +1460,12 @@ Authorization: Bearer <token>
   "message": "Cantidad del producto actualizada en el carrito",
   "cartId": 1,
   "item": {
-      "idItemCart": 1,
-      "idCart": 1,
-      "idProduct": 1,
-      "quantity": 1,
-      "individualPrice": 89,
-      "status": true
+    "idItemCart": 1,
+    "idCart": 1,
+    "idProduct": 1,
+    "quantity": 1,
+    "individualPrice": 89,
+    "status": true
   }
 }
 ```
@@ -1554,7 +1555,7 @@ Authorization: Bearer <token>
 - 403: Esta producto ya ha sido desactivado en el carrito o este no existe en carrito.
 - 500: Error del servidor
 
-**Notas***
+**Notas\***
 
 - El campo `quantity` es fijado en 0 despues de la eliminacion logica.
 
@@ -1618,10 +1619,10 @@ Authorization: Bearer <token>
 
 ```json
 {
-    "totalAmount": {
-        "cartId": 1,
-        "totalAmount": 416
-    }
+  "totalAmount": {
+    "cartId": 1,
+    "totalAmount": 416
+  }
 }
 ```
 
@@ -1645,10 +1646,10 @@ Authorization: Bearer <token>
 
 ```json
 {
-    "totalQuantity": {
-        "cartId": 1,
-        "totalQuantity": 5
-    }
+  "totalQuantity": {
+    "cartId": 1,
+    "totalQuantity": 5
+  }
 }
 ```
 
@@ -1658,7 +1659,41 @@ Authorization: Bearer <token>
 - 400: Error de peticion
 - 500: Error del servidor
 
-### 10.11 Obtener imagen de un producto
+### 10.12 Desactivar un carrito activo
+
+**PUT /api/cart/disable**
+
+Desactiva el carrito activo del usuario autenticado, cambiando su estado a inactivo (status = false).
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Carrito desactivado exitosamente",
+  "cartId": 1,
+  "status": false
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 404: No se encontró un carrito activo para el usuario
+- 400: Error en la peticion
+- 500: Error del servidor
+
+**Notas:**
+
+- Este endpoint permite desactivar un carrito completo, lo que puede ser útil cuando se completa una compra o se quiere iniciar un carrito nuevo
+- El carrito desactivado se mantiene en la base de datos pero no aparecerá en las consultas de carritos activos
+
+### 10.13 Obtener imagen de un producto
 
 **GET /api/products/:id/image**
 
@@ -1681,7 +1716,7 @@ Obtiene la imagen de un producto específico.
 - 404: Imagen no encontrada en el servidor
 - 500: Error al obtener la imagen del producto
 
-### 10.12 Subir imagen de un producto (Admin)
+### 10.14 Subir imagen de un producto (Admin)
 
 **POST /api/admin/products/:id/image**
 
@@ -1740,7 +1775,7 @@ Content-Type: multipart/form-data
 - 403: Usuario no es administrador
 - 500: Error al subir la imagen del producto
 
-### 10.13 Buscar productos
+### 10.15 Buscar productos
 
 **GET /api/products/search**
 
@@ -1814,7 +1849,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.14 Obtener Productos Populares
+### 10.16 Obtener Productos Populares
 
 **GET /api/products/popular**
 
@@ -1862,7 +1897,7 @@ limit: Número de productos a retornar (default: 5)
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.15 Obetner detalles del producto por ID
+### 10.17 Obetner detalles del producto por ID
 
 **GET /products/{id}**
 
@@ -1925,7 +1960,7 @@ Authorization: Bearer <token>
 - 404: No se encontro el producto
 - 500: Error del servidor
 
-### 10.16 Editar Personalización de Producto para usuarios
+### 10.18 Editar Personalización de Producto para usuarios
 
 **PUT /api/products/{id}/user/personalization**
 
@@ -1985,7 +2020,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.17 Obtner Personalizaciónes de Producto para usuarios
+### 10.19 Obtner Personalizaciónes de Producto para usuarios
 
 **GET /api/products/{id}/user/personalizations**
 
@@ -2050,7 +2085,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.18 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
+### 10.20 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
 
 **PACTH /api/products/{idProduct}/user/personalization/{idProductPersonalization}/status**
 
@@ -2210,6 +2245,7 @@ Authorization: Bearer <token>
 ```
 
 **Parámetros URL:**
+
 - id: ID de la dirección a consultar
 
 **Respuesta Exitosa (200):**
@@ -2661,6 +2697,7 @@ limit: Resultados por página (default: 10)
 - 500: Error del servidor
 
 ## 14.5 Reodernar pedido
+
 **PUT /api/orders/:idOrder**
 
 Permite agregar productos de una orden ya existente al carrito de compras.
@@ -2670,6 +2707,7 @@ Permite agregar productos de una orden ya existente al carrito de compras.
 ```
 Authorization: Bearer <token>
 ```
+
 **Parámetros URL:**
 
 - idOrder: ID de pedido existente a reodenar
@@ -2678,22 +2716,22 @@ Authorization: Bearer <token>
 
 ```json
 {
-    "message": "Pedido reordenado correctamente, productos agregados al carrito",
-    "data": {
-        "cartId": 2,
-        "items": [
-            {
-                "idProduct": 2,
-                "quantity": 3,
-                "individualPrice": 149.99,
-                "status": true,
-                "idCart": 2
-            }
-        ]
-    }
+  "message": "Pedido reordenado correctamente, productos agregados al carrito",
+  "data": {
+    "cartId": 2,
+    "items": [
+      {
+        "idProduct": 2,
+        "quantity": 3,
+        "individualPrice": 149.99,
+        "status": true,
+        "idCart": 2
+      }
+    ]
+  }
 }
-
 ```
+
 **Notas:**
 
 - Los productos existentes en el carrito de compras activo, son reemplados por los de los del pedido a reordenar.
@@ -2706,7 +2744,6 @@ Authorization: Bearer <token>
 - 403: Orden no encontrada o sin permiso para eliminar
 - 409: El carrito ya contiene los mismos productos
 - 500: Error del servidor
-
 
 ### 14.6 Webhook de Stripe
 

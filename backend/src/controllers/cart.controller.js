@@ -1,4 +1,4 @@
-const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService } = require('../services/cart.service');
+const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService, disableCartService } = require('../services/cart.service');
 
 const addItemToCart = async (req, res) => {
     const { idProduct } = req.params;
@@ -147,11 +147,40 @@ const getItemsQuantityCart = async (req, res) => {
     }
 };
 
+const disableCart = async (req, res) => {
+    const userId = req.user.userId; // Obtenido del middleware de autenticación
+
+    try {
+        const result = await disableCartService(userId);
+
+        return res.status(200).json({
+            message: "Carrito desactivado exitosamente",
+            cartId: result.cartId,
+            status: result.status
+        });
+
+    } catch (error) {
+        let status = 400;
+        let message = error.message;
+
+        // Customize error messages based on the error
+        if (error.message === 'No se encontró un carrito activo para el usuario.') {
+            status = 404;
+            message = 'No se encontró un carrito activo para el usuario.';
+        } else {
+            message = 'Error en la peticion';
+        }
+
+        return res.status(status).json({ message });
+    }
+};
+
 module.exports = {
     addItemToCart, 
     addOneItemToCart, 
     softDeleteItemFromCart, 
     getItemsCart, 
     getTotalAmountCart,
-    getItemsQuantityCart
+    getItemsQuantityCart,
+    disableCart
 };

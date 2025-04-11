@@ -292,11 +292,36 @@ const getItemsQuantityCartService = async (userId) => {
     });
 };
 
+const disableCartService = async (userId) => {
+    return await prisma.$transaction(async (prisma) => {
+        // Buscar el carrito activo del usuario
+        const cart = await prisma.cart.findFirst({
+            where: {
+                idUser: userId,
+                status: true
+            }
+        });
+
+        if (!cart) {
+            throw new Error("No se encontró un carrito activo para el usuario.");
+        }
+
+        // Desactivar el carrito
+        const disabledCart = await prisma.cart.update({
+            where: { idCart: cart.idCart },
+            data: { status: false }
+        });
+
+        return { cartId: disabledCart.idCart, status: disabledCart.status };
+    });
+};
+
 module.exports = {
     addItemToCartService,
     addOneItemToCartService,
     softDeleteItemFromCartService,
     getItemsCartService,
     getTotalAmountCartService,
-    getItemsQuantityCartService
+    getItemsQuantityCartService,
+    disableCartService
 };
