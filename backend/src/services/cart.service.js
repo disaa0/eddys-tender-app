@@ -316,6 +316,46 @@ const disableCartService = async (userId) => {
     });
 };
 
+const getCartByIdService = async (userId, cartId) => {
+    // Buscar el carrito
+    const cart = await prisma.cart.findUnique({
+        where: { idCart: cartId }
+    });
+
+    if (!cart) {
+        const error = new Error("Carrito no encontrado");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    // Si no es admin, verificar propiedad del carrito
+    if (userId !== 1 && cart.idUser !== userId) {
+        const error = new Error("No tienes permiso para ver este carrito");
+        error.statusCode = 403;
+        throw error;
+    }
+
+    // Buscar los productos en el carrito y excluir los productos inactivos
+    const itemsCart = await prisma.itemCart.findMany({
+        where: {
+            idCart: cart.idCart,
+            status: true,
+            product: { status: true } // Solo productos activos
+        },
+        include: {
+            product: true
+        }
+    });
+
+    return {
+        idCart: cart.idCart,
+        idUser: cart.idUser,
+        status: cart.status,
+        items: itemsCart
+    };
+};
+
+
 module.exports = {
     addItemToCartService,
     addOneItemToCartService,
@@ -323,5 +363,6 @@ module.exports = {
     getItemsCartService,
     getTotalAmountCartService,
     getItemsQuantityCartService,
-    disableCartService
+    disableCartService,
+    getCartByIdService
 };
