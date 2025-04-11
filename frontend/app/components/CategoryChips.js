@@ -28,14 +28,15 @@ export default function CategoryChips({ categories, selectedCategory, onSelect }
 
 const styles = StyleSheet.create({
   categories: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    paddingHorizontal: 10,
+    paddingBottom: 5,
     flexGrow: 0,
+    backgroundColor: theme.colors.surface,
   },
   chip: {
     marginRight: 8,
     backgroundColor: '#F5F5F5',
-    borderRadius: 20,
+    borderRadius: 10,
     height: 36,
   },
   selectedChip: {

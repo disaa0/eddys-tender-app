@@ -1,5 +1,5 @@
-import { View, FlatList, StyleSheet, Alert, TouchableWithoutFeedback, Image, TouchableOpacity } from 'react-native';
-import { Card, Text, Searchbar, ActivityIndicator, Switch } from 'react-native-paper';
+import { View, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Card, Text, Searchbar, ActivityIndicator } from 'react-native-paper';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';

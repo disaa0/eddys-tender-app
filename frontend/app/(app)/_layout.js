@@ -17,7 +17,7 @@ export default function AppLayout() {
       response = await apiService.getCartQuantity(); // LLamada API
       setCartCount(response.totalQuantity.totalQuantity);
     } catch (err) {
-      console.error('Error fetching cart count:', err);
+      setCartCount(0);
     }
   }, []);
 
@@ -28,7 +28,7 @@ export default function AppLayout() {
   return (
     <CartRefreshProvider reloadCart={fetchCartCount}>
       <SafeAreaProvider>
-        <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }} edges={['bottom']}>
           <Tabs
             screenOptions={{
               tabBarActiveTintColor: '#ffffff',
@@ -157,7 +157,7 @@ export default function AppLayout() {
 export const styles = StyleSheet.create({
   tabBarStyle: {
     position: 'absolute',
-    backgroundColor: '#ff3814',
+    backgroundColor: theme.colors.primary,
     height: 50,
     elevation: 0,
     shadowOpacity: 0,
@@ -178,7 +178,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 70,
     height: 70,
-    backgroundColor: '#ff3814',
+    backgroundColor: theme.colors.primary,
     borderRadius: 35,
     elevation: 5,
     shadowColor: '#000',

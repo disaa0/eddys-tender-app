@@ -7,9 +7,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import ProductCard from '../components/ProductCard';
 import CategoryChips from '../components/CategoryChips';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated';
 import SortChips from '../components/SortChips';
-import AdminApiService from '../api/AdminApiService';
 import { useFocusEffect } from '@react-navigation/native';
 import apiService from '../api/ApiService';
 import useUserProducts from '../hooks/useUserProducts';
@@ -123,9 +121,7 @@ export default function Index() {
 
   const renderProduct = ({ item, index }) => (
     <View style={{ flex: 1, padding: 8 }}>
-      <Animated.View
-        entering={FadeInDown.delay(index * 100).springify()}
-        layout={Layout.springify()}
+      <View
         style={styles.productContainer}
       >
         <ProductCard
@@ -135,7 +131,7 @@ export default function Index() {
           }}
           onPress={() => router.push(`/product/${item.idProduct}`)}
         />
-      </Animated.View>
+      </View>
     </View>
   );
 
@@ -162,9 +158,9 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Animated.View entering={FadeInUp.duration(800)} style={styles.logoContainer}>
+        <View /* entering={FadeInUp.duration(800)} */ style={styles.logoContainer}>
           <Image source={logo} style={styles.logo} />
-        </Animated.View>
+        </View>
 
         <View style={styles.searchContainer}>
           <Searchbar
@@ -186,9 +182,9 @@ export default function Index() {
         </View>
 
         {showFilters && (
-          <Animated.View entering={FadeInDown.duration(300)} style={styles.filtersContainer}>
+          <View style={styles.filtersContainer}>
             <SortChips categories={FILTERS} selectedCategory={selectedFilter} onSelect={handleSelectedFilter} horizontal={false} />
-          </Animated.View>
+          </View>
         )}
 
         <FlatList
@@ -209,7 +205,6 @@ export default function Index() {
               {loading && <ActivityIndicator size="large" />}
             </>
           }
-          ListHeaderComponentStyle={{ paddingHorizontal: 16, marginBottom: 10 }}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           stickyHeaderIndices={[0]}
@@ -227,7 +222,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.primary,
   },
   container: {
     flex: 1,
@@ -236,7 +231,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 0,
   },
   logo: {
     width: 300,
@@ -247,7 +242,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 5,
   },
   searchbar: {
     flex: 1,
@@ -268,10 +263,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 13,
     backgroundColor: theme.colors.primary,
-  },
-  filtersContainer: {
-    paddingHorizontal: 0,
-    marginBottom: 10,
   },
   productList: {
     padding: 4,

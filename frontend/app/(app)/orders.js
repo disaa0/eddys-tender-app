@@ -2,6 +2,7 @@ import { View, StyleSheet, ScrollView, } from 'react-native';
 import { Card, Text, Chip, List, IconButton, Searchbar } from 'react-native-paper';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useState, useCallback } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import apiService from '../api/ApiService';
 import { theme } from '../theme';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -53,12 +54,31 @@ const getStatusColor = (status) => {
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
+  const [addresses, setAddresses] = useState([]);
   const [cart, setCart] = useState('');
+  const [error, setError] = useState('')
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [showError, setShowError] = useState(false);
-  const [error, setError] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      const getShippingAddresses = async () => {
+        try {
+          setLoading(true);
+          const data = await apiService.getShippingAdresses();
+          setAddresses(data.data);
+        } catch (err) {
+          setError('Error al obtener direcciones');
+        } finally {
+          setLoading(false);
+        }
+      };
+      getShippingAddresses();
+
+    }, [])
+  );
 
 
   useFocusEffect(
@@ -69,12 +89,10 @@ export default function Orders() {
           setLoading(true);
           const ordersData = await apiService.getUserOrders();
           setOrders(ordersData);
-          console.log(orders);
         } catch (err) {
           setError('Error al obtener ordenes');
           console.error(err);
         } finally {
-          console.log(orders);
           setLoading(false);
         }
       };
@@ -108,42 +126,52 @@ export default function Orders() {
     return new Date(dateString).toLocaleDateString('es-MX', options);
   };
 
-  return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.safeAreaContainer}>
-        <ScrollView style={styles.container}>
-          <Searchbar
-            placeholder="Buscar"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            style={styles.searchbar}
-            inputStyle={styles.searchInput}
-            icon="magnify"
-            placeholderTextColor="#666"
-          />
-          {orders.map((order) => (
-            <Card key={order.idOrder} style={styles.orderCard}>
-              <Card.Content>
-                {/* Encabezado del pedido */}
-                <View style={styles.orderHeader}>
-                  <View>
-                    <Text variant="titleMedium">Pedido #{order.idOrder}</Text>
-                    <Text variant="bodySmall">{formatDate(order.createdAt)}</Text>
-                  </View>
-                  <Chip
-                    style={[
-                      styles.statusChip,
-                      { backgroundColor: getStatusColor(order.orderStatus.idOrderStatus) }
-                    ]}
-                  >
-                    <Text style={styles.statusText}>{order.orderStatus.status}</Text>
-                  </Chip>
-                </View>
+  const formatAddress = (addressIdString) => {
+    if (!addressIdString) {
+      return "Pedido para recoger en sucursal."
+    } else if (addressIdString) {
+      const addressId = Number(addressIdString);
+      const addressInfo = addresses[addressId - 1];
+      const addressInfoString = `${addressInfo.street} ${addressInfo.houseNumber}, ${addressInfo.neighborhood}, ${addressInfo.postalCode}`
+      return addressInfoString;
+    }
+  };
 
-                {/* Lista de productos */}
-                <List.Section>
-                  <List.Subheader>Productos</List.Subheader>
-                  {/*order.items.map((item, index) => (
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.scrollContainer}>
+        <Searchbar
+          placeholder="Buscar"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={styles.searchbar}
+          inputStyle={styles.searchInput}
+          icon="magnify"
+          placeholderTextColor="#666"
+        />
+        {orders.map((order) => (
+          <Card key={order.idOrder} style={styles.orderCard}>
+            <Card.Content>
+              {/* Encabezado del pedido */}
+              <View style={styles.orderHeader}>
+                <View>
+                  <Text variant="titleMedium">Pedido #{order.idOrder}</Text>
+                  <Text variant="bodySmall">{formatDate(order.createdAt)}</Text>
+                </View>
+                <Chip
+                  style={[
+                    styles.statusChip,
+                    { backgroundColor: getStatusColor(order.orderStatus.idOrderStatus) }
+                  ]}
+                >
+                  <Text style={styles.statusText}>{order.orderStatus.status}</Text>
+                </Chip>
+              </View>
+
+              {/* Lista de productos */}
+              <List.Section>
+                <List.Subheader>Productos</List.Subheader>
+                {/*order.items.map((item, index) => (
                 <List.Item
                   key={index}
                   title={item.name}
@@ -151,69 +179,52 @@ export default function Orders() {
                   left={props => <List.Icon {...props} icon="food" />}
                 />
               ))*/}
-                </List.Section>
+              </List.Section>
 
-                {/* Detalles de entrega */}
-                <List.Item
-                  title="Dirección de entrega"
-                  description={order.idLocation}
-                  left={props => <List.Icon {...props} icon="map-marker" />}
-                />
+              {/* Detalles de entrega */}
+              <List.Item
+                title="Dirección de entrega"
+                description={formatAddress(order.idLocation)}
+                left={props => <List.Icon {...props} icon="map-marker" />}
+              />
 
-                {/* Método de pago y total */}
-                <View style={styles.orderFooter}>
-                  <View>
-                    <Text variant="bodyMedium">Método de pago: {order.paymentType.type}</Text>
-                    <Text variant="titleMedium" style={styles.total}>
-                      Total: ${order.totalPrice.toFixed(2)}
-                    </Text>
-                  </View>
-
-                  {/* {order.status === 'Entregado' && ( */}
-                  {1 == 1 && (
-                    <IconButton
-                      icon="history" // este ícono se parece al de tu imagen
-                      mode="contained"
-                      onPress={() => handleReorder(order.idOrder)}
-                      iconColor="#ffffff"
-                      containerColor="#000000"
-                      size={24}
-                    />
-                  )}
+              {/* Método de pago y total */}
+              <View style={styles.orderFooter}>
+                <View>
+                  <Text variant="bodyMedium">Método de pago: {order.paymentType.type}</Text>
+                  <Text variant="titleMedium" style={styles.total}>
+                    Total: ${order.totalPrice.toFixed(2)}
+                  </Text>
                 </View>
-              </Card.Content>
-            </Card>
-          ))}
-        </ScrollView>
 
-        <ConfirmationDialog
-          message={error}
-          visible={showError}
-          onConfirm={() => {
-            setShowError(false);
-          }}
-          onDismiss={() => {
-            setShowError(false);
-          }
-          }
-          title={'Upps!'}
-          cancelButtonLabel={''}
-          confirmButtonLabel={'Cerrar'}
-
-        />
-      </SafeAreaView>
-    </SafeAreaProvider>
+                {order.status === 'Entregado' && (
+                  <IconButton
+                    icon="refresh"
+                    mode="contained"
+                    onPress={() => handleReorder(order.id)}
+                    iconColor="#fff"
+                    containerColor="#2196F3"
+                  />
+                )}
+              </View>
+            </Card.Content>
+          </Card>
+        ))}
+      </ScrollView>
+      <View style={styles.container}>
+      </View>
+    </SafeAreaView >
   );
 }
 
 const styles = StyleSheet.create({
-  safeAreaContainer: {
+  safeArea: {
     flex: 1,
+    backgroundColor: theme.colors.primary,
   },
-  container: {
+  scrollContainer: {
     flex: 1,
     backgroundColor: theme.colors.surface,
-    paddingBottom: 80,
   },
   searchbar: {
     flex: 1,
