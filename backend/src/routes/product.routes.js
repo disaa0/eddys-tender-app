@@ -1,7 +1,7 @@
 const express = require('express');
 
 const { authenticateToken, isAdmin } = require('../middlewares/auth.middleware');
-const { getProductPersonalizationsForUsers, getAllProducts, getAllProductsPagination, addProduct, modifyProductDetails, getProduct, getProductDetails, getProductPersonalizations, updateProductPersonalizationForUser, updateProductPersonalization, updatePersonalizationStatusForUser, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts } = require('../controllers/product.controller');
+const { getProductPersonalizationsForUsers, getAllProducts, getAllProductsPagination, addProduct, modifyProductDetails, getProduct, getProductDetails, getProductPersonalizations, updateProductPersonalizationForUser, updateProductPersonalization, updatePersonalizationStatusForUser, updatePersonalizationStatus, getProductImage, searchProducts, getPopularProducts, assignProductPersonalizationToCartItem, getPersonalizationsForCartItem, togglePersonalizationStatusForCartItem } = require('../controllers/product.controller');
 const { validateCustomization, validateSearchQuery } = require('../middlewares/validateInput');
 
 
@@ -29,11 +29,16 @@ router.patch('/:id/personalization/:personalizationId/status',
 
 // New personalization routes user
 router.get('/:id/user/personalizations', authenticateToken, getProductPersonalizationsForUsers);
-router.put('/:id/user/personalization', authenticateToken, validateCustomization, updateProductPersonalizationForUser);
-router.patch('/:id/user/personalization/:personalizationId/status',
-    authenticateToken,
-    updatePersonalizationStatusForUser
-);
+// router.put('/:id/user/personalization', authenticateToken, validateCustomization, updateProductPersonalizationForUser);
+// router.patch('/:id/user/personalization/:personalizationId/status',
+//     authenticateToken,
+//     updatePersonalizationStatusForUser
+// );
+
+// New personalization routes for items in the cart
+router.put('/cart/items/personalizations', authenticateToken, assignProductPersonalizationToCartItem);
+router.get('/cart/items/personalizations/:idItemCart', authenticateToken, getPersonalizationsForCartItem);
+router.patch('/cart/items/personalizations/:idUserProductPersonalize/status', authenticateToken, togglePersonalizationStatusForCartItem);
 
 // Add this route before other product routes
 router.get('/search', authenticateToken, validateSearchQuery, searchProducts);
@@ -41,7 +46,7 @@ router.get('/search', authenticateToken, validateSearchQuery, searchProducts);
 // Add this route before other product routes to avoid conflicts
 router.get('/popular', authenticateToken, getPopularProducts);
 
-// Rutas dinamicas al final, el orden es importante
+// Rutas dinamicas al final
 router.get('/', authenticateToken, getAllProducts);
 router.get('/:id', authenticateToken, getProductDetails);
 

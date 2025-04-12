@@ -1621,7 +1621,7 @@ Authorization: Bearer <token>
 {
   "totalAmount": {
     "cartId": 1,
-    "totalAmount": 416
+    "totalAmount": 416.00
   }
 }
 ```
@@ -2142,11 +2142,11 @@ Authorization: Bearer <token>
 - 404: No se encontro el producto
 - 500: Error del servidor
 
-### 10.21 Editar Personalización de Producto para usuarios
+### 10.21 Asginar Personalización a un Producto en el Carrito de compras.
 
-**PUT /api/products/{id}/user/personalization**
+**PUT /api/products/cart/items/personalizations**
 
-Actualiza o crea una personalización para un producto específico.
+Asigna personalizaciones disponibles del catalogo de cuztomizaciones para un producto especifico a un articulo añadido al carrito de compras.
 
 **Headers Requeridos:**
 
@@ -2154,59 +2154,70 @@ Actualiza o crea una personalización para un producto específico.
 Authorization: Bearer <token>
 ```
 
-**Parámetros URL:**
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| id | number | ID del producto |
-
 **Cuerpo de la Petición:**
 
 ```json
 {
-  "name": "Nombre de la personalización",
-  "status": true
+    "idItemCart":2, 
+    "idProductPersonalization":5
 }
 ```
 
 **Validaciones:**
 
-- name: String no vacío
-- status: Boolean requerido
+- idItemCart": valor numerico requerido 
+- idProductPersonalization:valor numerico requerido
 
 **Respuesta Exitosa (200):**
 
 ```json
 {
-  "message": "Personalización actualizada exitosamente",
-  "data": {
-    "Personalization": {
-      "idPersonalization": 4,
-      "name": "Sin mayonesa",
-      "status": true,
-      "createdAt": "2025-03-20T23:42:04.590Z"
-    },
-    "ProductPersonalization": {
-      "idProductPersonalization": 7,
-      "idProduct": 1,
-      "idPersonalization": 4,
-      "status": true
+    "message": "Personalización asignada correctamente al producto del carrito",
+    "data": {
+        "idUserProductPersonalize": 1,
+        "idItemCart": 1,
+        "idProductPersonalization": 1,
+        "status": true,
+        "productPersonalization": {
+            "idProductPersonalization": 1,
+            "idUserAdded": 1,
+            "idProduct": 1,
+            "idPersonalization": 1,
+            "status": true
+        },
+        "itemCart": {
+            "idItemCart": 1,
+            "idCart": 1,
+            "idProduct": 1,
+            "quantity": 1,
+            "individualPrice": 89,
+            "status": true
+        }
     }
-  }
 }
+
 ```
 
 **Errores Posibles:**
 
-- 400: Producto no encontrado
+- 400: ID inválido
 - 400: Datos de personalización inválidos
 - 401: Token no proporcionado
+- 403: No puedes modificar este producto del carrito
+- 403: La personalización no corresponde al producto del carrito
+- 404: La personalización no fue encontrada
 - 500: Error del servidor
 
-### 10.22 Obtner Personalizaciónes de Producto para usuarios
+**NOTAS** 
+
+- Se valida que el producto en el carrito pertenesca al usuario.
+- Las personalizaciones a asignar, deben estan disponibles para el producto.
+
+### 10.22 Obtner Personalizaciónes disponibles para un Producto.
 
 **GET /api/products/{id}/user/personalizations**
 
-Obtiene los detalles de las personalizaciónes para un producto específico.
+Obtiene los detalles de las personalizaciónes que se ecuentran disponibles a asginar para un producto específico.
 
 **Headers Requeridos:**
 
@@ -2267,11 +2278,66 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.23 Cambiar status activo o inactivo de la Personalización de Producto para usuarios
+### 10.23 Obtner Personalizaciónes de Producto especifico en el Carrito de compras.
 
-**PACTH /api/products/{idProduct}/user/personalization/{idProductPersonalization}/status**
+**GET api/cart/items/personalizations/{:idItemCart}**
 
-Cambia el estado de activo o inactivo de personalización para un producto específico.
+Obtiene la lista de las personalizaciónes asignadas para un producto en el carrito.
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| idItemCart | number | ID del producto en el carrito |
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+    "message": "Personalizaciones recuperadas correctamente",
+    "data": [
+        {
+            "idUserProductPersonalize": 1,
+            "idItemCart": 1,
+            "idProductPersonalization": 1,
+            "status": true,
+            "productPersonalization": {
+                "idProductPersonalization": 1,
+                "idUserAdded": 1,
+                "idProduct": 1,
+                "idPersonalization": 1,
+                "status": true
+            },
+            "itemCart": {
+                "idItemCart": 1,
+                "idCart": 1,
+                "idProduct": 1,
+                "quantity": 0,
+                "individualPrice": 89,
+                "status": false
+            }
+        }
+    ]
+}
+```
+
+**Errores Posibles:**
+
+- 400: ID inválido
+- 401: Token no proporcionado
+- 404: Producto del carrito no encontrado
+- 500: Error del servidor
+
+### 10.23 Cambiar status activo o inactivo de la Personalización asignada a un Producto en el carrito de compras
+
+**PACTH api/cart/items/personalizations/:idUserProductPersonalize/status**
+
+Cambia el estado de activo o inactivo de personalización asiginada para un producto específico en el carrito.
 
 **Headers Requeridos:**
 
@@ -2283,7 +2349,7 @@ Authorization: Bearer <token>
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
 | idProduct | number | ID del producto |
-| idProductPersonalization | number | ID de la personalizacion del producto |
+| idUserProductPersonalize | number | ID de la personalizacion del producto en el carrito de compras |
 
 **Cuerpo de la Petición:**
 
@@ -2301,21 +2367,13 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "message": "Estado de personalización actualizado correctamente",
-  "data": {
-    "personalization": {
-      "idProductPersonalization": 1,
-      "idProduct": 1,
-      "idPersonalization": 1,
-      "status": false,
-      "personalization": {
-        "idPersonalization": 1,
-        "name": "Sin Cebolla",
-        "status": true,
-        "createdAt": "2025-03-20T23:40:57.273Z"
-      }
+    "message": "Personalización desactivada correctamente",
+    "data": {
+        "idUserProductPersonalize": 2,
+        "idItemCart": 2,
+        "idProductPersonalization": 5,
+        "status": true
     }
-  }
 }
 ```
 
@@ -2324,7 +2382,11 @@ Authorization: Bearer <token>
 - 400: Producto no encontrado
 - 400: Datos de personalización inválidos
 - 401: Token no proporcionado
+- 403: No puedes modificar esta personalización
 - 500: Error del servidor
+
+**NOTAS**
+- Se valida que la personalizacion pertesca al usuario
 
 ## 11. ENDPOINTS DE DIRECCIONES
 
