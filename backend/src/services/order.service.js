@@ -44,7 +44,7 @@ async function createOrder(userId, orderData) {
     const itemsTotal = cart.itemsCart.reduce((sum, item) => {
       return sum + item.quantity * item.individualPrice;
     }, 0);
-    
+
     // Add shipment value to total price (if it's a delivery order)
     // For pickup orders, we'll set shipmentValue to 0 regardless of input
     const finalShipmentValue = idShipmentType === 1 ? shipmentValue : 0;
@@ -421,10 +421,17 @@ async function reorderService(userId, orderId) {
       throw new Error('La orden no pertenece al usuario');
     }
 
-    const items = order.cart.itemsCart.map((item) => ({
-      idProduct: item.idProduct,
-      quantity: item.quantity,
-    }));
+    const items = order.cart.itemsCart
+      .filter((item) => item.quantity > 0)
+      .map((item) => ({
+        idProduct: item.idProduct,
+        quantity: item.quantity,
+      }));
+
+    if (items.length === 0) {
+      throw new Error('No hay productos válidos con cantidad mayor a cero en la orden');
+    }
+
 
     const activeProducts = await tx.product.findMany({
       where: {
@@ -461,24 +468,6 @@ async function reorderService(userId, orderId) {
     });
 
     if (cart) {
-      const existingItems = cart.itemsCart.map((item) => ({
-        idProduct: item.idProduct,
-        quantity: item.quantity,
-      }));
-
-      const areSameItems =
-        existingItems.length === itemsToAdd.length &&
-        existingItems.every((existingItem) =>
-          itemsToAdd.some(
-            (newItem) =>
-              newItem.idProduct === existingItem.idProduct &&
-              newItem.quantity === existingItem.quantity
-          )
-        );
-
-      if (areSameItems) {
-        throw new Error('El carrito ya contiene los mismos productos');
-      }
 
       await tx.cart.update({
         where: { idCart: cart.idCart },

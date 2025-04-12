@@ -249,7 +249,7 @@ const getTotalAmountCartService = async (userId) => {
 
         // Calcular el total del carrito
         const totalAmount = items.reduce((total, item) => {
-            return total + (item.quantity * item.individualPrice);
+            return total + (item.quantity * item.product.price);
         }, 0);
 
         return { cartId: cart.idCart, totalAmount };
