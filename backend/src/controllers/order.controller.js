@@ -20,7 +20,7 @@ async function createOrder(req, res) {
                 message: 'Se requiere una dirección de entrega para envíos a domicilio'
             });
         }
-        
+
         // Validate shipment value if provided
         if (shipmentValue !== undefined) {
             const shipmentValueNumber = parseFloat(shipmentValue);
@@ -252,9 +252,9 @@ async function reoder(req, res) {
                 status = 403;
                 message = 'No tienes permiso para reordenar este pedido, solo puedes reordenar tus propios pedidos';
                 break;
-            case 'El carrito ya contiene los mismos productos':
-                status = 409;
-                message = 'El carrito ya contiene los mismos productos';
+            case 'No hay productos válidos con cantidad mayor a cero en la orden':
+                status = 403;
+                message = 'No hay productos válidos con cantidad mayor a cero en la orden';
                 break;
             default:
                 message = 'Error al reordenar el pedido';
