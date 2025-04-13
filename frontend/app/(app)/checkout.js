@@ -306,9 +306,9 @@ export default function Checkout() {
             <FlatList data={cartItems} renderItem={renderProduct} keyExtractor={(item, index) => index.toString()} contentContainerStyle={styles.productList} />
             <Divider style={styles.divider} />
             <List.Item title="Subtotal" right={() => <Text>${subtotal.toFixed(2)}</Text>} />
-            {/* <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
+            <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
             <Divider style={styles.divider} />
-            <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} /> */}
+            <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} /> */
           </Card.Content>
         </Card>
 
