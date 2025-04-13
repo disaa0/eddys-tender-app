@@ -60,6 +60,8 @@ export default function Orders() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [showError, setShowError] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogMsg, setDialogMsg] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -108,10 +110,16 @@ export default function Orders() {
     try {
       const reorderResponse = await apiService.reorderUserOrder(orderId);
       console.log(reorderResponse);
+
+      if (reorderResponse?.data?.cartId) {
+        setDialogMsg(reorderResponse.message)
+        setShowDialog(true);
+      }
     } catch (error) {
       console.error('Error al reordenar:', error);
       setError(error.message || 'Error al reordenar');
-      setShowError(true);
+      setDialogMsg(error.message || 'Error al reordenar');
+      setDialogMsg(true);
     }
   };
 
@@ -197,15 +205,14 @@ export default function Orders() {
                   </Text>
                 </View>
 
-                {order.status === 'Entregado' && (
-                  <IconButton
-                    icon="refresh"
-                    mode="contained"
-                    onPress={() => handleReorder(order.id)}
-                    iconColor="#fff"
-                    containerColor="#2196F3"
-                  />
-                )}
+                <IconButton
+                  icon="backup-restore"
+                  mode="contained"
+                  onPress={() => handleReorder(order.idOrder)}
+                  iconColor="#fff"         // flecha blanca
+                  containerColor="#000"    // fondo negro
+                />
+
               </View>
             </Card.Content>
           </Card>
@@ -213,6 +220,19 @@ export default function Orders() {
       </ScrollView>
       <View style={styles.container}>
       </View>
+
+
+      <ConfirmationDialog
+        visible={showDialog}
+        message={dialogMsg || error}
+        onConfirm={() => { setShowDialog(false); router.push('/cart') }}
+        onDismiss={() => setShowDialog(false)}
+        title={'Aviso'}
+        cancelButtonLabel=''
+        confirmButtonLabel='Cerrar'
+      />
+
+
     </SafeAreaView >
   );
 }
