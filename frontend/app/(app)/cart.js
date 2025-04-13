@@ -107,7 +107,7 @@ export default function Cart() {
                         {personalizacion
                           .filter(p => p.productPersonalization.idProduct === item.idProduct)
                           .map((p, index) => (
-                            <Text key={index} style={styles.personalizationItem}>• {p.productPersonalization.idPersonalization}</Text>
+                            <Text key={index} style={styles.personalizationItem}>• {p.productPersonalization.personalization.name}</Text>
                           ))}
                       </View>
                     )}

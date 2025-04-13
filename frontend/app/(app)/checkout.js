@@ -226,7 +226,7 @@ export default function Checkout() {
             <View>
               <Text style={{ fontWeight: 'bold' }}>Extras:</Text>
               {extras.map((p, index) => (
-                <Text key={index}>• {p?.productPersonalization?.idPersonalization}</Text>
+                <Text key={index}>• {p?.productPersonalization?.personalization.name}</Text>
               ))}
             </View>
           )
