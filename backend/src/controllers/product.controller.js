@@ -407,15 +407,32 @@ async function getPersonalizationsForCartItem(req, res) {
                 idItemCart,
             },
             include: {
-                productPersonalization: true,
+                productPersonalization: {
+                    include: {
+                        personalization: true,
+                    },
+                },
                 itemCart: true,
             },
         });
 
+        const sanitized = personalizations.map(p => ({
+            ...p,
+            productPersonalization: {
+                ...p.productPersonalization,
+                personalization: {
+                    idPersonalization: p.productPersonalization.personalization.idPersonalization,
+                    name: p.productPersonalization.personalization.name,
+                    status: p.productPersonalization.personalization.status,
+                },
+            },
+        }));
+
         res.json({
             message: "Personalizaciones recuperadas correctamente",
-            data: personalizations,
+            data: sanitized,
         });
+
     } catch (error) {
         console.error("Error al recuperar personalizaciones:", error);
         res.status(500).json({ message: "Error interno", error: error.message });

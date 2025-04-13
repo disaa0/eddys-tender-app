@@ -2304,22 +2304,27 @@ Authorization: Bearer <token>
         {
             "idUserProductPersonalize": 1,
             "idItemCart": 1,
-            "idProductPersonalization": 1,
+            "idProductPersonalization": 5,
             "status": true,
             "productPersonalization": {
-                "idProductPersonalization": 1,
+                "idProductPersonalization": 5,
                 "idUserAdded": 1,
-                "idProduct": 1,
-                "idPersonalization": 1,
-                "status": true
+                "idProduct": 2,
+                "idPersonalization": 2,
+                "status": true,
+                "personalization": {
+                    "idPersonalization": 2,
+                    "name": "Extra Queso",
+                    "status": true
+                }
             },
             "itemCart": {
                 "idItemCart": 1,
                 "idCart": 1,
-                "idProduct": 1,
-                "quantity": 0,
-                "individualPrice": 89,
-                "status": false
+                "idProduct": 2,
+                "quantity": 1,
+                "individualPrice": 149,
+                "status": true
             }
         }
     ]
