@@ -1,7 +1,7 @@
 import { View, StyleSheet, ScrollView, Text, FlatList } from 'react-native';
 import { Card, Button, RadioButton, List, Divider, TextInput, ActivityIndicator } from 'react-native-paper';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { theme } from '../theme';
 import apiService from '../api/ApiService';
 import ConfirmationDialog from '../components/ConfirmationDialog';
@@ -52,50 +52,53 @@ export default function Checkout() {
   // );
   useFocusEffect(
     useCallback(() => {
-      const getShippingAddresses = async () => {
+      const fetchData = async () => {
         try {
           setLoading(true);
-          const data = await apiService.getShippingAdresses();
-          setAddresses(data.data);
+
+          const [addressesRes, cartTotalRes] = await Promise.all([
+            apiService.getShippingAdresses(),
+            apiService.getCartTotal(),
+          ]);
+
+          setAddresses(addressesRes.data);
+          setSubtotal(cartTotalRes.totalAmount.totalAmount);
+
+          // Set defaults
+          setOrder({});
+          setSelectedAddressId(0);
+          setAddress({
+            street: '',
+            houseNumber: '',
+            neighborhood: '',
+            postalCode: '',
+          })
+          setDelivery(0.00);
+          setShipmentType(2);
+          setError('');
         } catch (err) {
-          setError('Error al obtener direcciones');
+          setError('Error al cargar datos');
+          console.error(err);
         } finally {
           setLoading(false);
         }
       };
-      getShippingAddresses();
-      setSelectedAddressId(0);
-      setDelivery(0.00);
-      setShipmentType(1);
 
+      fetchData();
     }, [])
   );
 
+  useEffect(() => {
+    setTotal(subtotal + delivery);
+  }, [delivery, subtotal]);
 
-  useFocusEffect(
-    useCallback(() => {
-      const getCartTotal = async () => {
-        try {
-          setLoading(true);
-          const data = await apiService.getCartTotal();
-          setSubtotal(data.totalAmount.totalAmount);
-          setTotal(data.totalAmount.totalAmount + delivery);
-        } catch (err) {
-          setError('Error al obtener total de la orden');
-        } finally {
-          setLoading(false);
-        }
-      };
-      getCartTotal();
-    }, [])
-  );
   const createShippingAddress = async () => {
     try {
       setLoading(true);
       const data = await apiService.addShippingAdresses(address.street, address.houseNumber, address.postalCode, address.neighborhood);
       console.log('nuevaDirección', data)
     } catch (err) {
-      setError('Error al crear dirección');
+      setError('Error al crear dirección.');
       setPurchaseErrorDialogVisible(true);
     } finally {
       setLoading(false);
@@ -103,17 +106,20 @@ export default function Checkout() {
   };
 
   const handleOnValueChangeAddressId = (value) => {
-    setSelectedAddressId(value);
+    setSelectedAddressId(value)
     if (value == 0) {
-      setDelivery(0.00);
-      setShipmentType(2)
+      setDelivery(0);
+      setShipmentType(2);
+
     } else {
-      setDelivery(35.00)
-      setShipmentType(1)
+      setDelivery(35);
+      setShipmentType(1);
     }
   }
   const handlePlaceOrder = () => {
-    createShippingAddress();
+    if (selectedAddressId == (addresses.length + 1)) {
+      createShippingAddress();
+    }
     if (paymentMethod === 'card') {
       handleStripePayment();
     } else {
@@ -124,47 +130,56 @@ export default function Checkout() {
   const handleStripePayment = async () => {
     try {
       setLoading(true);
+      let data
       if (shipmentType == 2) {
-        const data = await apiService.createOrder(1, shipmentType, delivery);
-        setOrder(data);
+        data = await apiService.createOrder(2, shipmentType, delivery);
       } else {
-        const data = await apiService.createOrder(2, shipmentType, delivery, 1);
-        setOrder(data);
+        data = await apiService.createOrder(2, shipmentType, delivery, 1);
       }
-
-      const { stripeClientSecret } = order.order;
+      setOrder(data);
+      const { stripeClientSecret } = await data.order;
       if (!stripeClientSecret) {
         setError("No se pudo generar el pago.");
         setPurchaseErrorDialogVisible(true);
       }
 
-
-
       // Initialize Stripe Payment Sheet
-      const { error } = await initPaymentSheet({
+      const { error: paymentSheetError } = await initPaymentSheet({
         paymentIntentClientSecret: stripeClientSecret,
         merchantDisplayName: "Eddy's",
       });
 
-      if (error) {
-        setError("Error de Stripe.")
-        setPurchaseErrorDialogVisible(true);
+      if (paymentSheetError) {
+        //console.log(paymentError);
+        setError("Error de Stripe.");
       }
 
       // Open Stripe Payment UI
       const { error: paymentError } = await presentPaymentSheet();
 
-      if (paymentError) {
+      if (!paymentError && (error == '')) {
+        try {
+          await apiService.disableCart();
+        } catch (error) {
+          //console.log(error)
+          setError(error)
+          setPurchaseErrorDialogVisible(true);
+        }
+        setPurchaseSuccessfulDialogVisible(true);
+        setTimeout(3000);
+        router.push('/orders');
+      } else if (paymentError.code != "Canceled") {
+        //console.log(paymentError);
         setError("Error en el pago.");
         setPurchaseErrorDialogVisible(true);
+      } else if (paymentError) {
+        //console.log(paymentError);
       }
 
-      setPurchaseSuccessfulDialogVisible(true);
-      setTimeout(3000)
-      router.push('./orders.js')
     } catch (error) {
-      setError(error.message || "Error en el pago");
+      setError('Error en el pago.')
       setPurchaseErrorDialogVisible(true);
+      console.log(error)
     } finally {
       reloadCart();
       setLoading(false);
@@ -181,8 +196,9 @@ export default function Checkout() {
       }
       setPurchaseSuccessfulDialogVisible(true);
     } catch (error) {
-      setError(error.message || "Error en el pago");
+      setError(error.message || "Error en el pago.");
       setPurchaseErrorDialogVisible(true);
+      console.log(error)
     } finally {
       reloadCart();
       setLoading(false);
@@ -230,14 +246,13 @@ export default function Checkout() {
           <Card.Content>
             {loading ? (
               <ActivityIndicator />
-            ) : error ? (
-              <Text>{error}</Text>
             ) : addresses.length == 0 ? (
-              <Text>No hay direcciones disponibles</Text>
+              <Text>No hay direcciones disponibles.</Text>
             ) : (
               <RadioButton.Group
                 onValueChange={(value) => handleOnValueChangeAddressId(value)}
                 value={selectedAddressId}
+                key={selectedAddressId}
               >
                 <RadioButton.Item
                   key={0}
@@ -307,7 +322,7 @@ export default function Checkout() {
 
         {/* Dialogs */}
         <ConfirmationDialog visible={purchaseSuccessfulDialogVisible} onDismiss={() => setPurchaseSuccessfulDialogVisible(false)} onConfirm={() => { setPurchaseSuccessfulDialogVisible(false); router.push('/orders'); }} title="Compra exitosa" message="Su orden se ha creado con éxito." confirmButtonLabel="Continuar" />
-        <ConfirmationDialog visible={purchaseErrorDialogVisible} onDismiss={() => setPurchaseErrorDialogVisible(false)} title="Error en compra" message={"Ha ocurrido un error, favor de reintentar. " + error} confirmButtonLabel="Reintentar" />
+        <ConfirmationDialog visible={purchaseErrorDialogVisible} onDismiss={() => { setPurchaseErrorDialogVisible(false); setError('') }} onConfirm={() => setError('')} title="Error en compra" message={"Ha ocurrido un error, favor de reintentar. " + error} confirmButtonLabel="Reintentar" />
       </ScrollView>
     </SafeAreaView>
   );

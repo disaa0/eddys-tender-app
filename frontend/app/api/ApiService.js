@@ -58,7 +58,7 @@ class ApiService extends BaseApiService {
         return this.request(`/cart/items/addOneItem/${idProduct}`, 'PUT');
     }
 
-    async createOrder(idPaymentType, idShipmentType, shipmentValue, idLocation,) {
+    async createOrder(idPaymentType, idShipmentType, shipmentValue, idLocation) {
         return this.request('/orders', 'POST', { idPaymentType, idShipmentType, idLocation, shipmentValue });
     }
 
@@ -68,6 +68,9 @@ class ApiService extends BaseApiService {
 
     async viewCartItems() {
         return this.request(`/cart`, 'GET')
+    }
+    async disableCart() {
+        return this.request(`/cart/disable`, 'PUT')
     }
 
     async removeCartItem(idProduct) {

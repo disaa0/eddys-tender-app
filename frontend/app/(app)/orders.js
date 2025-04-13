@@ -87,6 +87,7 @@ export default function Orders() {
           setOrders([])
           setLoading(true);
           const ordersData = await apiService.getUserOrders();
+          console.log(ordersData);
           setOrders(ordersData);
         } catch (err) {
           setError('Error al obtener ordenes');
