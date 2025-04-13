@@ -34,7 +34,7 @@ export default function AdminLayout() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }} edges={['bottom']}>
         <Tabs
           screenOptions={{
             tabBarActiveTintColor: '#ffffff',

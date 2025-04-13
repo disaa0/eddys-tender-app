@@ -242,7 +242,7 @@ export default function AdminDashboard() {
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff', // Asegura que el notch no muestre un color incorrecto
+    backgroundColor: theme.colors.primary, // Asegura que el notch no muestre un color incorrecto
   },
   container: {
     flex: 1,
