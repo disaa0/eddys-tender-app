@@ -3079,7 +3079,7 @@ Authorization: Bearer <token>
 - 500: Error del servidor
 
 
-### 14.6 Webhook de Stripe
+### 14.7 Webhook de Stripe
 
 **POST /api/webhooks/stripe**
 
