@@ -65,6 +65,7 @@ export default function Checkout() {
           setSubtotal(cartTotalRes.totalAmount.totalAmount);
 
           // Set defaults
+          setOrder({});
           setSelectedAddressId(0);
           setAddress({
             street: '',
@@ -128,21 +129,18 @@ export default function Checkout() {
   const handleStripePayment = async () => {
     try {
       setLoading(true);
+      let data
       if (shipmentType == 2) {
-        const data = await apiService.createOrder(1, shipmentType, delivery);
-        setOrder(data);
+        data = await apiService.createOrder(2, shipmentType, delivery);
       } else {
-        const data = await apiService.createOrder(2, shipmentType, delivery, 1);
-        setOrder(data);
+        data = await apiService.createOrder(2, shipmentType, delivery, 1);
       }
-
-      const { stripeClientSecret } = order.order;
+      setOrder(data);
+      const { stripeClientSecret } = await data.order;
       if (!stripeClientSecret) {
         setError("No se pudo generar el pago.");
         setPurchaseErrorDialogVisible(true);
       }
-
-
 
       // Initialize Stripe Payment Sheet
       const { error } = await initPaymentSheet({
@@ -151,24 +149,34 @@ export default function Checkout() {
       });
 
       if (error) {
-        setError("Error de Stripe.")
-        setPurchaseErrorDialogVisible(true);
+        console.log(error);
+        setError("Error de Stripe.");
       }
 
       // Open Stripe Payment UI
       const { error: paymentError } = await presentPaymentSheet();
 
-      if (paymentError) {
+      if (!paymentError) {
+        try {
+          await apiService.disableCart();
+        } catch (error) {
+          console.log(error)
+          setError(error)
+          setPurchaseErrorDialogVisible(true);
+        }
+        setPurchaseSuccessfulDialogVisible(true);
+        setTimeout(3000);
+        router.push('/orders');
+      } else if (paymentError.code != "Canceled") {
+        console.log(paymentError);
         setError("Error en el pago.");
         setPurchaseErrorDialogVisible(true);
       }
 
-      setPurchaseSuccessfulDialogVisible(true);
-      setTimeout(3000)
-      router.push('./orders.js')
     } catch (error) {
-      setError(error.message || "Error en el pago");
+      setError(error)
       setPurchaseErrorDialogVisible(true);
+      console.log("Error stripe:", error)
     } finally {
       reloadCart();
       setLoading(false);
@@ -179,7 +187,7 @@ export default function Checkout() {
     try {
       setLoading(true);
       if (shipmentType == 2) {
-        await apiService.createOrder(1, 2, delivery.valueOf());
+        await apiService.createOrder(1, 2, delivery);
       } else {
         await apiService.createOrder(1, 1, delivery, selectedAddressId);
       }

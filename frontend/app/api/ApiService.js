@@ -69,6 +69,9 @@ class ApiService extends BaseApiService {
     async viewCartItems() {
         return this.request(`/cart`, 'GET')
     }
+    async disableCart() {
+        return this.request(`/cart/disable`, 'PUT')
+    }
 
     async removeCartItem(idProduct) {
         return this.request(`/cart/items/${idProduct}`, 'DELETE')
