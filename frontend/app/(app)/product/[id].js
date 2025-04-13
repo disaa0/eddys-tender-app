@@ -31,6 +31,21 @@ export default function ProductDetails() {
       quantity = parseInt(quantity)
       const response = await apiService.addCartItem(idprod, quantity);
       console.log(response)
+
+
+      const idItemCart = response?.item?.idItemCart;
+      console.log('idItemCart', idItemCart)
+
+      // iterar en las personalizaciones seleccionadas para agregarlas al idItemCart
+      console.log('personalizaciones Seleccionadas', selectedPersonalizations)
+      if (selectedPersonalizations.length > 0) {
+        for (let i = 0; i < selectedPersonalizations.length; i++) {
+          const response = await apiService.addPersonalizationsToCartItem(idItemCart, selectedPersonalizations[i]);
+          console.log('Respuesta de agregar personalización al carrito:', response);
+        }
+      }
+      // return;
+
       router.push('/cart')
       // setProduct(null);
       setProductImage(defaultImage);
@@ -105,7 +120,7 @@ export default function ProductDetails() {
       if (response?.data?.personalizations && response.data.personalizations.length > 0) {
         setPersonalizations(response.data.personalizations);
 
-        setSelectedPersonalizations(response.data.personalizations.filter((p) => p.status === true).map(p => p.idProductPersonalization));
+        // setSelectedPersonalizations(response.data.personalizations.filter((p) => p.status === true).map(p => p.idProductPersonalization));
       }
     } catch (error) {
       console.error('Error al cargar personalizaciones:', error);

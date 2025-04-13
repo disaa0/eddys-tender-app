@@ -198,9 +198,10 @@ export default function Checkout() {
 
 
   const renderProduct = ({ item }) => {
+    // console.log(item)
     // Filtrar personalizaciones para este item
-    const extras = personalizacion.filter(p => p.idProduct === item.idProduct);
-
+    const extras = personalizacion.filter(p => p.idItemCart === item.idItemCart);
+    console.log(extras)
     return (
       <List.Item
         title={`${item.quantity} ${item.product.name}`}
@@ -209,7 +210,7 @@ export default function Checkout() {
             <View>
               <Text style={{ fontWeight: 'bold' }}>Extras:</Text>
               {extras.map((p, index) => (
-                <Text key={index}>• {p.personalization.name}</Text>
+                <Text key={index}>• {p?.productPersonalization?.idPersonalization}</Text>
               ))}
             </View>
           )
@@ -290,9 +291,9 @@ export default function Checkout() {
             <FlatList data={cartItems} renderItem={renderProduct} keyExtractor={(item, index) => index.toString()} contentContainerStyle={styles.productList} />
             <Divider style={styles.divider} />
             <List.Item title="Subtotal" right={() => <Text>${subtotal.toFixed(2)}</Text>} />
-            <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
+            {/* <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
             <Divider style={styles.divider} />
-            <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} />
+            <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} /> */}
           </Card.Content>
         </Card>
 
