@@ -14,14 +14,13 @@ export default function Checkout() {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  //const [cart, setCart] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(0);
   const [shipmentType, setShipmentType] = useState(1);
-  //const [cartId, setCartId] = useState(0);
   const [subtotal, setSubtotal] = useState(0.00);
   const [total, setTotal] = useState(0.00);
   const [delivery, setDelivery] = useState(0.00);
+  const [order, setOrder] = useState({})
   const [purchaseSuccessfulDialogVisible, setPurchaseSuccessfulDialogVisible] = useState(false);
   const [purchaseErrorDialogVisible, setPurchaseErrorDialogVisible] = useState(false);
   const router = useRouter();
@@ -97,7 +96,6 @@ export default function Checkout() {
       console.log('nuevaDirección', data)
     } catch (err) {
       setError('Error al crear dirección');
-      console.log("Error al crear dirección", err)
       setPurchaseErrorDialogVisible(true);
     } finally {
       setLoading(false);
@@ -126,13 +124,21 @@ export default function Checkout() {
   const handleStripePayment = async () => {
     try {
       setLoading(true);
-      //if idShipmentType 2, idLocation Null
-      const order = await apiService.createOrder(2, shipmentType, 1);
-      const { stripeClientSecret } = order.order;
-
-      if (!stripeClientSecret) {
-        throw new Error("No se pudo generar el pago");
+      if (shipmentType == 2) {
+        const data = await apiService.createOrder(1, shipmentType, delivery);
+        setOrder(data);
+      } else {
+        const data = await apiService.createOrder(2, shipmentType, delivery, 1);
+        setOrder(data);
       }
+
+      const { stripeClientSecret } = order.order;
+      if (!stripeClientSecret) {
+        setError("No se pudo generar el pago.");
+        setPurchaseErrorDialogVisible(true);
+      }
+
+
 
       // Initialize Stripe Payment Sheet
       const { error } = await initPaymentSheet({
@@ -141,14 +147,16 @@ export default function Checkout() {
       });
 
       if (error) {
-        throw new Error(error.message);
+        setError("Error de Stripe.")
+        setPurchaseErrorDialogVisible(true);
       }
 
       // Open Stripe Payment UI
       const { error: paymentError } = await presentPaymentSheet();
 
       if (paymentError) {
-        throw new Error(paymentError.message);
+        setError("Error en el pago.");
+        setPurchaseErrorDialogVisible(true);
       }
 
       setPurchaseSuccessfulDialogVisible(true);
@@ -167,9 +175,9 @@ export default function Checkout() {
     try {
       setLoading(true);
       if (shipmentType == 2) {
-        await apiService.createOrder(1, 2);
+        await apiService.createOrder(1, 2, delivery);
       } else {
-        await apiService.createOrder(1, 1, selectedAddressId);
+        await apiService.createOrder(1, 1, delivery, selectedAddressId);
       }
       setPurchaseSuccessfulDialogVisible(true);
     } catch (error) {

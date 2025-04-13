@@ -92,7 +92,7 @@ export default function Profile() {
   return (
     <>
       <SafeAreaProvider>
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }}>
           <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 80 }}>
             <Surface style={styles.header} elevation={2}>
               <Avatar.Image

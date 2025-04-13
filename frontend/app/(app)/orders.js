@@ -5,7 +5,6 @@ import { useState, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import apiService from '../api/ApiService';
 import { theme } from '../theme';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import ConfirmationDialog from '../components/ConfirmationDialog'
 
 // Datos de ejemplo - En producción vendrían de una API
