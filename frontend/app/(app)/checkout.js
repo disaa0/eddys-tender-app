@@ -75,6 +75,7 @@ export default function Checkout() {
           })
           setDelivery(0.00);
           setShipmentType(2);
+          setError('');
         } catch (err) {
           setError('Error al cargar datos');
           console.error(err);
@@ -143,24 +144,24 @@ export default function Checkout() {
       }
 
       // Initialize Stripe Payment Sheet
-      const { error } = await initPaymentSheet({
+      const { error: paymentSheetError } = await initPaymentSheet({
         paymentIntentClientSecret: stripeClientSecret,
         merchantDisplayName: "Eddy's",
       });
 
-      if (error) {
-        console.log(error);
+      if (paymentSheetError) {
+        //console.log(paymentError);
         setError("Error de Stripe.");
       }
 
       // Open Stripe Payment UI
       const { error: paymentError } = await presentPaymentSheet();
 
-      if (!paymentError) {
+      if (!paymentError && (error == '')) {
         try {
           await apiService.disableCart();
         } catch (error) {
-          console.log(error)
+          //console.log(error)
           setError(error)
           setPurchaseErrorDialogVisible(true);
         }
@@ -168,15 +169,17 @@ export default function Checkout() {
         setTimeout(3000);
         router.push('/orders');
       } else if (paymentError.code != "Canceled") {
-        console.log(paymentError);
+        //console.log(paymentError);
         setError("Error en el pago.");
         setPurchaseErrorDialogVisible(true);
+      } else if (paymentError) {
+        //console.log(paymentError);
       }
 
     } catch (error) {
-      setError(error)
+      setError('Error en el pago.')
       setPurchaseErrorDialogVisible(true);
-      console.log("Error stripe:", error)
+      console.log(error)
     } finally {
       reloadCart();
       setLoading(false);
@@ -193,7 +196,7 @@ export default function Checkout() {
       }
       setPurchaseSuccessfulDialogVisible(true);
     } catch (error) {
-      setError(error.message || "Error en el pago");
+      setError(error.message || "Error en el pago.");
       setPurchaseErrorDialogVisible(true);
       console.log(error)
     } finally {
@@ -248,6 +251,7 @@ export default function Checkout() {
               <RadioButton.Group
                 onValueChange={(value) => handleOnValueChangeAddressId(value)}
                 value={selectedAddressId}
+                key={selectedAddressId}
               >
                 <RadioButton.Item
                   key={0}

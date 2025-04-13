@@ -16,7 +16,7 @@ export default function useCart() {
             setError(null);
             setLoading(true);
             const response = await apiService.viewCartItems();
-            console.log(response);
+            //console.log(response);
 
             // Extraemos la lista de productos correctamente
             if (response.items && Array.isArray(response.items.items)) {
