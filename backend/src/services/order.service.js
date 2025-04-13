@@ -147,6 +147,34 @@ async function getUserOrders(userId) {
   return orders;
 }
 
+async function getUserOrdersDetailsService(userId) {
+  // Check if order exists and belongs to this user
+  const orders = await prisma.order.findMany({
+    where: {
+      cart: { idUser: userId },
+    },
+    include: {
+      cart: {
+        include: {
+          itemsCart: {
+            include: { product: true },
+          },
+        },
+      },
+      paymentType: true,
+      shipmentType: true,
+      orderStatus: true,
+    },
+  });
+
+  if (!orders) {
+    throw new Error('Ordenes no encontrada');
+  }
+
+  return orders;
+}
+
+
 /**
  * Process Stripe webhook events
  * @param {Object} event - The Stripe event object
@@ -510,4 +538,5 @@ module.exports = {
   searchOrders,
   getOrdersByStatus,
   reorderService,
+  getUserOrdersDetailsService,
 };
