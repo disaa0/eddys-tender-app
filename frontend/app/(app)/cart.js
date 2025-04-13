@@ -77,7 +77,7 @@ export default function Cart() {
   }
 
   // console.log(cartItems);
-  // console.log(personalizacion);
+  console.log(personalizacion);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -98,16 +98,16 @@ export default function Cart() {
                     <IconButton icon="delete" size={20} onPress={() => { removeItem(item.product.idProduct); }} />
                   </View>
                   <Text variant="bodyMedium">Descripción: {item.product.description}</Text>
-                  {personalizacion &&
+                  {personalizacion && personalizacion.length > 0 &&
                     personalizacion
-                      .filter(p => p.idProduct === item.idProduct)
+                      .filter(p => p.idItemCart === item.idItemCart)
                       .length > 0 && (
                       <View style={styles.personalizationsContainer}>
                         <Text style={styles.personalizationsTitle}>Extras:</Text>
                         {personalizacion
-                          .filter(p => p.idProduct === item.idProduct)
+                          .filter(p => p.productPersonalization.idProduct === item.idProduct)
                           .map((p, index) => (
-                            <Text key={index} style={styles.personalizationItem}>• {p.personalization.name}</Text>
+                            <Text key={index} style={styles.personalizationItem}>• {p.productPersonalization.idPersonalization}</Text>
                           ))}
                       </View>
                     )}

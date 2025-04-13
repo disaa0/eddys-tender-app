@@ -38,14 +38,15 @@ export default function useCart() {
                     const allPersonalizations = [];
 
                     for (const item of cartItems) {
-                        const response = await apiService.getProductPersonalizations(item.idProduct);
-                        if (response?.data?.personalizations) {
-                            // Añadir cada personalización y asociar el id del item
-                            const personalizationsWithItemId = response.data.personalizations.map(p => ({
-                                ...p,
+                        const response = await apiService.getPersonalizationsItemCart(item.idItemCart);
+                        // console.log(response.data);
+                        if (response?.data) {
+                            // Añadir cada personalización a la lista
+                            const personalizationsSelectedByItemCart = response.data.map((personalization) => ({
                                 idItemCart: item.idItemCart,
+                                productPersonalization: personalization.productPersonalization,
                             }));
-                            allPersonalizations.push(...personalizationsWithItemId);
+                            allPersonalizations.push(...personalizationsSelectedByItemCart);
                         }
                     }
 

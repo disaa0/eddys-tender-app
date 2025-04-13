@@ -105,6 +105,14 @@ class ApiService extends BaseApiService {
     async reorderUserOrder(idOrder) {
         return this.request(`/orders/${idOrder}`, 'PUT');
     }
+
+    async addPersonalizationsToCartItem(idItemCart, idProductPersonalization) {
+        return this.request(`/products/cart/items/personalizations`, 'PUT', { idItemCart, idProductPersonalization });
+    }
+
+    async getPersonalizationsItemCart(idItemCart) {
+        return this.request(`/products/cart/items/personalizations/${idItemCart}`, 'GET');
+    }
 }
 
 const apiService = new ApiService();

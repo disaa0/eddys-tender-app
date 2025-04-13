@@ -7,16 +7,16 @@ import apiService from '../api/ApiService';
 
 const PersonalizationList = ({ personalizations, selectedPersonalizations, setSelectedPersonalizations, setShowPersonalizations, setError }) => {
     const toggleSelection = async (idProduct, idPersonalization, estatus) => {
-        console.log(idProduct, idPersonalization, estatus)
-        try {
-            const res = await apiService.setProductPersonalizationsStatus(idProduct, idPersonalization, estatus)
+        // console.log(idProduct, idPersonalization, estatus)
+        // try {
+        //     const res = await apiService.setProductPersonalizationsStatus(idProduct, idPersonalization, estatus)
 
-            console.log(res)
+        //     console.log(res)
 
-        } catch (error) {
-            console.log(error.message)
-            setError(error.message)
-        }
+        // } catch (error) {
+        //     console.log(error.message)
+        //     setError(error.message)
+        // }
 
 
 
