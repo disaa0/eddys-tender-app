@@ -1,47 +1,25 @@
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Card, Text, Chip, List, IconButton } from 'react-native-paper';
-import { useRouter } from 'expo-router';
+import { Card, Text, Chip, List, IconButton, Searchbar, ActivityIndicator } from 'react-native-paper';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { useState, useCallback, act } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import apiService from '../api/ApiService';
 import { theme } from '../theme';
-import { useState } from 'react';
+import ConfirmationDialog from '../components/ConfirmationDialog'
+import adminApiService from '../api/AdminApiService';
 
-// Datos de ejemplo - En producción vendrían de una API
-// const ORDERS = [
-//   {
-//     id: '001',
-//     date: '2024-02-20 15:30',
-//     status: 'En preparación',
-//     total: 293,
-//     items: [
-//       { name: 'Tender Box', quantity: 2, sauce: 'BBQ', notes: 'Extra salsa' },
-//     ],
-//     address: 'Calle Principal 123, Colonia Centro',
-//     paymentMethod: 'Tarjeta',
-//   },
-//   {
-//     id: '002',
-//     date: '2024-02-19 14:20',
-//     status: 'Entregado',
-//     total: 164,
-//     items: [
-//       { name: 'Tender Box', quantity: 1, sauce: 'Ranch', notes: '' },
-//     ],
-//     address: 'Calle Principal 123, Colonia Centro',
-//     paymentMethod: 'Efectivo',
-//   },
-// ];
-// const orders = [];
 // Función para obtener el color según el estado
 const getStatusColor = (status) => {
   switch (status) {
-    case 'Confirmado':
+    case 1:
       return '#2196F3'; // Azul
-    case 'En preparación':
+    case 2:
       return '#FF9800'; // Naranja
-    case 'En camino':
+    case 5:
       return '#9C27B0'; // Morado
-    case 'Entregado':
+    case 6:
       return '#4CAF50'; // Verde
-    case 'Cancelado':
+    case 7:
       return '#F44336'; // Rojo
     default:
       return '#757575'; // Gris
@@ -49,20 +27,70 @@ const getStatusColor = (status) => {
 };
 
 export default function Orders() {
+  const [orders, setOrders] = useState([]);
+  const [addresses, setAddresses] = useState([]);
+  const [error, setError] = useState('')
   const [searchQuery, setSearchQuery] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [reload, setReload] = useState(false);
+  const router = useRouter();
   const [showError, setShowError] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [dialogMsg, setDialogMsg] = useState('');
-  const [addresses, setAddresses] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const router = useRouter();
 
-  const handleReorder = (orderId) => {
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const addressesData = await apiService.getShippingAdresses();
+          const activeOrders = await adminApiService.getActiveOrders();
+          console.log(activeOrders.data.orders);
+          setOrders(activeOrders.data.orders)
+          setAddresses(addressesData.data);
+        } catch (err) {
+          setError('Error al cargar información');
+          console.log(err)
+        } finally {
+          setLoading(false);
+        }
+      };
+      const fetchOrderDetails = async () => {
+        try {
+
+        } catch (error) {
+
+        }
+      }
+      setSearchQuery('');
+      setOrders([]);
+      setReload('false');
+      setError('');
+      fetchData();
+
+
+
+    }, [reload])
+  );
+
+  const handleReorder = async (orderId) => {
     // Implementar lógica de reorden
-    router.push('/cart');
+    // router.push('/cart');
+
+    try {
+      const reorderResponse = await apiService.reorderUserOrder(orderId);
+      console.log(reorderResponse);
+
+      if (reorderResponse?.data?.cartId) {
+        setDialogMsg(reorderResponse.message)
+        setShowDialog(true);
+      }
+    } catch (error) {
+      console.error('Error al reordenar:', error);
+      setError(error.message || 'Error al reordenar');
+      setDialogMsg(error.message || 'Error al reordenar');
+      setDialogMsg(true);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -76,13 +104,31 @@ export default function Orders() {
     return new Date(dateString).toLocaleDateString('es-MX', options);
   };
 
-  if (orders.length === 0) {
+  const formatAddress = (addressIdString) => {
+    if (!addressIdString) {
+      return "Pedido para recoger en sucursal"
+    } else if (addressIdString) {
+      const addressId = Number(addressIdString);
+      const addressInfo = addresses[addressId - 1];
+      const addressInfoString = `${addressInfo.street} ${addressInfo.houseNumber}, ${addressInfo.neighborhood}, ${addressInfo.postalCode}`
+      return addressInfoString;
+    }
+  };
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (orders.length == 0) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>No tienes pedidos registrados</Text>
-        <Text style={styles.errorTextDescription}>Aqui se mostraran los pedidos una vez se registren.</Text>
+        <Text style={styles.errorText}>El historial está vacío</Text>
+        <Text style={styles.errorTextDescription}>Inicia creando una orden</Text>
         <TouchableOpacity
-          onPress={() => { router.push('/(appAdmin)'); }}
+          onPress={() => router.push('/')}
           style={styles.goBackButton}
         >
           <Text style={styles.goBackButtonText}>Regresar</Text>
@@ -90,6 +136,21 @@ export default function Orders() {
       </View>
     );
   }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity
+          onPress={() => setReload(true)}
+          style={styles.goBackButton}
+        >
+          <Text style={styles.goBackButtonText}>Reintentar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -125,7 +186,7 @@ export default function Orders() {
               {/* Lista de productos */}
               <List.Section>
                 <List.Subheader>Productos</List.Subheader>
-                {order.cart.itemsCart.map((item, index) => (
+                {/* {order.cart.itemsCart.map((item, index) => (
                   <List.Item
                     key={index}
                     title={`${item.product.name}`}
@@ -133,7 +194,7 @@ export default function Orders() {
                     left={props => <List.Icon {...props} icon="food" />}
                     right={props => <Text {...props}>{`$${(item.quantity * item.product.price).toFixed(2)}`}</Text>}
                   />
-                ))}
+                ))} */}
               </List.Section>
 
               {/* Detalles de entrega */}

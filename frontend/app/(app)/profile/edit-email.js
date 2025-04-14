@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../../theme';
 import AuthService from '../../api/AuthService';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function EditEmail() {
     const [email, setEmail] = useState('');
@@ -56,46 +57,50 @@ export default function EditEmail() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text variant="titleLarge" style={styles.title}>
-                Actualizar Correo Electrónico
-            </Text>
+        <SafeAreaProvider>
+            <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }}>
+                <View style={styles.container}>
+                    <Text variant="titleLarge" style={styles.title}>
+                        Actualizar Correo Electrónico
+                    </Text>
 
-            <TextInput
-                mode="outlined"
-                label="Nuevo correo electrónico"
-                value={email}
-                onChangeText={handleEmailChange}
-                style={styles.input}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                error={!!error}
-                disabled={loading}
-            />
+                    <TextInput
+                        mode="outlined"
+                        label="Nuevo correo electrónico"
+                        value={email}
+                        onChangeText={handleEmailChange}
+                        style={styles.input}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        error={!!error}
+                        disabled={loading}
+                    />
 
-            {error ? (
-                <Text style={styles.error}>{error}</Text>
-            ) : null}
+                    {error ? (
+                        <Text style={styles.error}>{error}</Text>
+                    ) : null}
 
-            <Button
-                mode="contained"
-                onPress={handleUpdateEmail}
-                style={styles.button}
-                loading={loading}
-                disabled={loading || !email.trim()}
-            >
-                Actualizar
-            </Button>
+                    <Button
+                        mode="contained"
+                        onPress={handleUpdateEmail}
+                        style={styles.button}
+                        loading={loading}
+                        disabled={loading || !email.trim()}
+                    >
+                        Actualizar
+                    </Button>
 
-            <Button
-                mode="text"
-                onPress={() => router.back()}
-                style={styles.cancelButton}
-                disabled={loading}
-            >
-                Cancelar
-            </Button>
-        </View>
+                    <Button
+                        mode="text"
+                        onPress={() => router.back()}
+                        style={styles.cancelButton}
+                        disabled={loading}
+                    >
+                        Cancelar
+                    </Button>
+                </View>
+            </SafeAreaView>
+        </SafeAreaProvider>
     );
 }
 
@@ -103,7 +108,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.surface,
     },
     title: {
         marginBottom: 20,
