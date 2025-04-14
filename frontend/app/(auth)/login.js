@@ -8,6 +8,7 @@ import { ActivityIndicator } from 'react-native-paper';
 import { API_URL } from '../config';
 import { useRouter } from 'expo-router';
 import ConfirmationDialog from '../components/ConfirmationDialog';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Login() {
   const { login, isAdmin } = useAuth();
@@ -55,108 +56,115 @@ export default function Login() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../../assets/eddys.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
-      <View style={styles.welcomeContainer}>
-        <Text variant="headlineMedium" style={styles.welcomeMessage}>
-          Inicia sesión o registrate
-        </Text>
-      </View>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../../assets/eddys.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+          <View style={styles.welcomeContainer}>
+            <Text variant="headlineMedium" style={styles.welcomeMessage}>
+              Inicia sesión o registrate
+            </Text>
+          </View>
 
-      {
-        error ? (
-          <Text style={styles.errorText}>{error}</Text>
-        ) : null
-      }
-      <View style={styles.formContainer}>
-        <TextInput
-          mode="outlined"
-          label="Email o nombre de usuario"
-          value={emailOrUsername}
-          onChangeText={setEmailOrUsername}
-          style={[styles.input, (getFieldError('email') || getFieldError('username')) && styles.inputError]}
-          error={!!getFieldError('email') || !!getFieldError('username')}
-          autoCapitalize="none"
-        />
-        {
-          getFieldError('email') && (
-            <Text style={styles.fieldError}>{getFieldError('email')}</Text>
-          )
-        }
-        {
-          getFieldError('username') && (
-            <Text style={styles.fieldError}>{getFieldError('username')}</Text>
-          )
-        }
+          {
+            error ? (
+              <Text style={styles.errorText}>{error}</Text>
+            ) : null
+          }
+          <View style={styles.formContainer}>
+            <TextInput
+              mode="outlined"
+              label="Email o nombre de usuario"
+              value={emailOrUsername}
+              onChangeText={setEmailOrUsername}
+              style={[styles.input, (getFieldError('email') || getFieldError('username')) && styles.inputError]}
+              error={!!getFieldError('email') || !!getFieldError('username')}
+              autoCapitalize="none"
+            />
+            {
+              getFieldError('email') && (
+                <Text style={styles.fieldError}>{getFieldError('email')}</Text>
+              )
+            }
+            {
+              getFieldError('username') && (
+                <Text style={styles.fieldError}>{getFieldError('username')}</Text>
+              )
+            }
 
-        <TextInput
-          mode="outlined"
-          label="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          style={[styles.input, getFieldError('password') && styles.inputError]}
-          error={!!getFieldError('password')}
-          secureTextEntry
-        />
-        {
-          getFieldError('password') && (
-            <Text style={styles.fieldError}>{getFieldError('password')}</Text>
-          )
-        }
+            <TextInput
+              mode="outlined"
+              label="Contraseña"
+              value={password}
+              onChangeText={setPassword}
+              style={[styles.input, getFieldError('password') && styles.inputError]}
+              error={!!getFieldError('password')}
+              secureTextEntry
+            />
+            {
+              getFieldError('password') && (
+                <Text style={styles.fieldError}>{getFieldError('password')}</Text>
+              )
+            }
 
-        <Button
-          mode="contained"
-          onPress={handleLogin}
-          style={styles.button}
-          buttonColor={theme.colors.primary}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color={theme.colors.surface} />
-          ) : (
-            'Iniciar Sesión'
-          )}
-        </Button>
+            <Button
+              mode="contained"
+              onPress={handleLogin}
+              style={styles.button}
+              buttonColor={theme.colors.primary}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={theme.colors.surface} />
+              ) : (
+                'Iniciar Sesión'
+              )}
+            </Button>
 
-        <Link style={styles.link} href="/register" asChild>
-          <Button mode="text" textColor={theme.colors.primary}>
-            ¿No tienes cuenta? Regístrate.
-          </Button>
-        </Link>
-      </View>
+            <Link style={styles.link} href="/register" asChild>
+              <Button mode="text" textColor={theme.colors.primary}>
+                ¿No tienes cuenta? Regístrate.
+              </Button>
+            </Link>
+          </View>
 
 
-      <ConfirmationDialog
-        visible={messageDialogVisible}
-        onDismiss={() => setMessageDialogVisible(false)}
-        title="Mensaje"
-        content={messageDialogText}
-        onConfirm={() => {
-          setMessageDialogVisible(false)
-          setMessageDialogText('')
-        }}
-        cancelButtonLabel=""
-        confirmButtonLabel="Cerrar"
-      />
-    </KeyboardAvoidingView>
+          <ConfirmationDialog
+            visible={messageDialogVisible}
+            onDismiss={() => setMessageDialogVisible(false)}
+            title="Mensaje"
+            content={messageDialogText}
+            onConfirm={() => {
+              setMessageDialogVisible(false)
+              setMessageDialogText('')
+            }}
+            cancelButtonLabel=""
+            confirmButtonLabel="Cerrar"
+          />
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.primary,
+  },
   container: {
     flex: 1,
     alignContent: 'center',
     padding: 20,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 10,
+    backgroundColor: theme.colors.surface,
   },
   logoContainer: {
     alignItems: 'center',

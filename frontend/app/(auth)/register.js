@@ -198,19 +198,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.primary,
   },
   container: {
     flex: 1,
     alignContent: 'center',
-    padding: 20,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 10,
+    padding: 30,
+    backgroundColor: theme.colors.surface,
   },
   logoContainer: {
     alignItems: 'center',
     height: '20vh',
-    marginBottom: 50,
+    marginBottom: -100,
     marginTop: -100,
   },
   logo: {

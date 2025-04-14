@@ -119,7 +119,7 @@ export default function Profile() {
                 title="Cambiar Contraseña"
                 left={(props) => <List.Icon {...props} icon="form-textbox-password" />}
                 right={(props) => <List.Icon {...props} icon="chevron-right" />}
-                onPress={() => router.push('./profile/editPassword')}
+                onPress={() => router.push('/profile/editPassword')}
               />
               <Divider />
               <List.Item
