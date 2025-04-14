@@ -100,6 +100,14 @@ export default function AdminLayout() {
               href: null,
             }}
           />
+
+          <Tabs.Screen
+            name="orderHistory"
+            options={{
+              href: null,
+            }}
+          />
+
           <Tabs.Screen
             name="profile/editEmail"
             options={{
@@ -121,7 +129,7 @@ export default function AdminLayout() {
 const styles = StyleSheet.create({
   tabBarStyle: {
     position: 'absolute',
-    backgroundColor: '#ff3814',
+    backgroundColor: theme.colors.primary,
     height: 50,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
@@ -144,7 +152,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 70,
     height: 70,
-    backgroundColor: '#ff3814',
+    backgroundColor: theme.colors.primary,
     borderRadius: 35,
     elevation: 5,
     shadowColor: '#000',
