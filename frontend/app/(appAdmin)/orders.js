@@ -126,9 +126,8 @@ export default function Orders() {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>El historial está vacío</Text>
-        <Text style={styles.errorTextDescription}>Inicia creando una orden</Text>
         <TouchableOpacity
-          onPress={() => router.push('/')}
+          onPress={() => router.push('/profile')}
           style={styles.goBackButton}
         >
           <Text style={styles.goBackButtonText}>Regresar</Text>
