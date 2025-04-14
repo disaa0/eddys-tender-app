@@ -399,7 +399,11 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
       shipmentType: true,
       cart: {
         include: {
-          itemsCart: true,
+          itemsCart: {
+            include: {
+              product: true,
+            },
+          },
         },
       },
     },
