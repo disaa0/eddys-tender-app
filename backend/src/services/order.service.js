@@ -392,6 +392,11 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
       orderStatus: true,
       paymentType: true,
       shipmentType: true,
+      cart: {
+        include: {
+          itemsCart: true,
+        },
+      },
     },
     skip,
     take: parseInt(limit),
