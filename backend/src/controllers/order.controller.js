@@ -74,6 +74,19 @@ async function getUserOrders(req, res) {
     }
 }
 
+async function getUserOrdersDatails(req, res) {
+    try {
+        const userId = req.user.userId;
+
+        const orders = await orderService.getUserOrdersDetailsService(userId);
+
+        res.json(orders);
+    } catch (error) {
+        console.error('Get user orders error:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
 // Handle Stripe webhook events
 async function handleStripeWebhook(req, res) {
     const sig = req.headers['stripe-signature'];
@@ -272,6 +285,5 @@ module.exports = {
     getUserOrders,
     handleStripeWebhook,
     searchOrders,
-    getActiveOrders,
-    getOrderHistory
+    getUserOrdersDatails
 }; 

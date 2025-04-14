@@ -1,37 +1,11 @@
-import { View, StyleSheet, ScrollView, } from 'react-native';
-import { Card, Text, Chip, List, IconButton, Searchbar } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Card, Text, Chip, List, IconButton, Searchbar, ActivityIndicator } from 'react-native-paper';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useState, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import apiService from '../api/ApiService';
 import { theme } from '../theme';
 import ConfirmationDialog from '../components/ConfirmationDialog'
-
-// Datos de ejemplo - En producción vendrían de una API
-const ORDERS = [
-  {
-    id: '001',
-    date: '2024-02-20 15:30',
-    status: 'En preparación',
-    total: 293,
-    items: [
-      { name: 'Tender Box', quantity: 2, sauce: 'BBQ', notes: 'Extra salsa' },
-    ],
-    address: 'Calle Principal 123, Colonia Centro',
-    paymentMethod: 'Tarjeta',
-  },
-  {
-    id: '002',
-    date: '2024-02-19 14:20',
-    status: 'Entregado',
-    total: 164,
-    items: [
-      { name: 'Tender Box', quantity: 1, sauce: 'Ranch', notes: '' },
-    ],
-    address: 'Calle Principal 123, Colonia Centro',
-    paymentMethod: 'Efectivo',
-  },
-];
 
 // Función para obtener el color según el estado
 const getStatusColor = (status) => {
@@ -54,10 +28,10 @@ const getStatusColor = (status) => {
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [addresses, setAddresses] = useState([]);
-  const [cart, setCart] = useState('');
   const [error, setError] = useState('')
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [reload, setReload] = useState(false);
   const router = useRouter();
   const [showError, setShowError] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
@@ -65,42 +39,37 @@ export default function Orders() {
 
   useFocusEffect(
     useCallback(() => {
-      const getShippingAddresses = async () => {
+      const fetchData = async () => {
         try {
           setLoading(true);
-          const data = await apiService.getShippingAdresses();
-          setAddresses(data.data);
+          console.log('Cargando info')
+          const addressesData = await apiService.getShippingAdresses();
+          const ordersDetailsData = await apiService.getUserOrdersDetails();
+          setAddresses(addressesData.data);
+          setOrders(ordersDetailsData);
+          console.log(ordersDetailsData)
         } catch (err) {
-          setError('Error al obtener direcciones');
+          setError('Error al cargar información')
         } finally {
           setLoading(false);
         }
       };
-      getShippingAddresses();
-
-    }, [])
-  );
-
-
-  useFocusEffect(
-    useCallback(() => {
-      const getUserOrders = async () => {
+      const fetchOrderDetails = async () => {
         try {
-          setOrders([])
-          setLoading(true);
-          const ordersData = await apiService.getUserOrders();
-          console.log(ordersData);
-          setOrders(ordersData);
-        } catch (err) {
-          setError('Error al obtener ordenes');
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      };
 
-      getUserOrders();
-    }, [])
+        } catch (error) {
+
+        }
+      }
+      setSearchQuery('');
+      setOrders([]);
+      setReload('false')
+      setError('')
+      fetchData();
+
+
+
+    }, [reload])
   );
 
   const handleReorder = async (orderId) => {
@@ -136,7 +105,7 @@ export default function Orders() {
 
   const formatAddress = (addressIdString) => {
     if (!addressIdString) {
-      return "Pedido para recoger en sucursal."
+      return "Pedido para recoger en sucursal"
     } else if (addressIdString) {
       const addressId = Number(addressIdString);
       const addressInfo = addresses[addressId - 1];
@@ -144,6 +113,43 @@ export default function Orders() {
       return addressInfoString;
     }
   };
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (orders.length == 0) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>El historial está vacío</Text>
+        <Text style={styles.errorTextDescription}>Inicia creando una orden</Text>
+        <TouchableOpacity
+          onPress={() => router.push('/')}
+          style={styles.goBackButton}
+        >
+          <Text style={styles.goBackButtonText}>Regresar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity
+          onPress={() => setReload(true)}
+          style={styles.goBackButton}
+        >
+          <Text style={styles.goBackButtonText}>Reintentar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -179,14 +185,15 @@ export default function Orders() {
               {/* Lista de productos */}
               <List.Section>
                 <List.Subheader>Productos</List.Subheader>
-                {/*order.items.map((item, index) => (
-                <List.Item
-                  key={index}
-                  title={item.name}
-                  description={`Cantidad: ${item.quantity} - Salsa: ${item.sauce}${item.notes ? `\nNotas: ${item.notes}` : ''}`}
-                  left={props => <List.Icon {...props} icon="food" />}
-                />
-              ))*/}
+                {order.cart.itemsCart.map((item, index) => (
+                  <List.Item
+                    key={index}
+                    title={`${item.product.name}`}
+                    description={`Cantidad: ${item.quantity}`}
+                    left={props => <List.Icon {...props} icon="food" />}
+                    right={props => <Text {...props}>{`$${(item.quantity * item.product.price).toFixed(2)}`}</Text>}
+                  />
+                ))}
               </List.Section>
 
               {/* Detalles de entrega */}
@@ -283,5 +290,56 @@ const styles = StyleSheet.create({
   total: {
     fontWeight: 'bold',
     marginTop: 4,
+  },
+  error: {
+    flex: 1,
+    justifyContent: 'center !important',
+    alignItems: 'center',
+    textAlign: 'center',
+    color: 'red',
+    marginTop: "40vh",
+    fontSize: 16, // Ajustar el tamaño del texto
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    // color: 'red',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  errorTextDescription: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 5,
+  },
+  goBackButton: {
+    backgroundColor: '#2D221D', // Color oscuro similar al botón de la imagen
+    // flex: 1, // Para que ocupe más espacio
+    marginTop: 20,
+    marginLeft: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 0.5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  goBackButtonText: {
+    fontSize: 15,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }); 
