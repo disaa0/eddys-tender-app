@@ -102,6 +102,12 @@ export default function AdminLayout() {
           />
 
           <Tabs.Screen
+            name="orders/[id]"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
             name="orderHistory"
             options={{
               href: null,
@@ -127,6 +133,10 @@ export default function AdminLayout() {
 }
 
 const styles = StyleSheet.create({
+  safeAreaContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.primary,
+  },
   tabBarStyle: {
     position: 'absolute',
     backgroundColor: theme.colors.primary,
