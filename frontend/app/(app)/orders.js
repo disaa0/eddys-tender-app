@@ -28,7 +28,6 @@ const getStatusColor = (status) => {
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [addresses, setAddresses] = useState([]);
-  const [carts, setCarts] = useState('');
   const [error, setError] = useState('')
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,10 +44,10 @@ export default function Orders() {
           setLoading(true);
           console.log('Cargando info')
           const addressesData = await apiService.getShippingAdresses();
-          const ordersData = await apiService.getUserOrders();
-          console.log(ordersData)
+          const ordersDetailsData = await apiService.getUserOrdersDetails();
           setAddresses(addressesData.data);
-          setOrders(ordersData);
+          setOrders(ordersDetailsData);
+          console.log(ordersDetailsData)
         } catch (err) {
           setError('Error al cargar información')
         } finally {
@@ -106,7 +105,7 @@ export default function Orders() {
 
   const formatAddress = (addressIdString) => {
     if (!addressIdString) {
-      return "Pedido para recoger en sucursal."
+      return "Pedido para recoger en sucursal"
     } else if (addressIdString) {
       const addressId = Number(addressIdString);
       const addressInfo = addresses[addressId - 1];
@@ -186,14 +185,15 @@ export default function Orders() {
               {/* Lista de productos */}
               <List.Section>
                 <List.Subheader>Productos</List.Subheader>
-                {/*order.items.map((item, index) => (
-                <List.Item
-                  key={index}
-                  title={item.name}
-                  description={`Cantidad: ${item.quantity} - Salsa: ${item.sauce}${item.notes ? `\nNotas: ${item.notes}` : ''}`}
-                  left={props => <List.Icon {...props} icon="food" />}
-                />
-              ))*/}
+                {order.cart.itemsCart.map((item, index) => (
+                  <List.Item
+                    key={index}
+                    title={`${item.product.name}`}
+                    description={`Cantidad: ${item.quantity}`}
+                    left={props => <List.Icon {...props} icon="food" />}
+                    right={props => <Text {...props}>{`$${(item.quantity * item.product.price).toFixed(2)}`}</Text>}
+                  />
+                ))}
               </List.Section>
 
               {/* Detalles de entrega */}
