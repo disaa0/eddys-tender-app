@@ -50,24 +50,8 @@ export default function Orders() {
   } = useAdminOrders();
 
 
-  const handleReorder = async (orderId) => {
-    // Implementar lógica de reorden
-    // router.push('/cart');
-
-    try {
-      const reorderResponse = await apiService.reorderUserOrder(orderId);
-      console.log(reorderResponse);
-
-      if (reorderResponse?.data?.cartId) {
-        setDialogMsg(reorderResponse.message)
-        setShowDialog(true);
-      }
-    } catch (error) {
-      console.error('Error al reordenar:', error);
-      setError(error.message || 'Error al reordenar');
-      setDialogMsg(error.message || 'Error al reordenar');
-      setDialogMsg(true);
-    }
+  const handleOnClickOrder = (orderId) => {
+    router.push(`/orders/${orderId}`);
   };
 
   if (loading) {
@@ -170,9 +154,9 @@ export default function Orders() {
                 </View>
 
                 <IconButton
-                  icon="backup-restore"
+                  icon="eye"
                   mode="contained"
-                  onPress={() => handleReorder(order.idOrder)}
+                  onPress={() => handleOnClickOrder(order.idOrder)}
                   iconColor="#fff"         // flecha blanca
                   containerColor="#000"    // fondo negro
                 />

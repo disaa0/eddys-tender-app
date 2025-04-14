@@ -102,6 +102,12 @@ export default function AdminLayout() {
           />
 
           <Tabs.Screen
+            name="orders/[id]"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
             name="orderHistory"
             options={{
               href: null,

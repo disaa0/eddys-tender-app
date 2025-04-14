@@ -1,5 +1,5 @@
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Avatar, Text, List, Divider, Surface, Button, Snackbar } from 'react-native-paper';
+import { Avatar, Text, List, Divider, Surface, Button, Snackbar, ActivityIndicator } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { theme } from '../theme';
 import { useAuth } from '../context/AuthContext';
@@ -61,7 +61,7 @@ export default function Profile() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
