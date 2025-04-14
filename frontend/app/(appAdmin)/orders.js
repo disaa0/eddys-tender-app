@@ -7,6 +7,7 @@ import apiService from '../api/ApiService';
 import { theme } from '../theme';
 import ConfirmationDialog from '../components/ConfirmationDialog'
 import adminApiService from '../api/AdminApiService';
+import { useAdminOrders } from '../hooks/useAdminOrders';
 
 // Función para obtener el color según el estado
 const getStatusColor = (status) => {
@@ -27,51 +28,27 @@ const getStatusColor = (status) => {
 };
 
 export default function Orders() {
-  const [orders, setOrders] = useState([]);
+
   const [addresses, setAddresses] = useState([]);
-  const [error, setError] = useState('')
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(false);
+
   const [reload, setReload] = useState(false);
   const router = useRouter();
   const [showError, setShowError] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [dialogMsg, setDialogMsg] = useState('');
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchData = async () => {
-        try {
-          setLoading(true);
-          const addressesData = await apiService.getShippingAdresses();
-          const activeOrders = await adminApiService.getActiveOrders();
-          console.log(activeOrders.data.orders);
-          setOrders(activeOrders.data.orders)
-          setAddresses(addressesData.data);
-        } catch (err) {
-          setError('Error al cargar información');
-          console.log(err)
-        } finally {
-          setLoading(false);
-        }
-      };
-      const fetchOrderDetails = async () => {
-        try {
 
-        } catch (error) {
+  const {
+    orders,
+    error,
+    loading,
+    reloadData,
+    formatAddress,
+    formatDate,
+  } = useAdminOrders();
 
-        }
-      }
-      setSearchQuery('');
-      setOrders([]);
-      setReload('false');
-      setError('');
-      fetchData();
-
-
-
-    }, [reload])
-  );
 
   const handleReorder = async (orderId) => {
     // Implementar lógica de reorden
@@ -93,27 +70,6 @@ export default function Orders() {
     }
   };
 
-  const formatDate = (dateString) => {
-    const options = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    return new Date(dateString).toLocaleDateString('es-MX', options);
-  };
-
-  const formatAddress = (addressIdString) => {
-    if (!addressIdString) {
-      return "Pedido para recoger en sucursal"
-    } else if (addressIdString) {
-      const addressId = Number(addressIdString);
-      const addressInfo = addresses[addressId - 1];
-      const addressInfoString = `${addressInfo.street} ${addressInfo.houseNumber}, ${addressInfo.neighborhood}, ${addressInfo.postalCode}`
-      return addressInfoString;
-    }
-  };
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -142,7 +98,7 @@ export default function Orders() {
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
-          onPress={() => setReload(true)}
+          onPress={() => reloadData()}
           style={styles.goBackButton}
         >
           <Text style={styles.goBackButtonText}>Reintentar</Text>
