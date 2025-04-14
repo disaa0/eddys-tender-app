@@ -60,7 +60,6 @@ export default function Checkout() {
             apiService.getShippingAdresses(),
             apiService.getCartTotal(),
           ]);
-
           setAddresses(addressesRes.data);
           setSubtotal(cartTotalRes.totalAmount.totalAmount);
 
@@ -253,40 +252,57 @@ export default function Checkout() {
         <Card style={styles.card}>
           <Card.Title title="Dirección de Entrega" />
           <Card.Content>
-            {loading ? (
-              <ActivityIndicator />
-            ) : addresses.length == 0 ? (
-              <Text>No hay direcciones disponibles.</Text>
-            ) : (
-              <RadioButton.Group
-                onValueChange={(value) => handleOnValueChangeAddressId(value)}
-                value={selectedAddressId}
-                key={selectedAddressId}
-              >
-                <RadioButton.Item
-                  key={0}
-                  label={"Recoger orden."}
-                  value={0}
-                />
-                <Divider style={styles.divider} />
-                {addresses.map((address) => (
-                  <View>
+            {loading ? (<ActivityIndicator />)
+              : addresses.length == 0
+                ? ((
+                  <RadioButton.Group
+                    onValueChange={(value) => handleOnValueChangeAddressId(value)}
+                    value={selectedAddressId}
+                    key={selectedAddressId}
+                  >
                     <RadioButton.Item
-                      key={address.idLocation}
-                      label={`${address.idLocation}. ${address.street} ${address.houseNumber}, ${address.neighborhood}, ${address.postalCode}`}
-                      value={address.idLocation}
+                      key={0}
+                      label={"Recoger orden."}
+                      value={0}
                     />
                     <Divider style={styles.divider} />
-                  </View>
-                ))}
-                <RadioButton.Item
-                  key={addresses.length + 1}
-                  label={"Añadir dirección"}
-                  value={addresses.length + 1}
-                />
-              </RadioButton.Group>
-            )}
-            {selectedAddressId == (addresses.length + 1) && (
+                    <RadioButton.Item
+                      key={1}
+                      label={"Añadir dirección"}
+                      value={1}
+                    />
+                  </RadioButton.Group>
+                ))
+                : (
+                  <RadioButton.Group
+                    onValueChange={(value) => handleOnValueChangeAddressId(value)}
+                    value={selectedAddressId}
+                    key={selectedAddressId}
+                  >
+                    <RadioButton.Item
+                      key={0}
+                      label={"Recoger orden."}
+                      value={0}
+                    />
+                    <Divider style={styles.divider} />
+                    {addresses.map((address) => (
+                      <View>
+                        <RadioButton.Item
+                          key={address.idLocation}
+                          label={`${address.idLocation}. ${address.street} ${address.houseNumber}, ${address.neighborhood}, ${address.postalCode}`}
+                          value={address.idLocation}
+                        />
+                        <Divider style={styles.divider} />
+                      </View>
+                    ))}
+                    <RadioButton.Item
+                      key={addresses.length + 1}
+                      label={"Añadir dirección"}
+                      value={addresses.length + 1}
+                    />
+                  </RadioButton.Group>
+                )}
+            {(selectedAddressId == (addresses.length + 1)) && (
               <>
                 <TextInput mode="outlined" label="Calle" value={address.street} onChangeText={text => setAddress({ ...address, street: text })} style={styles.input} />
                 <TextInput mode="outlined" label="Número" value={address.houseNumber} onChangeText={text => setAddress({ ...address, houseNumber: text })} style={styles.input} keyboardType="number-pad" />
