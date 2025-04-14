@@ -392,6 +392,11 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
       orderStatus: true,
       paymentType: true,
       shipmentType: true,
+      cart: {
+        include: {
+          itemsCart: true,
+        },
+      },
     },
     skip,
     take: parseInt(limit),
@@ -434,7 +439,14 @@ async function reorderService(userId, orderId) {
         cart: {
           include: {
             itemsCart: {
-              include: { product: true },
+              include: {
+                product: true,
+                userProductPersonalize: {
+                  include: {
+                    productPersonalization: true,
+                  },
+                },
+              },
             },
           },
         },
@@ -522,6 +534,57 @@ async function reorderService(userId, orderId) {
     if (!itemsCreated) {
       throw new Error('Error al agregar productos al carrito');
     }
+
+    const originalPersonalizations = order.cart.itemsCart.flatMap((item) =>
+      item.userProductPersonalize.map((upp) => ({
+        idProduct: item.idProduct,
+        idProductPersonalization: upp.idProductPersonalization,
+      }))
+    );
+
+    // Verificar disponibilidad en productPersonalization
+    const availablePersonalizations = await tx.productPersonalization.findMany({
+      where: {
+        idProductPersonalization: {
+          in: originalPersonalizations.map((p) => p.idProductPersonalization),
+        },
+        status: true,
+      },
+    });
+
+    const availableIds = new Set(
+      availablePersonalizations.map((p) => p.idProductPersonalization)
+    );
+
+    // Obtener los nuevos items creados del carrito nuevo
+    const newItemsCart = await tx.itemCart.findMany({
+      where: { idCart: cart.idCart },
+    });
+
+    // Crear nuevas userProductPersonalize
+    const userPersonalizationsToCreate = [];
+
+    for (const newItem of newItemsCart) {
+      for (const original of originalPersonalizations) {
+        if (
+          original.idProduct === newItem.idProduct &&
+          availableIds.has(original.idProductPersonalization)
+        ) {
+          userPersonalizationsToCreate.push({
+            idItemCart: newItem.idItemCart,
+            idProductPersonalization: original.idProductPersonalization,
+            status: true,
+          });
+        }
+      }
+    }
+
+    if (userPersonalizationsToCreate.length > 0) {
+      await tx.userProductPersonalize.createMany({
+        data: userPersonalizationsToCreate,
+      });
+    }
+
 
     return {
       cartId: cart.idCart,

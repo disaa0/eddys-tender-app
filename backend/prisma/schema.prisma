@@ -132,7 +132,7 @@ model ItemCart{
   idCart Int
   idProduct Int
   quantity Int
-  individualPrice Int
+  individualPrice Float  // Changed from Int to Float to properly store decimal prices
   status Boolean
 
   // Relaciones
