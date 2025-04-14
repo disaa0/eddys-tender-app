@@ -7,7 +7,7 @@
  */
 
 // Development API URL - fallback to localhost if env variable is not set
-const DEV_API_URL = process.env.EXPO_PUBLIC_DEV_API_URL || 'http://192.168.1.20:3000/api';
+const DEV_API_URL = process.env.EXPO_PUBLIC_DEV_API_URL || 'http://172.20.10.13:3000/api';
 
 // Production API URL
 const PROD_API_URL = 'http://192.168.0.138:3000/api';
