@@ -9,7 +9,12 @@ const paymentService = require('./payment.service');
  * @returns {Object} - The created order with payment intent
  */
 async function createOrder(userId, orderData) {
-  const { idPaymentType, idShipmentType, idLocation, shipmentValue = 0 } = orderData;
+  const {
+    idPaymentType,
+    idShipmentType,
+    idLocation,
+    shipmentValue = 0,
+  } = orderData;
 
   // Double-check location requirement for delivery orders
   if (idShipmentType === 1 && !idLocation) {
@@ -165,6 +170,7 @@ async function getUserOrdersDetailsService(userId) {
       shipmentType: true,
       orderStatus: true,
     },
+    orderBy: { createdAt: 'desc' },
   });
 
   if (!orders) {
@@ -173,7 +179,6 @@ async function getUserOrdersDetailsService(userId) {
 
   return orders;
 }
-
 
 /**
  * Process Stripe webhook events
@@ -469,9 +474,10 @@ async function reorderService(userId, orderId) {
       }));
 
     if (items.length === 0) {
-      throw new Error('No hay productos válidos con cantidad mayor a cero en la orden');
+      throw new Error(
+        'No hay productos válidos con cantidad mayor a cero en la orden'
+      );
     }
-
 
     const activeProducts = await tx.product.findMany({
       where: {
@@ -508,7 +514,6 @@ async function reorderService(userId, orderId) {
     });
 
     if (cart) {
-
       await tx.cart.update({
         where: { idCart: cart.idCart },
         data: { status: false },
@@ -584,7 +589,6 @@ async function reorderService(userId, orderId) {
         data: userPersonalizationsToCreate,
       });
     }
-
 
     return {
       cartId: cart.idCart,
