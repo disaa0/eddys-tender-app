@@ -85,6 +85,14 @@ class AdminApiService extends BaseApiService {
             status
         });
     }
+
+    async getAllOrders() {
+        return this.request('/admin/orders', 'GET');
+    }
+
+    async getActiveOrders() {
+        return this.request('/admin/orders/current', 'GET');
+    }
 }
 
 // Export a single instance
