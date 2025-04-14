@@ -107,7 +107,7 @@ export default function Cart() {
                         {personalizacion
                           .filter(p => p.productPersonalization.idProduct === item.idProduct)
                           .map((p, index) => (
-                            <Text key={index} style={styles.personalizationItem}>• {p.productPersonalization.idPersonalization}</Text>
+                            <Text key={index} style={styles.personalizationItem}>• {p.productPersonalization.personalization.name}</Text>
                           ))}
                       </View>
                     )}
@@ -128,9 +128,9 @@ export default function Cart() {
                 <Card style={styles.summary}>
                   <Card.Content>
                     <List.Item title="Subtotal" right={() => <Text>${subtotal.toFixed(2)}</Text>} />
-                    <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
+                    {/* <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
                     <Divider style={styles.divider} />
-                    <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} />
+                    <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} /> */}
                     <Button mode="contained" onPress={handleCheckout} style={styles.checkoutButton}>
                       Proceder al Pago
                     </Button>

@@ -96,7 +96,7 @@ export default function Checkout() {
     try {
       setLoading(true);
       const data = await apiService.addShippingAdresses(address.street, address.houseNumber, address.postalCode, address.neighborhood);
-      console.log('nuevaDirección', data)
+      //console.log('nuevaDirección', data)
     } catch (err) {
       setError('Error al crear dirección.');
       setPurchaseErrorDialogVisible(true);
@@ -194,7 +194,16 @@ export default function Checkout() {
       } else {
         await apiService.createOrder(1, 1, delivery, selectedAddressId);
       }
+      try {
+        await apiService.disableCart();
+      } catch (error) {
+        //console.log(error)
+        setError(error)
+        setPurchaseErrorDialogVisible(true);
+      }
       setPurchaseSuccessfulDialogVisible(true);
+      setTimeout(3000);
+      router.push('/orders');
     } catch (error) {
       setError(error.message || "Error en el pago.");
       setPurchaseErrorDialogVisible(true);
@@ -217,16 +226,16 @@ export default function Checkout() {
     // console.log(item)
     // Filtrar personalizaciones para este item
     const extras = personalizacion.filter(p => p.idItemCart === item.idItemCart);
-    console.log(extras)
+    //console.log(extras)
     return (
       <List.Item
-        title={`${item.quantity} ${item.product.name}`}
+        title={`${item.quantity} x ${item.product.name}`}
         description={() =>
           extras.length > 0 && (
             <View>
               <Text style={{ fontWeight: 'bold' }}>Extras:</Text>
               {extras.map((p, index) => (
-                <Text key={index}>• {p?.productPersonalization?.idPersonalization}</Text>
+                <Text key={index}>• {p?.productPersonalization?.personalization.name}</Text>
               ))}
             </View>
           )
@@ -306,9 +315,9 @@ export default function Checkout() {
             <FlatList data={cartItems} renderItem={renderProduct} keyExtractor={(item, index) => index.toString()} contentContainerStyle={styles.productList} />
             <Divider style={styles.divider} />
             <List.Item title="Subtotal" right={() => <Text>${subtotal.toFixed(2)}</Text>} />
-            {/* <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
+            <List.Item title="Envío" right={() => <Text>${delivery.toFixed(2)}</Text>} />
             <Divider style={styles.divider} />
-            <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} /> */}
+            <List.Item title="Total" titleStyle={styles.total} right={() => <Text style={styles.total}>${total.toFixed(2)}</Text>} /> */
           </Card.Content>
         </Card>
 

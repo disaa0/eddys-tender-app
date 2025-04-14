@@ -65,6 +65,9 @@ class ApiService extends BaseApiService {
     async getUserOrders() {
         return this.request('/orders', 'GET');
     }
+    async getUserOrdersDetails() {
+        return this.request('/orders/details', 'GET');
+    }
 
     async viewCartItems() {
         return this.request(`/cart`, 'GET')

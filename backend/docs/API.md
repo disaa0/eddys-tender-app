@@ -2998,6 +2998,87 @@ Authorization: Bearer <token>
 - 409: El carrito ya contiene los mismos productos
 - 500: Error del servidor
 
+### 14.6 Obtener Detalles de Pedidos perteneciantes a un usaurio.
+
+**GET /api/orders/datails**
+
+Recupera información detallada sobre pedidos correspondientes a un usuario autenticado.
+
+**Encabezados Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta (200 OK):**
+
+```
+[
+    {
+        "idOrder": 1,
+        "idCart": 1,
+        "idPaymentType": 1,
+        "idShipmentType": 1,
+        "idOrderStatus": 1,
+        "idLocation": 1,
+        "createdAt": "2025-04-13T22:09:19.812Z",
+        "deliveryAt": null,
+        "totalPrice": 149,
+        "shipmentValue": 0,
+        "paid": false,
+        "paidAt": null,
+        "stripePaymentIntentId": null,
+        "stripeClientSecret": null,
+        "stripePaymentStatus": null,
+        "cart": {
+            "idCart": 1,
+            "idUser": 2,
+            "status": false,
+            "createdAt": "2025-04-13T22:09:09.499Z",
+            "itemsCart": [
+                {
+                    "idItemCart": 1,
+                    "idCart": 1,
+                    "idProduct": 2,
+                    "quantity": 1,
+                    "individualPrice": 149,
+                    "status": true,
+                    "product": {
+                        "idProduct": 2,
+                        "idProductType": 1,
+                        "idUserAdded": 1,
+                        "name": "Pizza Pepperoni",
+                        "description": "Pizza con pepperoni, queso y salsa de tomate",
+                        "price": 149.99,
+                        "status": true,
+                        "createdAt": "2025-04-13T22:08:08.840Z"
+                    }
+                }
+            ]
+        },
+        "paymentType": {
+            "idPaymentType": 1,
+            "type": "Efectivo"
+        },
+        "shipmentType": {
+            "idShipmentType": 1,
+            "type": "Envío a domicilio"
+        },
+        "orderStatus": {
+            "idOrderStatus": 1,
+            "status": "Pendiente"
+        }
+    }
+]
+```
+
+**Respuestas de Error:**
+
+- 400: Ordenes no encontradas
+- 401: Token no proporcionado
+- 500: Error del servidor
+
+
 ### 14.6 Webhook de Stripe
 
 **POST /api/webhooks/stripe**

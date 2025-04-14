@@ -6,7 +6,8 @@ const {
     getOrderDetails,
     getUserOrders,
     searchOrders,
-    reoder
+    reoder,
+    getUserOrdersDatails
 } = require('../controllers/order.controller');
 
 // Apply authentication to all order routes
@@ -17,6 +18,9 @@ router.post('/', createOrder);
 
 // Search orders with filters
 router.get('/search', searchOrders);
+
+// Get all orders for the authenticated user with details
+router.get('/details', getUserOrdersDatails);
 
 // Get all orders for the authenticated user
 router.get('/', getUserOrders);
