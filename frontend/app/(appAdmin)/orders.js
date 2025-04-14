@@ -129,7 +129,7 @@ export default function Orders() {
                 {order.cart.itemsCart.map((item, index) => (
                   <List.Item
                     key={index}
-                    title={'nombre del producto'} //`${item.product?.name}`
+                    title={`${item.product.name}`} //
                     description={`Cantidad: ${item.quantity}`}
                     left={props => <List.Icon {...props} icon="food" />}
                     right={props => <Text {...props}>{`$${(item.quantity * item.individualPrice).toFixed(2)}`}</Text>}
