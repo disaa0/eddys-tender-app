@@ -92,8 +92,8 @@ class AdminApiService extends BaseApiService {
     }
 
     // Get all closed orders
-    async getOrderHistory() {
-        return this.request('/admin/orders/history', 'GET');
+    async getOrderHistory(date_from, date_to) {
+        return this.request(`/admin/orders?date_from=${date_from}&date_to=${date_to}`, 'GET');
     }
 
     async getActiveOrderDetail(idOrder) {
