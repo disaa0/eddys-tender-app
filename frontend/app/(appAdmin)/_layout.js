@@ -34,7 +34,7 @@ export default function AdminLayout() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+      <SafeAreaView style={styles.safeAreaContainer} edges={['bottom']}>
         <Tabs
           screenOptions={{
             tabBarActiveTintColor: '#ffffff',
@@ -119,6 +119,10 @@ export default function AdminLayout() {
 }
 
 const styles = StyleSheet.create({
+  safeAreaContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.primary,
+  },
   tabBarStyle: {
     position: 'absolute',
     backgroundColor: '#ff3814',
