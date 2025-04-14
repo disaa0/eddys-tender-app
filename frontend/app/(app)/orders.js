@@ -54,13 +54,7 @@ export default function Orders() {
           setLoading(false);
         }
       };
-      const fetchOrderDetails = async () => {
-        try {
 
-        } catch (error) {
-
-        }
-      }
       setSearchQuery('');
       setOrders([]);
       setReload('false')

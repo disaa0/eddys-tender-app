@@ -65,10 +65,9 @@ export default function Orders() {
   if (orders.length == 0) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>El historial está vacío</Text>
-        <Text style={styles.errorTextDescription}>Inicia creando una orden</Text>
+        <Text style={styles.errorText}>No hay pedidos activos</Text>
         <TouchableOpacity
-          onPress={() => router.push('/')}
+          onPress={() => router.push('/profile')}
           style={styles.goBackButton}
         >
           <Text style={styles.goBackButtonText}>Regresar</Text>
@@ -80,6 +79,7 @@ export default function Orders() {
   if (error) {
     return (
       <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error</Text>
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           onPress={() => reloadData()}
@@ -126,15 +126,15 @@ export default function Orders() {
               {/* Lista de productos */}
               <List.Section>
                 <List.Subheader>Productos</List.Subheader>
-                {/* {order.cart.itemsCart.map((item, index) => (
+                {order.cart.itemsCart.map((item, index) => (
                   <List.Item
                     key={index}
-                    title={`${item.product.name}`}
+                    title={'nombre del producto'} //`${item.product?.name}`
                     description={`Cantidad: ${item.quantity}`}
                     left={props => <List.Icon {...props} icon="food" />}
-                    right={props => <Text {...props}>{`$${(item.quantity * item.product.price).toFixed(2)}`}</Text>}
+                    right={props => <Text {...props}>{`$${(item.quantity * item.individualPrice).toFixed(2)}`}</Text>}
                   />
-                ))} */}
+                ))}
               </List.Section>
 
               {/* Detalles de entrega */}
