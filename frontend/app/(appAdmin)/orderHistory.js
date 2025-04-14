@@ -42,6 +42,24 @@ export default function OrdersHistory() {
     const router = useRouter();
     const isAndroid = Platform.OS === 'android';
 
+    useFocusEffect(
+        useCallback(() => {
+            // reset state when the screen is focused
+            setStartDate(null);
+            setEndDate(null);
+            setOrders([]);
+            setAddresses([]);
+            setError('');
+            setLoading(false);
+            setShowStartPicker(false);
+            setShowEndPicker(false);
+            setShowDialog(false);
+            setDialogMsg('');
+            setSearchQuery('');
+
+        }, [])
+    );
+
     const formatDate = (dateString) => {
         const options = {
             year: 'numeric',
@@ -67,7 +85,8 @@ export default function OrdersHistory() {
     const handleStartDateChange = (event, selectedDate) => {
         setShowStartPicker(false);
 
-        if (selectedDate > endDate) {
+        if (endDate != null && selectedDate > endDate) {
+            console.log(endDate);
             setDialogMsg('La fecha de inicio no puede ser posterior a la fecha de fin.');
             setShowDialog(true);
         }
