@@ -65,7 +65,7 @@ export default function Register() {
       <SafeAreaView style={styles.safeAreaContainer}>
         <KeyboardAvoidingView
           style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         >
           <ScrollView style={styles.container}>
             <View style={styles.logoContainer}>
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignContent: 'center',
-    padding: 30,
+    padding: 10,
     backgroundColor: theme.colors.surface,
   },
   logoContainer: {
