@@ -146,6 +146,103 @@ const addOneItemToCartService = async (userId, idProduct) => {
     });
 };
 
+const addOneItemToCartWithPersonalizationCheck = async (userId, idProduct) => {
+    return await prisma.$transaction(async (prisma) => {
+        const product = await prisma.product.findUnique({
+            where: { idProduct: parseInt(idProduct) },
+        });
+
+        if (!product) {
+            throw new Error("Producto no encontrado");
+        }
+
+        if (!product.status) {
+            throw new Error("El producto está inactivo y no se puede agregar al carrito");
+        }
+
+        let cart = await prisma.cart.findFirst({
+            where: {
+                idUser: userId,
+                status: true,
+            },
+        });
+
+        if (!cart) {
+            cart = await prisma.cart.create({
+                data: {
+                    idUser: userId,
+                    status: true,
+                },
+            });
+        }
+
+        const cartId = cart.idCart;
+
+        // Obtener todas las instancias activas de este producto en el carrito, ordenadas por creación
+        const existingItems = await prisma.itemCart.findMany({
+            where: {
+                idCart: cartId,
+                idProduct: parseInt(idProduct),
+                status: true,
+            },
+            orderBy: {
+                idItemCart: 'desc', // ver si se puede cambiar por fecha en futuro
+            },
+        });
+
+        if (existingItems.length > 0) {
+            const latestItem = existingItems[0];
+
+            // Verificar si tiene personalización
+            const personalization = await prisma.userProductPersonalize.findFirst({
+                where: {
+                    idItemCart: latestItem.idItemCart,
+                },
+            });
+
+            if (personalization) {
+                // Crear nueva instancia del producto en itemCart
+                const newItem = await prisma.itemCart.create({
+                    data: {
+                        idCart: cartId,
+                        idProduct: parseInt(idProduct),
+                        quantity: 1,
+                        individualPrice: product.price,
+                        status: true,
+                    },
+                });
+
+                return { cartId, item: newItem, updated: false, newInstanceDueToPersonalization: true };
+            } else {
+                // Actualizar cantidad
+                const updatedItem = await prisma.itemCart.update({
+                    where: { idItemCart: latestItem.idItemCart },
+                    data: {
+                        quantity: latestItem.quantity + 1,
+                        status: true,
+                    },
+                });
+
+                return { cartId, item: updatedItem, updated: true };
+            }
+        }
+
+        // No hay instancias previas del producto en el carrito
+        const newItem = await prisma.itemCart.create({
+            data: {
+                idCart: cartId,
+                idProduct: parseInt(idProduct),
+                quantity: 1,
+                individualPrice: product.price,
+                status: true,
+            },
+        });
+
+        return { cartId, item: newItem, updated: false };
+    });
+};
+
+
 const softDeleteItemFromCartService = async (userId, idProduct) => {
     return await prisma.$transaction(async (prisma) => {
         // Buscar el carrito activo del usuario
@@ -406,6 +503,39 @@ const getCartsByIdUserService = async (requestingUserId, targetUserId, requestin
     return carts;
 };
 
+const getLastItemCartForProductService = async (userId, idProduct) => {
+    return await prisma.$transaction(async (prisma) => {
+        const cart = await prisma.cart.findFirst({
+            where: {
+                idUser: userId,
+                status: true,
+            },
+        });
+
+        if (!cart) {
+            throw new Error("No se encontró un carrito activo para el usuario.");
+        }
+
+        const lastItem = await prisma.itemCart.findFirst({
+            where: {
+                idCart: cart.idCart,
+                idProduct: parseInt(idProduct),
+            },
+            orderBy: {
+                idItemCart: "desc", // cabiar por fecha en futuro
+            },
+        });
+
+        if (!lastItem) {
+            throw new Error("No se encontró ningún itemCart para este producto.");
+        }
+
+        return {
+            cartId: cart.idCart,
+            lastItem,
+        };
+    });
+};
 
 module.exports = {
     addItemToCartService,
@@ -416,5 +546,7 @@ module.exports = {
     getItemsQuantityCartService,
     disableCartService,
     getCartByIdService,
-    getCartsByIdUserService
+    getCartsByIdUserService,
+    addOneItemToCartWithPersonalizationCheck,
+    getLastItemCartForProductService
 };

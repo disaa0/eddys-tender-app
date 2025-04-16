@@ -1,4 +1,4 @@
-const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService, disableCartService, getCartByIdService, getCartsByIdUserService } = require('../services/cart.service');
+const { addItemToCartService, addOneItemToCartWithPersonalizationCheck, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService, disableCartService, getCartByIdService, getCartsByIdUserService, getLastItemCartForProductService } = require('../services/cart.service');
 
 const addItemToCart = async (req, res) => {
     const { idProduct } = req.params;
@@ -239,6 +239,46 @@ const getCartsByUserId = async (req, res) => {
         return res.status(status).json({ message: error.message || "Error del servidor" });
     }
 };
+
+const addOneItemToCartPersonalizations = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { idProduct } = req.params;
+
+        if (isNaN(userId) || userId <= 0) {
+            return res.status(400).json({ message: "El ID del usuario debe ser un número entero positivo" });
+        }
+
+        if (!idProduct) {
+            return res.status(400).json({ message: "idProduct es requerido" });
+        }
+
+        const result = await addOneItemToCartWithPersonalizationCheck(userId, idProduct);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error al agregar producto al carrito:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getLastItemCartForProduct = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { idProduct } = req.params;
+
+        if (!idProduct) {
+            return res.status(400).json({ message: "idProduct es requerido" });
+        }
+
+        const result = await getLastItemCartForProductService(userId, idProduct);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error al obtener último itemCart:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
 module.exports = {
     addItemToCart,
     addOneItemToCart,
@@ -249,6 +289,8 @@ module.exports = {
     disableCart,
     getCartById,
     getCartsByUserId,
-    getCartsByUser
+    getCartsByUser,
+    addOneItemToCartPersonalizations,
+    getLastItemCartForProduct,
 
 };
