@@ -9,8 +9,7 @@ Aplicación full-stack construida con **ExpressJS** (backend), **React Native/Ex
 - **Frontend**: React Native, Expo
 - **Contenerización**: Docker, Docker Compose
 - **Pasarela de pagos**: Stripe
-- **Control de versiones**: Git + GitHub
-- **Gestión del proyecto**: Jira
+- **Control de versiones**: Git + GitHub **Gestión del proyecto**: Jira
 - **Diseño**: Figma
 - **Testing**: Manual + (por definir)
 - **Documentación**: Markdown
@@ -208,15 +207,16 @@ Para probar en dispositivos físicos, necesitas usar la dirección IP local de t
 
 ### Configuración del frontend
 
-En el archivo `frontend/app/config/index.js`, configura las URLs de API según corresponda:
+En el archivo `frontend/.env`, configura las URLs de API según corresponda:
 
-```javascript
-// URL de API para desarrollo (comenta/descomenta según necesites)
-// const DEV_API_URL = 'http://localhost:3000/api';  // Para emuladores
-const DEV_API_URL = 'http://192.168.0.138:3000/api'; // Para dispositivos físicos (usa tu IP)
-
-// URL de API para producción
-const PROD_API_URL = 'http://192.168.0.138:3000/api'; // Actualiza con tu URL de producción
 ```
+# URL de API para desarrollo (usa tu dirección IP local)
+EXPO_PUBLIC_DEV_API_URL=http://192.168.0.138:3000/api
+
+# URL de API para producción
+EXPO_PUBLIC_PROD_API_URL=http://192.168.0.138:3000/api
+```
+
+La configuración se carga automáticamente en `frontend/app/config/index.js` a través de las variables de entorno.
 
 Para más información, consultar la documentación específica en las carpetas `backend/docs/` y `frontend/docs/`.
