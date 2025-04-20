@@ -20,7 +20,7 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
         }
 
         if (!product.status) {
-            throw new Error("El producto está inactivo y no se puede agregar al carrito");
+            throw new Error("El producto esta inactivo y no se puede agregar al carrito");
         }
 
 
@@ -43,6 +43,13 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
         }
         const cartId = cart.idCart;
 
+        const totalQuantity = await prisma.itemCart.aggregate({
+            where: { idCart: cartId, status: true },
+            _sum: { quantity: true },
+        });
+
+
+
         // 3. Verificar si el producto ya está en el carrito
         const existingItem = await prisma.itemCart.findFirst({
             where: {
@@ -51,11 +58,21 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
             }
         });
 
+        const currentTotal = totalQuantity._sum.quantity || 0;
+
+        const newTotal = existingItem
+            ? currentTotal - existingItem.quantity + quantity
+            : currentTotal + quantity;
+
+        if (newTotal > 100) {
+            throw new Error("El carrito no puede contener mas de 100 productos");
+        }
+
         if (existingItem) {
             // 4. Si el producto ya existe en el carrito, actualizar la cantidad
             const updatedItem = await prisma.itemCart.update({
                 where: { idItemCart: existingItem.idItemCart },
-                data: { quantity: existingItem.quantity = quantity, status: existingItem.status = true }
+                data: { quantity: quantity, status: true }
             });
 
             return { cartId, item: updatedItem, updated: true };
@@ -80,59 +97,58 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
 
 const addOneItemToCartService = async (userId, idProduct) => {
     return await prisma.$transaction(async (prisma) => {
-
-        //Verificar si el producto existe y está activo
         const product = await prisma.product.findUnique({
             where: { idProduct: parseInt(idProduct) }
         });
 
-        if (!product) {
-            throw new Error("Producto no encontrado");
-        }
+        if (!product) throw new Error("Producto no encontrado");
+        if (!product.status) throw new Error("El producto está inactivo");
 
-        if (!product.status) {
-            throw new Error("El producto esta inactivo y no se puede agregar al carrito");
-        }
-        // 1. Buscar un carrito activo del usuario
         let cart = await prisma.cart.findFirst({
-            where: {
-                idUser: userId,
-                status: true
-            }
+            where: { idUser: userId, status: true }
         });
-        // 2. Si no existe, crear un nuevo carrito
+
         if (!cart) {
             cart = await prisma.cart.create({
-                data: {
-                    idUser: userId,
-                    status: true
-                }
+                data: { idUser: userId, status: true }
             });
         }
+
         const cartId = cart.idCart;
-        // 3. Verificar si el producto ya está en el carrito
+
+        const totalQuantity = await prisma.itemCart.aggregate({
+            where: { idCart: cartId, status: true },
+            _sum: { quantity: true },
+        });
+
+        const currentTotal = totalQuantity._sum.quantity || 0;
+        if (currentTotal + 1 > 100) {
+            throw new Error("El carrito no puede contener mas de 100 productos");
+        }
+
         const existingItem = await prisma.itemCart.findFirst({
             where: {
                 idCart: cartId,
                 idProduct: parseInt(idProduct)
             }
-        }
-        );
+        });
 
-        //3.1 Si la cantidad es 100, no se puede agregar más
         if (existingItem && existingItem.quantity >= 100) {
-            throw new Error("cantidad maxima alcanzada");
+            throw new Error("Cantidad maxima por producto alcanzada");
         }
 
         if (existingItem) {
-            // 4. Si el producto ya existe en el carrito, actualizar la cantidad
             const updatedItem = await prisma.itemCart.update({
                 where: { idItemCart: existingItem.idItemCart },
-                data: { quantity: existingItem.quantity + 1, status: existingItem.status = true }
+                data: {
+                    quantity: existingItem.quantity + 1,
+                    status: true
+                }
             });
+
             return { cartId, item: updatedItem, updated: true };
         }
-        // 5. Agregar el producto al carrito
+
         const newItem = await prisma.itemCart.create({
             data: {
                 idCart: cartId,
@@ -142,43 +158,43 @@ const addOneItemToCartService = async (userId, idProduct) => {
                 status: true
             }
         });
+
         return { cartId, item: newItem, updated: false };
     });
 };
 
+
 const addOneItemToCartWithPersonalizationCheck = async (userId, idProduct) => {
     return await prisma.$transaction(async (prisma) => {
         const product = await prisma.product.findUnique({
-            where: { idProduct: parseInt(idProduct) },
+            where: { idProduct: parseInt(idProduct) }
         });
 
-        if (!product) {
-            throw new Error("Producto no encontrado");
-        }
-
-        if (!product.status) {
-            throw new Error("El producto está inactivo y no se puede agregar al carrito");
-        }
+        if (!product) throw new Error("Producto no encontrado");
+        if (!product.status) throw new Error("Producto inactivo");
 
         let cart = await prisma.cart.findFirst({
-            where: {
-                idUser: userId,
-                status: true,
-            },
+            where: { idUser: userId, status: true }
         });
 
         if (!cart) {
             cart = await prisma.cart.create({
-                data: {
-                    idUser: userId,
-                    status: true,
-                },
+                data: { idUser: userId, status: true }
             });
         }
 
         const cartId = cart.idCart;
 
-        // Obtener todas las instancias activas de este producto en el carrito, ordenadas por creación
+        const totalQuantity = await prisma.itemCart.aggregate({
+            where: { idCart: cartId, status: true },
+            _sum: { quantity: true },
+        });
+
+        const currentTotal = totalQuantity._sum.quantity || 0;
+        if (currentTotal + 1 > 100) {
+            throw new Error("El carrito no puede contener mas de 100 productos");
+        }
+
         const existingItems = await prisma.itemCart.findMany({
             where: {
                 idCart: cartId,
@@ -186,22 +202,18 @@ const addOneItemToCartWithPersonalizationCheck = async (userId, idProduct) => {
                 status: true,
             },
             orderBy: {
-                idItemCart: 'desc', // ver si se puede cambiar por fecha en futuro
+                idItemCart: 'desc',
             },
         });
 
         if (existingItems.length > 0) {
             const latestItem = existingItems[0];
 
-            // Verificar si tiene personalización
             const personalization = await prisma.userProductPersonalize.findFirst({
-                where: {
-                    idItemCart: latestItem.idItemCart,
-                },
+                where: { idItemCart: latestItem.idItemCart },
             });
 
             if (personalization) {
-                // Crear nueva instancia del producto en itemCart
                 const newItem = await prisma.itemCart.create({
                     data: {
                         idCart: cartId,
@@ -212,9 +224,13 @@ const addOneItemToCartWithPersonalizationCheck = async (userId, idProduct) => {
                     },
                 });
 
-                return { cartId, item: newItem, updated: false, newInstanceDueToPersonalization: true };
+                return {
+                    cartId,
+                    item: newItem,
+                    updated: false,
+                    newInstanceDueToPersonalization: true
+                };
             } else {
-                // Actualizar cantidad
                 const updatedItem = await prisma.itemCart.update({
                     where: { idItemCart: latestItem.idItemCart },
                     data: {
@@ -227,7 +243,6 @@ const addOneItemToCartWithPersonalizationCheck = async (userId, idProduct) => {
             }
         }
 
-        // No hay instancias previas del producto en el carrito
         const newItem = await prisma.itemCart.create({
             data: {
                 idCart: cartId,

@@ -26,6 +26,10 @@ const addItemToCart = async (req, res) => {
                 status = 403;
                 message = 'Esta producto ha sido desactivado.';
                 break;
+            case 'El carrito no puede contener mas de 100 productos':
+                status = 406;
+                message = 'El carrito no puede contener mas de 100 productos';
+                break;
             case 'La cantidad debe ser mayor a 0':
                 message = 'La cantidad de productos debe ser mayor a 0. Por favor, ingrese una cantidad valida para el producto';
                 break;
@@ -67,6 +71,10 @@ const addOneItemToCart = async (req, res) => {
             case 'cantidad maxima alcanzada':
                 status = 406;
                 message = 'No se puede agregar más de 100 unidades del mismo producto';
+                break;
+            case 'El carrito no puede contener mas de 100 productos':
+                status = 406;
+                message = 'El carrito no puede contener mas de 100 productos';
                 break;
             default:
                 message = 'Error en la peticion';
@@ -256,6 +264,27 @@ const addOneItemToCartPersonalizations = async (req, res) => {
         const result = await addOneItemToCartWithPersonalizationCheck(userId, idProduct);
         res.status(200).json(result);
     } catch (error) {
+        let status = 400;
+        let message = error.message;
+
+        // Customize error messages based on the error
+        switch (error.message) {
+            case 'Producto no encontrado':
+                status = 404;
+                message = 'Producto no encontrado';
+                break;
+            case 'El producto esta inactivo y no se puede agregar al carrito':
+                status = 403;
+                message = 'El producto esta inactivo y no se puede agregar al carrito';
+                break;
+            case 'El carrito no puede contener mas de 100 productos':
+                status = 406;
+                message = 'El carrito no puede contener mas de 100 productos';
+                break;
+            default:
+                message = 'Error en la peticion';
+        }
+
         console.error("Error al agregar producto al carrito:", error);
         res.status(500).json({ message: error.message });
     }
