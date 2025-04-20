@@ -1441,6 +1441,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 400: Error de solicitud
 - 404: Producto no encontrado
+- 406: El carrito no puede contener mas de 100 productos
 - 500: Error del servidor
 
 ### 10.6 Agregar un solo un producto directamente al carrito
@@ -1476,10 +1477,55 @@ Authorization: Bearer <token>
 - 400: Error de solicitud
 - 403: El producto esta inactivo y no se puede agregar al carrito
 - 404: Producto no encontrado
-- 406: No se puede agregar más de 100 unidades del mismo producto
+- 406: El carrito no puede contener mas de 100 productos
 - 500: Error del servidor
 
-### 10.7 Modificar cantidad de un producto en el carrito
+### 10.7 Agregar un solo un producto como nueva instancia directamente al carrito 
+
+**PUT /api/cart/items/new/{id}**
+
+Permite agrega un solo producto al carrito de compras. 
+- En caso de que el el producto en el carrito `itemCart` cuente con un o mas
+personalizaciones asociadas, se crea una una nueva instancia  del producto en el carrito.
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Respuesta Exitosa (201):**
+
+```json
+{
+    "cartId": 1,
+    "item": {
+        "idItemCart": 1,
+        "idCart": 1,
+        "idProduct": 1,
+        "quantity": 1,
+        "individualPrice": 89.99,
+        "status": true
+    },
+    "updated": false
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Error de solicitud
+- 403: El producto esta inactivo y no se puede agregar al carrito
+- 404: Producto no encontrado
+- 406: El carrito no puede contener mas de 100 productos
+- 500: Error del servidor
+
+### 10.8 Modificar cantidad de un producto en el carrito
 
 **PUT /cart/items/{id}**
 
@@ -1515,9 +1561,10 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 400: Error de solicitud
 - 404: Producto no encontrado
+- 406: El carrito no puede contener mas de 100 productos
 - 500: Error del servidor
 
-### 10.8 Eliminar un producto en el carrito
+### 10.9 Eliminar un producto en el carrito
 
 **DELETE /cart/items/{id}**
 
@@ -1559,7 +1606,7 @@ Authorization: Bearer <token>
 
 - El campo `quantity` es fijado en 0 despues de la eliminacion logica.
 
-### 10.9 Ver productos en el carrito
+### 10.10 Ver productos en el carrito
 
 **GET /cart/**
 
@@ -1605,7 +1652,47 @@ Authorization: Bearer <token>
 - 400: Error de peticion
 - 500: Error del servidor
 
-### 10.10 Ver monto total de productos en el carrito
+### 10.11 Obenter ultima instancia `itemCart` generada  en el carrito de compras, para un producto especifico.
+
+**GET /api/cart/items/last/{id}**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| id | number | ID del producto |
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+    "cartId": 1,
+    "lastItem": {
+        "idItemCart": 1,
+        "idCart": 1,
+        "idProduct": 1,
+        "quantity": 1,
+        "individualPrice": 89.99,
+        "status": true
+    }
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Error de peticion
+- 500: Error del servidor
+
+
+
+### 10.12 Ver monto total de productos en el carrito
 
 **GET /cart/total**
 
@@ -1632,7 +1719,7 @@ Authorization: Bearer <token>
 - 400: Error de peticion
 - 500: Error del servidor
 
-### 10.11 Ver cantidad total de productos en el carrito
+### 10.13 Ver cantidad total de productos en el carrito
 
 **GET /cart/quantity**
 
@@ -1659,7 +1746,7 @@ Authorization: Bearer <token>
 - 400: Error de peticion
 - 500: Error del servidor
 
-### 10.12 Desactivar un carrito activo
+### 10.14 Desactivar un carrito activo
 
 **PUT /api/cart/disable**
 
@@ -1693,7 +1780,7 @@ Authorization: Bearer <token>
 - Este endpoint permite desactivar un carrito completo, lo que puede ser útil cuando se completa una compra o se quiere iniciar un carrito nuevo
 - El carrito desactivado se mantiene en la base de datos pero no aparecerá en las consultas de carritos activos
 
-### 10.13 Obtener productos del carrito por ID
+### 10.15 Obtener productos del carrito por ID
 
 **GET /cart/{id}**
 
@@ -1752,7 +1839,7 @@ Authorization: Bearer <token>
 - Los usuario administradores pueden consultar cualquier carrito por ID
 - Los usuario cliente puende consultar cualquier carrito por ID miestra les pernesca
 
-### 10.14 Obtener carritos de un usuario por ID
+### 10.16 Obtener carritos de un usuario por ID
 
 - Permite obtener todos lo carrito existentes que pertenescan a un usuario especifico
 - Para usarios administradores
@@ -1816,7 +1903,7 @@ Authorization: Bearer <token>
 
 - Los usuario administradores pueden consultar cualquier listado de carritos por ID
 
-### 10.15 Obtener carritos pertenecientes a un usuario autenticado
+### 10.17 Obtener carritos pertenecientes a un usuario autenticado
 
 - Permite obtener todos lo carrito existentes que pertenescan a un usuario especifico
 - Para usarios administradores
@@ -1875,7 +1962,7 @@ Authorization: Bearer <token>
 
 - Los usuario administradores pueden consultar cualquier listado de carritos por ID
 
-### 10.16 Obtener imagen de un producto
+### 10.18 Obtener imagen de un producto
 
 **GET /api/products/:id/image**
 
@@ -1898,7 +1985,7 @@ Obtiene la imagen de un producto específico.
 - 404: Imagen no encontrada en el servidor
 - 500: Error al obtener la imagen del producto
 
-### 10.17 Subir imagen de un producto (Admin)
+### 10.19 Subir imagen de un producto (Admin)
 
 **POST /api/admin/products/:id/image**
 
@@ -1957,7 +2044,7 @@ Content-Type: multipart/form-data
 - 403: Usuario no es administrador
 - 500: Error al subir la imagen del producto
 
-### 10.18 Buscar productos
+### 10.20 Buscar productos
 
 **GET /api/products/search**
 
@@ -2031,7 +2118,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.19 Obtener Productos Populares
+### 10.21 Obtener Productos Populares
 
 **GET /api/products/popular**
 
@@ -2079,7 +2166,7 @@ limit: Número de productos a retornar (default: 5)
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.20 Obetner detalles del producto por ID
+### 10.22 Obetner detalles del producto por ID
 
 **GET /products/{id}**
 
@@ -2142,7 +2229,7 @@ Authorization: Bearer <token>
 - 404: No se encontro el producto
 - 500: Error del servidor
 
-### 10.21 Asginar Personalización a un Producto en el Carrito de compras.
+### 10.23 Asginar Personalización a un Producto en el Carrito de compras.
 
 **PUT /api/products/cart/items/personalizations**
 
@@ -2213,7 +2300,7 @@ Authorization: Bearer <token>
 - Se valida que el producto en el carrito pertenesca al usuario.
 - Las personalizaciones a asignar, deben estan disponibles para el producto.
 
-### 10.22 Obtner Personalizaciónes disponibles para un Producto.
+### 10.24 Obtner Personalizaciónes disponibles para un Producto.
 
 **GET /api/products/{id}/user/personalizations**
 
@@ -2278,7 +2365,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 10.23 Obtner Personalizaciónes de Producto especifico en el Carrito de compras.
+### 10.25 Obtner Personalizaciónes de Producto especifico en el Carrito de compras.
 
 **GET api/cart/items/personalizations/{:idItemCart}**
 
@@ -2338,7 +2425,7 @@ Authorization: Bearer <token>
 - 404: Producto del carrito no encontrado
 - 500: Error del servidor
 
-### 10.23 Cambiar status activo o inactivo de la Personalización asignada a un Producto en el carrito de compras
+### 10.26 Cambiar status activo o inactivo de la Personalización asignada a un Producto en el carrito de compras
 
 **PACTH api/cart/items/personalizations/:idUserProductPersonalize/status**
 

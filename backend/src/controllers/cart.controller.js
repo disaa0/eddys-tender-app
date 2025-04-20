@@ -284,9 +284,7 @@ const addOneItemToCartPersonalizations = async (req, res) => {
             default:
                 message = 'Error en la peticion';
         }
-
-        console.error("Error al agregar producto al carrito:", error);
-        res.status(500).json({ message: error.message });
+        return res.status(status).json({ message });
     }
 };
 
