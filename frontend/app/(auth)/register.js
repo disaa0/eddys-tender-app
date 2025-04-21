@@ -43,7 +43,7 @@ export default function Register() {
       };
 
       await api.register(userData);
-      router.push('/registerCompleted');
+      router.push('/registerSuccesful');
     } catch (error) {
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
