@@ -2553,6 +2553,39 @@ Authorization: Bearer <token>
 - 400: No se encontró dirección activa para este usuario
 - 500: Error del servidor
 
+### 11.5 Obtener la ultima direccion dirección registrada del usuario
+
+**GET /api/shipping-address/last**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+    "message": "Dirección obtenida correctamente",
+    "data": {
+        "idLocation": 2,
+        "idUserInformation": 2,
+        "street": "Av. Luis Encinas Jhonson",
+        "houseNumber": "10",
+        "postalCode": "83000",
+        "neighborhood": "Centro",
+        "status": true
+    }
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: No se encontró dirección registrada para este usuario
+- 500: Error del servidor
+
 ### 11.4 Actualizar una dirección
 
 **PUT /api/shipping-address/:id**
