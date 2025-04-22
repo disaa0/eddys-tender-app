@@ -5,7 +5,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { theme } from '../theme';
 import apiService from '../api/ApiService';
 import ConfirmationDialog from '../components/ConfirmationDialog';
-import { useStripe } from '@stripe/stripe-react-native';
+import { confirmPaymentSheetPayment, useStripe } from '@stripe/stripe-react-native';
 import useCart from '../hooks/useCart';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCartRefresh } from '../context/CartRefreshContext';
@@ -106,6 +106,7 @@ export default function Checkout() {
 
   const handleOnValueChangeAddressId = (value) => {
     setSelectedAddressId(value)
+    console.log(value);
     if (value == 0) {
       setDelivery(0);
       setShipmentType(2);
@@ -262,7 +263,7 @@ export default function Checkout() {
                   >
                     <RadioButton.Item
                       key={0}
-                      label={"Recoger orden."}
+                      label={"Recoger orden"}
                       value={0}
                     />
                     <Divider style={styles.divider} />
@@ -285,11 +286,11 @@ export default function Checkout() {
                       value={0}
                     />
                     <Divider style={styles.divider} />
-                    {addresses.map((address) => (
+                    {addresses.map((address, index) => (
                       <View>
                         <RadioButton.Item
                           key={address.idLocation}
-                          label={`${address.idLocation}. ${address.street} ${address.houseNumber}, ${address.neighborhood}, ${address.postalCode}`}
+                          label={`${index}. ${address.street} ${address.houseNumber}, ${address.neighborhood}, ${address.postalCode}`}
                           value={address.idLocation}
                         />
                         <Divider style={styles.divider} />
