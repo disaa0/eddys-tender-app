@@ -1,4 +1,4 @@
-const { addShippingAddress, getShippingAddress, getShippingAddresses, updateAddress, deleteAddress, getShippingAddressById } = require("../services/shippingAddress.service.js");
+const { addShippingAddress, getShippingAddress, getShippingAddresses, updateAddress, deleteAddress, getShippingAddressById, getLastShippingAddress } = require("../services/shippingAddress.service.js");
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -33,6 +33,20 @@ async function getAllUserShippingAddresses(req, res) {
         res.status(200).json({
             message: "Direcciones obtenidas correctamente",
             data: addresses
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
+async function getLastAddress(req, res) {
+    try {
+        const userId = req.user.userId; // ID del usuario autenticado
+
+        const address = await getLastShippingAddress(userId);
+        res.status(200).json({
+            message: "Dirección obtenida correctamente",
+            data: address
         });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -84,17 +98,17 @@ async function handleGetShippingAddressById(req, res) {
         const addressId = parseInt(req.params.id);
 
         if (!userId || isNaN(addressId)) {
-            return res.status(400).json({ 
-                error: "Invalid user ID or address ID" 
+            return res.status(400).json({
+                error: "Invalid user ID or address ID"
             });
         }
 
         // If user is not admin, verify they own the address
         if (userType !== 1) { // Regular user
             const address = await getShippingAddressById(userId, addressId);
-            return res.status(200).json({ 
-                message: "Dirección obtenida correctamente", 
-                data: address 
+            return res.status(200).json({
+                message: "Dirección obtenida correctamente",
+                data: address
             });
         } else {
             // For admin, get any address without user check
@@ -106,14 +120,14 @@ async function handleGetShippingAddressById(req, res) {
             });
 
             if (!address) {
-                return res.status(404).json({ 
-                    error: "Dirección no encontrada" 
+                return res.status(404).json({
+                    error: "Dirección no encontrada"
                 });
             }
 
-            return res.status(200).json({ 
-                message: "Dirección obtenida correctamente", 
-                data: address 
+            return res.status(200).json({
+                message: "Dirección obtenida correctamente",
+                data: address
             });
         }
     } catch (error) {
@@ -128,6 +142,7 @@ module.exports = {
     getAllUserShippingAddresses,
     updateShippingAddress,
     deleteShippingAddress,
-    handleGetShippingAddressById
+    handleGetShippingAddressById,
+    getLastAddress
 };
 

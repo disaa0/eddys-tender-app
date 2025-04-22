@@ -53,6 +53,33 @@ async function getShippingAddresses(userId) {
     return addresses;
 }
 
+async function getLastShippingAddress(userId) {
+    const user = await prisma.userInformation.findFirst({
+        where: { idUserInformation: userId }
+    });
+
+    if (!user) {
+        throw new Error("Usuario no autorizado o inactivo.");
+    }
+
+    // Find the last active address for this user
+    const address = await prisma.location.findFirst({
+        where: {
+            idUserInformation: user.idUserInformation,
+        },
+        orderBy: {
+            idLocation: 'desc'
+        }
+    });
+
+    if (!address || address.length === 0) {
+        throw new Error("No se encontró dirección registrada para este usuario");
+    }
+
+
+    return address;
+}
+
 // Keep the single address getter for backward compatibility
 async function getShippingAddress(userId) {
     const addresses = await getShippingAddresses(userId);
@@ -163,6 +190,7 @@ module.exports = {
     getShippingAddresses,
     updateAddress,
     deleteAddress,
-    getShippingAddressById
+    getShippingAddressById,
+    getLastShippingAddress
 };
 
