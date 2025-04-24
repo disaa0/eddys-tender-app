@@ -234,11 +234,51 @@ const validateIdParam = (req, res, next) => {
     next();
 };
 
+const addItemToCartSchemaWithPersonzalization = z.object({
+    quantity: z
+        .number({ invalid_type_error: "La cantidad debe ser un número" })
+        .int("La cantidad debe ser un número entero")
+        .positive("La cantidad debe ser mayor que 0"),
+
+    personalizations: z
+        .array(
+            z.number({ invalid_type_error: "Cada personalización debe ser un número" })
+                .int("Cada personalización debe ser un número entero")
+        )
+        .optional()
+        .refine(val => val === undefined || Array.isArray(val), {
+            message: "Personalizations debe ser una lista",
+        }),
+});
+
+const idProductParamSchema = z.object({
+    id: z.string().regex(/^\d+$/, "El ID del producto debe ser un número entero"),
+});
+
+const validateAddItemToCartWithPersonalzations = (req, res, next) => {
+    try {
+        const parsedParams = idProductParamSchema.parse(req.params);
+        req.params.id = Number(parsedParams.id); // Convertir a número entero
+
+        const parsedBody = addItemToCartSchemaWithPersonzalization.parse(req.body);
+        req.body = {
+            quantity: parsedBody.quantity,
+            personalizations: parsedBody.personalizations || [],
+        };
+
+        next();
+    } catch (error) {
+        res.status(400).json({ error: error.errors });
+    }
+}
+
+
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
     validateEmailUpdate,
     validateCustomization,
     productSchema, productDetailsSchema, validateAddItemToCart, validateDeleteItemFromCart,
-    validateSearchQuery, validateShippingAddress, validateIdParam, validateAddOneItemToCart
+    validateSearchQuery, validateShippingAddress, validateIdParam, validateAddOneItemToCart,
+    validateAddItemToCartWithPersonalzations
 };

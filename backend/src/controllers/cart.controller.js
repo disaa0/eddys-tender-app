@@ -1,4 +1,4 @@
-const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService, disableCartService, getCartByIdService, getCartsByIdUserService } = require('../services/cart.service');
+const { addItemToCartService, addOneItemToCartService, softDeleteItemFromCartService, getItemsCartService, getTotalAmountCartService, getItemsQuantityCartService, disableCartService, getCartByIdService, getCartsByIdUserService, addItemToCartServicePersonalizations, getLastItemCartForProductService } = require('../services/cart.service');
 
 const addItemToCart = async (req, res) => {
     const { idProduct } = req.params;
@@ -26,6 +26,10 @@ const addItemToCart = async (req, res) => {
                 status = 403;
                 message = 'Esta producto ha sido desactivado.';
                 break;
+            case 'El carrito no puede contener mas de 20 productos':
+                status = 409;
+                message = 'El carrito no puede contener mas de 20 productos';
+                break;
             case 'La cantidad debe ser mayor a 0':
                 message = 'La cantidad de productos debe ser mayor a 0. Por favor, ingrese una cantidad valida para el producto';
                 break;
@@ -37,6 +41,26 @@ const addItemToCart = async (req, res) => {
 
     }
 };
+
+const addItemToCartPersonalized = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { id } = req.params;
+        const { quantity, personalizations } = req.body;
+
+        const response = await addItemToCartServicePersonalizations(
+            userId,
+            parseInt(id),
+            quantity,
+            personalizations || []
+        );
+
+        return res.status(201).json(response);
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+};
+
 
 const addOneItemToCart = async (req, res) => {
     const { idProduct } = req.params;
@@ -66,7 +90,11 @@ const addOneItemToCart = async (req, res) => {
                 break;
             case 'cantidad maxima alcanzada':
                 status = 406;
-                message = 'No se puede agregar más de 100 unidades del mismo producto';
+                message = 'No se puede agregar más de 20 unidades del mismo producto';
+                break;
+            case 'El carrito no puede contener mas de 20 productos':
+                status = 409;
+                message = 'El carrito no puede contener mas de 20 productos';
                 break;
             default:
                 message = 'Error en la peticion';
@@ -239,6 +267,24 @@ const getCartsByUserId = async (req, res) => {
         return res.status(status).json({ message: error.message || "Error del servidor" });
     }
 };
+
+const getLastItemCartForProduct = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { idProduct } = req.params;
+
+        if (!idProduct) {
+            return res.status(400).json({ message: "idProduct es requerido" });
+        }
+
+        const result = await getLastItemCartForProductService(userId, idProduct);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error al obtener último itemCart:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     addItemToCart,
     addOneItemToCart,
@@ -249,6 +295,8 @@ module.exports = {
     disableCart,
     getCartById,
     getCartsByUserId,
-    getCartsByUser
+    getCartsByUser,
+    addItemToCartPersonalized,
+    getLastItemCartForProduct
 
 };
