@@ -107,7 +107,7 @@ export default function Register() {
                 (getFieldError('lastName') || getFieldError('secondLastName')) && styles.inputError
               ]}
               error={!!getFieldError('lastName') || !!getFieldError('secondLastName')}
-              placeholder="Apellido Paterno Apellido Materno (Opcional)"
+            // placeholder="Apellidos"    
             />
             {getFieldError('lastName') && (
               <Text style={styles.fieldError}>{getFieldError('lastName')}</Text>
@@ -205,6 +205,7 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     padding: 10,
     backgroundColor: theme.colors.surface,
+    width: '100%',
   },
   logoContainer: {
     alignItems: 'center',
