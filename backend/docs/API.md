@@ -1441,7 +1441,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 400: Error de solicitud
 - 404: Producto no encontrado
-- 406: El carrito no puede contener mas de 20 productos
+- 406: El carrito no puede contener mas de 30 productos
 - 500: Error del servidor
 
 ### 10.6 Agregar un solo un producto directamente al carrito
@@ -1477,7 +1477,7 @@ Authorization: Bearer <token>
 - 400: Error de solicitud
 - 403: El producto esta inactivo y no se puede agregar al carrito
 - 404: Producto no encontrado
-- 406: El carrito no puede contener mas de 100 productos
+- 406: El carrito no puede contener mas de 30 productos
 - 500: Error del servidor
 
 ### 10.7 Agregar producto al carrito de compras con perosnzonalizaciones 
@@ -1532,7 +1532,7 @@ Content-Type: application/json
 - 401: Token no proporcionado
 - 403: El producto está inactivo y no se puede agregar al carrito
 - 404: Producto no encontrado
-- 406: El carrito no puede contener más de 20 productos
+- 406: El carrito no puede contener más de 30 productos
 - 500: Error del servidor
 
 ### 10.8 Modificar cantidad de un producto en el carrito
@@ -1571,7 +1571,7 @@ Authorization: Bearer <token>
 - 401: Token no proporcionado
 - 400: Error de solicitud
 - 404: Producto no encontrado
-- 406: El carrito no puede contener mas de 20 productos
+- 406: El carrito no puede contener mas de 30 productos
 - 500: Error del servidor
 
 ### 10.9 Eliminar un producto en el carrito
@@ -2561,7 +2561,7 @@ Authorization: Bearer <token>
 - 400: Error de solicitud
 - 500: Error del servidor
 
-### 11.2 Obtener todas las direcciones del usuario
+### 11.2 Obtener todas las direcciones activas del usuario
 
 **GET /api/shipping-address**
 
@@ -2605,7 +2605,51 @@ Authorization: Bearer <token>
 - 400: Usuario no autorizado o inactivo
 - 500: Error del servidor
 
-### 11.3 Obtener una dirección por ID
+### 11.3 Obtener todas las direcciones registradas del usuario
+
+**GET /api/shipping-address/all**
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+    "message": "Direcciones obtenidas correctamente",
+    "data": [
+        {
+            "idLocation": 2,
+            "idUserInformation": 2,
+            "street": "Av. Luis Encinas Jhonson",
+            "houseNumber": "10",
+            "postalCode": "83000",
+            "neighborhood": "Centro",
+            "status": true
+        },
+        {
+            "idLocation": 3,
+            "idUserInformation": 2,
+            "street": "Av. Luis Encinas Jhonson",
+            "houseNumber": "11",
+            "postalCode": "83000",
+            "neighborhood": "Centro",
+            "status": false
+        }
+    ]
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 400: Usuario no autorizado o inactivo
+- 500: Error del servidor
+
+### 11.4 Obtener una dirección por ID
 
 **GET /api/shipping-address/:id**
 
@@ -2642,7 +2686,7 @@ Authorization: Bearer <token>
 - 400: Dirección no encontrada o no autorizada
 - 500: Error del servidor
 
-### 11.4 Obtener una dirección específica (compatibilidad)
+### 11.5 Obtener una dirección específica (compatibilidad)
 
 **GET /api/shipping-address/single**
 
@@ -2675,7 +2719,7 @@ Authorization: Bearer <token>
 - 400: No se encontró dirección activa para este usuario
 - 500: Error del servidor
 
-### 11.5 Obtener la ultima direccion dirección registrada del usuario
+### 11.6 Obtener la ultima direccion dirección registrada del usuario
 
 **GET /api/shipping-address/last**
 
@@ -2708,7 +2752,7 @@ Authorization: Bearer <token>
 - 400: No se encontró dirección registrada para este usuario
 - 500: Error del servidor
 
-### 11.4 Actualizar una dirección
+### 11.7 Actualizar una dirección
 
 **PUT /api/shipping-address/:id**
 
@@ -2757,7 +2801,7 @@ Authorization: Bearer <token>
 - 403: Dirección no encontrada o sin permiso para modificar
 - 500: Error del servidor
 
-### 11.5 Eliminar una dirección
+### 11.8 Eliminar una dirección
 
 **DELETE /api/shipping-address/:id**
 

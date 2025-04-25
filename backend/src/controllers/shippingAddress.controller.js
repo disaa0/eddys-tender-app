@@ -1,4 +1,4 @@
-const { addShippingAddress, getShippingAddress, getShippingAddresses, updateAddress, deleteAddress, getShippingAddressById, getLastShippingAddress } = require("../services/shippingAddress.service.js");
+const { addShippingAddress, getShippingAddress, getShippingAddresses, updateAddress, deleteAddress, getShippingAddressById, getLastShippingAddress, getAllShippingAddressesForUser } = require("../services/shippingAddress.service.js");
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -30,6 +30,21 @@ async function getAllUserShippingAddresses(req, res) {
         const userId = req.user.userId; // ID del usuario autenticado
 
         const addresses = await getShippingAddresses(userId);
+        res.status(200).json({
+            message: "Direcciones obtenidas correctamente",
+            data: addresses
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
+
+async function getAllRegisteredUserShippingAddresses(req, res) {
+    try {
+        const userId = req.user.userId; // ID del usuario autenticado
+
+        const addresses = await getAllShippingAddressesForUser(userId);
         res.status(200).json({
             message: "Direcciones obtenidas correctamente",
             data: addresses
@@ -143,6 +158,7 @@ module.exports = {
     updateShippingAddress,
     deleteShippingAddress,
     handleGetShippingAddressById,
-    getLastAddress
+    getLastAddress,
+    getAllRegisteredUserShippingAddresses
 };
 
