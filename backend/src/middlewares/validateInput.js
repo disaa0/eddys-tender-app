@@ -117,7 +117,7 @@ const validateAddItemToCart = (req, res, next) => {
         idProduct: z.string().regex(/^\d+$/, "El id del producto debe ser un número entero").transform(Number).refine(val => val > 0, {
             message: "El id del producto debe ser un número entero mayor que 0"
         }),
-        quantity: z.number().int().min(1, "La cantidad debe ser al menos 1").max(100, "La cantidad no puede ser mayor a 100")
+        quantity: z.number().int().min(1, "La cantidad debe ser al menos 1").max(30, "La cantidad no puede ser mayor a 30")
     });
 
     try {

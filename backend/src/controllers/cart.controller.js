@@ -26,9 +26,9 @@ const addItemToCart = async (req, res) => {
                 status = 403;
                 message = 'Esta producto ha sido desactivado.';
                 break;
-            case 'El carrito no puede contener mas de 20 productos':
+            case 'El carrito no puede contener mas de 30 productos':
                 status = 409;
-                message = 'El carrito no puede contener mas de 20 productos';
+                message = 'El carrito no puede contener mas de 30 productos';
                 break;
             case 'La cantidad debe ser mayor a 0':
                 message = 'La cantidad de productos debe ser mayor a 0. Por favor, ingrese una cantidad valida para el producto';
@@ -90,11 +90,11 @@ const addOneItemToCart = async (req, res) => {
                 break;
             case 'cantidad maxima alcanzada':
                 status = 406;
-                message = 'No se puede agregar más de 20 unidades del mismo producto';
+                message = 'No se puede agregar más de 30 unidades del mismo producto';
                 break;
-            case 'El carrito no puede contener mas de 20 productos':
+            case 'El carrito no puede contener mas de 30 productos':
                 status = 409;
-                message = 'El carrito no puede contener mas de 20 productos';
+                message = 'El carrito no puede contener mas de 30 productos';
                 break;
             default:
                 message = 'Error en la peticion';

@@ -55,6 +55,9 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
             where: {
                 idCart: cartId,
                 idProduct: parseInt(idProduct)
+            },
+            orderBy: {
+                idItemCart: 'desc'
             }
         });
 
@@ -64,8 +67,8 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
             ? currentTotal - existingItem.quantity + quantity
             : currentTotal + quantity;
 
-        if (newTotal > 20) {
-            throw new Error("El carrito no puede contener mas de 100 productos");
+        if (newTotal > 30) {
+            throw new Error("El carrito no puede contener mas de 30 productos");
         }
 
         if (existingItem) {
@@ -122,8 +125,8 @@ const addOneItemToCartService = async (userId, idProduct) => {
         });
 
         const currentTotal = totalQuantity._sum.quantity || 0;
-        if (currentTotal + 1 > 20) {
-            throw new Error("El carrito no puede contener mas de 20 productos");
+        if (currentTotal + 1 > 30) {
+            throw new Error("El carrito no puede contener mas de 30 productos");
         }
 
         const existingItem = await prisma.itemCart.findFirst({
@@ -136,7 +139,7 @@ const addOneItemToCartService = async (userId, idProduct) => {
             }
         });
 
-        if (existingItem && existingItem.quantity >= 100) {
+        if (existingItem && existingItem.quantity >= 30) {
             throw new Error("Cantidad maxima por producto alcanzada");
         }
 
@@ -276,8 +279,8 @@ const addItemToCartServicePersonalizations = async (userId, idProduct, quantity,
             ? currentTotal - matchedItem.quantity + quantity
             : currentTotal + quantity;
 
-        if (newTotal > 20) {
-            throw new Error("El carrito no puede contener más de 20 productos");
+        if (newTotal > 30) {
+            throw new Error("El carrito no puede contener más de 30 productos");
         }
 
         if (matchedItem) {
