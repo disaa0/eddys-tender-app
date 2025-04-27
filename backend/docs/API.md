@@ -992,7 +992,14 @@ limit: Resultados por página (default: 10)
         "shipmentType": {
           "idShipmentType": 1,
           "type": "Envío a domicilio"
-        }
+        },
+        "location": {
+          "street": "Av. Luis Encinas",
+          "houseNumber": "10",
+          "postalCode": "83000",
+          "neighborhood": "Centro"
+        },
+        "locationFormatted": "Av. Luis Encinas, 10\nCentro\n83000"
       },
       {
         "idOrder": 3,
@@ -1019,7 +1026,14 @@ limit: Resultados por página (default: 10)
         "shipmentType": {
           "idShipmentType": 1,
           "type": "Envío a domicilio"
-        }
+        },
+        "location": {
+          "street": "Av. Luis Encinas",
+          "houseNumber": "10",
+          "postalCode": "83000",
+          "neighborhood": "Centro"
+        },
+        "locationFormatted": "Av. Luis Encinas, 10\nCentro\n83000"
       }
     ],
     "pagination": {
@@ -1093,7 +1107,14 @@ limit: Resultados por página (default: 10)
         "shipmentType": {
           "idShipmentType": 1,
           "type": "Envío a domicilio"
-        }
+        },
+        "location": {
+          "street": "Av. Luis Encinas",
+          "houseNumber": "10",
+          "postalCode": "83000",
+          "neighborhood": "Centro"
+        },
+        "locationFormatted": "Av. Luis Encinas, 10\nCentro\n83000"
       }
     ],
     "pagination": {
@@ -3266,7 +3287,14 @@ Authorization: Bearer <token>
         "orderStatus": {
             "idOrderStatus": 1,
             "status": "Pendiente"
-        }
+        },
+        "location": {
+            "street": "Av. Luis Encinas",
+            "houseNumber": "10",
+            "postalCode": "83000",
+            "neighborhood": "Centro"
+        },
+        "locationFormatted": "Av. Luis Encinas, 10\nCentro\n83000"
     }
 ]
 ```
