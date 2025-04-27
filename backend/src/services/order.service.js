@@ -169,6 +169,7 @@ async function getUserOrdersDetailsService(userId) {
       paymentType: true,
       shipmentType: true,
       orderStatus: true,
+      location: true, // Include location details
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -177,7 +178,20 @@ async function getUserOrdersDetailsService(userId) {
     throw new Error('Ordenes no encontrada');
   }
 
-  return orders;
+  // Add formatted location string to each order
+  const ordersWithFormattedLocation = orders.map(order => {
+    let locationFormatted = null;
+    if (order.location) {
+      locationFormatted = `${order.location.street}, ${order.location.houseNumber}\n${order.location.neighborhood}\n${order.location.postalCode}`;
+    }
+
+    return {
+      ...order,
+      locationFormatted
+    };
+  });
+
+  return ordersWithFormattedLocation;
 }
 
 /**
@@ -397,6 +411,7 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
       orderStatus: true,
       paymentType: true,
       shipmentType: true,
+      location: true, // Include location details
       cart: {
         include: {
           itemsCart: {
@@ -414,11 +429,20 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
     },
   });
 
-  // Sanitize the order data , removing stripe client secret, with the map function
-
+  // Sanitize the order data and add formatted location string
   const sanitizedOrders = orders.map((order) => {
     const { stripeClientSecret, ...rest } = order;
-    return rest;
+    
+    // Add formatted location string if location exists
+    let locationFormatted = null;
+    if (order.location) {
+      locationFormatted = `${order.location.street}, ${order.location.houseNumber}\n${order.location.neighborhood}\n${order.location.postalCode}`;
+    }
+
+    return {
+      ...rest,
+      locationFormatted
+    };
   });
 
   // Return the sanitized orders

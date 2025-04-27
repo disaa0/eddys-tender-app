@@ -18,7 +18,7 @@ router.use(authenticateToken);
 // Admin product routes
 router.get('/products', isAdmin, getAllProductsPagination);
 router.get('/products/:id', isAdmin, getProduct);
-router.post('/products', isAdmin, addProduct);
+router.post('/products', isAdmin, handleProductImageUpload, addProduct);
 router.put('/products/:id', isAdmin, modifyProductDetails);
 router.patch('/products/:id/status', isAdmin, toggleProductStatus);
 router.put('/products/:id/customization', isAdmin, updateProductCustomization);
