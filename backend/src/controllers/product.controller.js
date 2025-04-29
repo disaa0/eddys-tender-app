@@ -117,10 +117,22 @@ async function getProduct(req, res) {
             });
         }
 
+        // Check if product image exists
+        const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
+        const imagePng = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.png`);
+        const imageWebp = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.webp`);
+        
+        let productWithImage = {...product};
+        
+        if (fs.existsSync(imagePath) || fs.existsSync(imagePng) || fs.existsSync(imageWebp)) {
+            // Add image URL only if the image exists
+            productWithImage.image_url = `/api/products/${product.idProduct}/image`;
+        }
+
         res.json({
             message: "Producto obtenido correctamente",
             data: {
-                product: product
+                product: productWithImage
             }
         });
     } catch (error) {
@@ -665,11 +677,25 @@ const searchProducts = async (req, res) => {
                 name: 'asc'
             }
         });
+        
+        // Add image URL to each product only if image exists
+        const productsWithImages = await Promise.all(products.map(async product => {
+            const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
+            const imagePng = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.png`); 
+            const imageWebp = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.webp`);
+            
+            let productWithImage = {...product};
+            if (fs.existsSync(imagePath) || fs.existsSync(imagePng) || fs.existsSync(imageWebp)) {
+                // Add image URL only if the image exists
+                productWithImage.image_url = `/api/products/${product.idProduct}/image`;
+            }
+            return productWithImage;
+        }));
 
         return res.status(200).json({
             message: "Productos encontrados",
             data: {
-                products,
+                products: productsWithImages,
                 pagination: {
                     totalItems: totalCount,
                     totalPages: Math.ceil(totalCount / parseInt(limit)),
@@ -720,11 +746,24 @@ async function getPopularProducts(req, res) {
             },
             take: limitNum
         });
-        // Format the response
-        const formattedProducts = popularProducts.map(product => ({
-            ...product,
-            popularity: product._count.itemsCart,
-            _count: undefined // Remove the _count field from response
+        // Format the response with image URLs if they exist
+        const formattedProducts = await Promise.all(popularProducts.map(async product => {
+            const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
+            const imagePng = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.png`); 
+            const imageWebp = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.webp`);
+            
+            const productObj = {
+                ...product,
+                popularity: product._count.itemsCart,
+                _count: undefined // Remove the _count field from response
+            };
+            
+            if (fs.existsSync(imagePath) || fs.existsSync(imagePng) || fs.existsSync(imageWebp)) {
+                // Add image URL only if the image exists
+                productObj.image_url = `/api/products/${product.idProduct}/image`;
+            }
+            
+            return productObj;
         }));
 
         return res.status(200).json({

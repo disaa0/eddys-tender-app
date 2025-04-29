@@ -58,7 +58,8 @@ async function uploadProductImage(req, res) {
             product: {
                 idProduct: product.idProduct,
                 name: product.name,
-                imageUrl: `/uploads/products/${filename}`
+                imageUrl: `/uploads/products/${filename}`,
+                image_url: `/api/products/${product.idProduct}/image`
             }
         });
     } catch (error) {

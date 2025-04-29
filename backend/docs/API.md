@@ -2033,6 +2033,25 @@ Obtiene la imagen de un producto específico.
 
 - Devuelve directamente el archivo de imagen
 
+**Nota:**
+- Cuando se obtiene la información de un producto a través de cualquiera de los endpoints correspondientes (como `GET /api/products`, `GET /api/products/:id`, etc.), estos pueden incluir un campo `image_url` que contiene la ruta a este endpoint para obtener la imagen del producto.
+- Este campo `image_url` solo se incluye si el producto tiene una imagen asociada.
+
+**Ejemplo de respuesta con imagen_url:**
+```json
+{
+    "idProduct": 7,
+    "idProductType": 1,
+    "idUserAdded": 1,
+    "name": "burger2",
+    "description": "Hamburguesa de pollo",
+    "price": 100,
+    "status": true,
+    "createdAt": "2025-04-29T02:43:23.947Z",
+    "image_url": "/api/products/7/image"
+}
+```
+
 **Errores Posibles:**
 
 - 400: ID de producto inválido
