@@ -11,6 +11,7 @@ import SortChips from '../components/SortChips';
 import { useFocusEffect } from '@react-navigation/native';
 import apiService from '../api/ApiService';
 import useUserProducts from '../hooks/useUserProducts';
+import { API_URL } from '../config';
 
 const logo = require('../../assets/eddys.png');
 
@@ -119,21 +120,31 @@ export default function Index() {
     });
   };
 
-  const renderProduct = ({ item, index }) => (
-    <View style={{ flex: 1, padding: 8 }}>
-      <View
-        style={styles.productContainer}
-      >
-        <ProductCard
-          product={{
-            ...item,
-            imageSource: require('../../assets/products/tenders.png'),
-          }}
-          onPress={() => router.push(`/product/${item.idProduct}`)}
-        />
+  const renderProduct = ({ item, index }) => {
+    let image_url = item.image_url;
+    if (image_url) {
+      image_url = API_URL + image_url.replace('/api', '');
+      image_url = { uri: image_url };
+    } else {
+      image_url = require('../../assets/products/tenders.png');
+    }
+
+    return (
+      <View style={{ flex: 1, padding: 8 }}>
+        <View
+          style={styles.productContainer}
+        >
+          <ProductCard
+            product={{
+              ...item,
+              imageSource: image_url,
+            }}
+            onPress={() => router.push(`/product/${item.idProduct}`)}
+          />
+        </View>
       </View>
-    </View>
-  );
+    );
+  }
 
 
   if (loading && page === 1) {
