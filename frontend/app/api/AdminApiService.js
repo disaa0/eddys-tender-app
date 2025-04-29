@@ -103,6 +103,12 @@ class AdminApiService extends BaseApiService {
     async updateOrderStatus(idOrder, idOrderStatus) {
         return this.request(`/admin/order/${idOrder}`, 'PATCH', { idOrderStatus });
     }
+
+    async UploadProductImage(idProduct, imageFormData) {
+        return this.request(`/admin/products/${idProduct}/image`, 'POST', imageFormData, {
+            'Content-Type': 'multipart/form-data',
+        });
+    }
 }
 
 // Export a single instance

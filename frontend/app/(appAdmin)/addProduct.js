@@ -6,6 +6,7 @@ import * as ImagePicker from "expo-image-picker";
 import AdminApiService from '../api/AdminApiService';
 import { theme } from '../theme';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import adminApiService from '../api/AdminApiService';
 
 export default function AddProduct() {
   const router = useRouter();
@@ -76,6 +77,24 @@ export default function AddProduct() {
     }
   };
 
+  const getMimeType = (filename) => {
+    const extension = filename.split('.').pop().toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'heic':
+        return 'image/heic'; // Por si usas fotos de iPhone
+      default:
+        return 'application/octet-stream'; // Tipo genérico si no sabemos
+    }
+  };
+
+
   const handleAddProduct = async () => {
     try {
       const validationErrors = validateForm();
@@ -93,18 +112,56 @@ export default function AddProduct() {
         idProductType: parseInt(form.idProductType),
       };
 
+      // console.log(image);
+
+      // return
+
       const response = await AdminApiService.addProduct(productData);
 
-      if (response) {
+      const idProduct = response?.product?.idProduct;
+
+      if (!idProduct) {
         setSnackbar({
           visible: true,
-          message: 'Producto agregado correctamente'
+          message: 'Error al agregar el producto'
         });
-
-        setTimeout(() => {
-          router.replace('/(appAdmin)/adminDashboard');
-        }, 1500);
+        return;
       }
+
+      const fileName = image.split('/').pop();
+      const mimeType = getMimeType(fileName);
+
+      const formData = new FormData();
+      formData.append('productImage', {
+        uri: image,
+        type: mimeType,
+        name: fileName,
+      });;
+
+      const uploadResponse = await adminApiService.UploadProductImage(idProduct, formData);
+      if (!uploadResponse) {
+        setSnackbar({
+          visible: true,
+          message: 'Error al subir la imagen del producto'
+        });
+        return;
+      }
+      // Si la respuesta es exitosa, mostramos el snackbar
+      setSnackbar({
+        visible: true,
+        message: 'Producto con imagen Guardado correctamente'
+      });
+
+      // if (response) {
+      //   setSnackbar({
+      //     visible: true,
+      //     message: 'Producto agregado correctamente'
+      //   });
+
+      setTimeout(() => {
+        router.replace('/(appAdmin)/adminDashboard');
+      }, 1500);
+      // }
 
       setForm({
         name: "",

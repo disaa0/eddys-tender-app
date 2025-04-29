@@ -14,16 +14,18 @@ export class BaseApiService {
         };
     }
 
-    async request(endpoint, method = 'GET', body = null) {
+    async request(endpoint, method = 'GET', body = null, adittionalHeaders = {}) {
         try {
-            const headers = await this.getHeaders();
+            const baseHeaders = await this.getHeaders();
+            const headers = { ...baseHeaders, ...adittionalHeaders };
             const url = `${this.baseURL}${endpoint}`;
 
             const config = {
                 method,
                 headers,
-                ...(body ? { body: JSON.stringify(body) } : {}),
+                ...(body ? { body: body instanceof FormData ? body : JSON.stringify(body) } : {}),
             };
+
 
             const response = await fetch(url, config);
             const data = await response.json();
