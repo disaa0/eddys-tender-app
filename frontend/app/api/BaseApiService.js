@@ -14,10 +14,10 @@ export class BaseApiService {
         };
     }
 
-    async request(endpoint, method = 'GET', body = null, adittionalHeaders = {}) {
+    async request(endpoint, method = 'GET', body = null, adittionalConfig = {}) {
         try {
             const baseHeaders = await this.getHeaders();
-            const headers = { ...baseHeaders, ...adittionalHeaders };
+            const headers = { ...baseHeaders, ...adittionalConfig.headers };
             const url = `${this.baseURL}${endpoint}`;
 
             const config = {
@@ -26,12 +26,19 @@ export class BaseApiService {
                 ...(body ? { body: body instanceof FormData ? body : JSON.stringify(body) } : {}),
             };
 
-
             const response = await fetch(url, config);
-            const data = await response.json();
+
+            let data;
+            if (adittionalConfig.responseType === 'blob') {
+                data = await response.blob();
+            } else if (adittionalConfig.responseType === 'text') {
+                data = await response.text();
+            } else {
+                data = await response.json();
+            }
 
             if (!response.ok) {
-                const error = new Error(data.message || 'Error en la petición');
+                const error = new Error(data?.message || 'Error en la petición');
                 error.response = { data, status: response.status };
                 throw error;
             }
@@ -39,7 +46,7 @@ export class BaseApiService {
             return data;
         } catch (error) {
             if (error.response) {
-                throw error; // Re-throw if we already formatted the error
+                throw error; // Re-throw if already formatted
             }
             console.error('API Error:', error);
             throw error;
