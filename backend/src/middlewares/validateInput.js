@@ -272,6 +272,30 @@ const validateAddItemToCartWithPersonalzations = (req, res, next) => {
     }
 }
 
+const validateQueryProductIds = (req, res, next) => {
+    const schema = z.object({
+        product_id: z.union([
+            z.string().regex(/^\d+$/),
+            z.array(z.string().regex(/^\d+$/))
+        ])
+    });
+
+    const parsed = schema.safeParse(req.query);
+
+    if (!parsed.success) {
+        return res.status(400).json({
+            message: "Parámetros inválidos: product_id debe ser uno o más IDs numéricos",
+            errors: parsed.error.errors
+        });
+    }
+
+    // Normalizamos los IDs a array de enteros
+    req.productIds = Array.isArray(req.query.product_id)
+        ? req.query.product_id.map(id => parseInt(id))
+        : [parseInt(req.query.product_id)];
+
+    next();
+};
 
 module.exports = {
     validateRegister,
@@ -280,5 +304,6 @@ module.exports = {
     validateCustomization,
     productSchema, productDetailsSchema, validateAddItemToCart, validateDeleteItemFromCart,
     validateSearchQuery, validateShippingAddress, validateIdParam, validateAddOneItemToCart,
-    validateAddItemToCartWithPersonalzations
+    validateAddItemToCartWithPersonalzations,
+    validateQueryProductIds
 };

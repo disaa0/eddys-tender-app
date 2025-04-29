@@ -194,6 +194,8 @@ async function getUserOrdersDetailsService(userId) {
   return ordersWithFormattedLocation;
 }
 
+
+
 /**
  * Process Stripe webhook events
  * @param {Object} event - The Stripe event object
@@ -432,7 +434,7 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
   // Sanitize the order data and add formatted location string
   const sanitizedOrders = orders.map((order) => {
     const { stripeClientSecret, ...rest } = order;
-    
+
     // Add formatted location string if location exists
     let locationFormatted = null;
     if (order.location) {
