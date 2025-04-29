@@ -4,16 +4,22 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import adminApiService from '../api/AdminApiService';
 import { theme } from '../theme';
+import { API_URL } from "../config/index"
 
 export default function ProductCardAdmin({ product, isLastItem }) {
     const router = useRouter();
     const [localStatus, setLocalStatus] = useState(product.status === true || product.status === 'true');
     const [loading, setLoading] = useState(false);
+    const DEFAULT_IMAGE = require('../../assets/products/tenders.png');
 
-    const { idProduct, name, price, description, imageSource } = product;
+    const { idProduct, name, price, description, image_url } = product;
 
-    if (!imageSource) {
-        let imageDefault = require('../../assets/eddys.png');
+    let imageUrl = DEFAULT_IMAGE;
+    if (image_url) {
+        // quitar /api a la url
+        imageUrl = API_URL + image_url.replace('/api', '');
+        imageUrl = { uri: imageUrl };
+        // console.log(imageUrl);
 
     }
 
@@ -68,7 +74,7 @@ export default function ProductCardAdmin({ product, isLastItem }) {
             <TouchableRipple onPress={() => { handleEditProduct(idProduct) }} style={styles.touchable}>
                 <View style={styles.cardContainer}>
                     <Image
-                        source={require('../../assets/products/tenders.png')}
+                        source={imageUrl}
                         style={styles.cardImage}
                         resizeMode="cover"
                     />
