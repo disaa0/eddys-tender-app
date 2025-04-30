@@ -1,5 +1,5 @@
 import { View, StyleSheet, ScrollView, Image, TouchableOpacity, StatusBar } from 'react-native';
-import { Button, Card, Text, TextInput } from 'react-native-paper';
+import { ActivityIndicator, Button, Card, Text, TextInput } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons'; // Importar iconos de Expo
@@ -16,7 +16,7 @@ export default function ProductDetails() {
   const router = useRouter();
   const [quantity, setQuantity] = useState('1');
   const [product, setProduct] = useState(null);
-  const [productImage, setProductImage] = useState(defaultImage);
+  const [productImage, setProductImage] = useState(null);
   const [personalizations, setPersonalizations] = useState([]);
   const [showPersonalizations, setShowPersonalizations] = useState(false);
   const [selectedPersonalizations, setSelectedPersonalizations] = useState([]);
@@ -73,6 +73,17 @@ export default function ProductDetails() {
     }
   }, [productId]);
 
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const loadProductDetails = async () => {
     try {
       console.log(`Fetching product with ID: ${productId}`);
@@ -81,11 +92,16 @@ export default function ProductDetails() {
 
       try {
         const responseImage = await apiService.getProductImageById(productId);
-        setProductImage(responseImage);
+        // const base64Image = await responseImage.base64();
+        console.log(responseImage);
+        // blobl to uri 
+        const base64Image = await blobToBase64(responseImage);
+
+        setProductImage(base64Image);
       } catch (err) {
         if (err.response?.status === 404) {
           console.warn('Imagen no encontrada, usando imagen por defecto.');
-          setProductImage(defaultImage);
+          setProductImage(null);
         } else {
           console.error('Error al cargar la imagen:', err);
         }
@@ -142,7 +158,9 @@ export default function ProductDetails() {
   };
 
   if (loading) {
-    return <Text style={styles.loadingText}>Cargando producto...</Text>;
+    return (<View style={styles.centered}>
+      <ActivityIndicator size="large" />
+    </View>)
   }
 
   if (!product) {
@@ -157,7 +175,16 @@ export default function ProductDetails() {
           <Card style={{ borderRadius: 20, overflow: 'hidden', flex: 1 }}>
             {/* Contenedor de imagen con botón de regreso */}
             <View style={styles.imageContainer}>
-              <Card.Cover source={typeof productImage === 'string' ? { uri: productImage } : productImage} style={styles.image} />
+              <Card.Cover
+                source={
+                  productImage
+                    ? { uri: productImage }
+                    : defaultImage
+                }
+                style={styles.image}
+              />
+
+
               <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
                 <Ionicons name="arrow-back" size={24} color="white" />
               </TouchableOpacity>
@@ -256,6 +283,11 @@ export default function ProductDetails() {
 }
 
 const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',

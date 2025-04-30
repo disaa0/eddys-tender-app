@@ -117,7 +117,7 @@ const validateAddItemToCart = (req, res, next) => {
         idProduct: z.string().regex(/^\d+$/, "El id del producto debe ser un número entero").transform(Number).refine(val => val > 0, {
             message: "El id del producto debe ser un número entero mayor que 0"
         }),
-        quantity: z.number().int().min(1, "La cantidad debe ser al menos 1").max(100, "La cantidad no puede ser mayor a 100")
+        quantity: z.number().int().min(1, "La cantidad debe ser al menos 1").max(30, "La cantidad no puede ser mayor a 30")
     });
 
     try {
@@ -234,11 +234,76 @@ const validateIdParam = (req, res, next) => {
     next();
 };
 
+const addItemToCartSchemaWithPersonzalization = z.object({
+    quantity: z
+        .number({ invalid_type_error: "La cantidad debe ser un número" })
+        .int("La cantidad debe ser un número entero")
+        .positive("La cantidad debe ser mayor que 0"),
+
+    personalizations: z
+        .array(
+            z.number({ invalid_type_error: "Cada personalización debe ser un número" })
+                .int("Cada personalización debe ser un número entero")
+        )
+        .optional()
+        .refine(val => val === undefined || Array.isArray(val), {
+            message: "Personalizations debe ser una lista",
+        }),
+});
+
+const idProductParamSchema = z.object({
+    id: z.string().regex(/^\d+$/, "El ID del producto debe ser un número entero"),
+});
+
+const validateAddItemToCartWithPersonalzations = (req, res, next) => {
+    try {
+        const parsedParams = idProductParamSchema.parse(req.params);
+        req.params.id = Number(parsedParams.id); // Convertir a número entero
+
+        const parsedBody = addItemToCartSchemaWithPersonzalization.parse(req.body);
+        req.body = {
+            quantity: parsedBody.quantity,
+            personalizations: parsedBody.personalizations || [],
+        };
+
+        next();
+    } catch (error) {
+        res.status(400).json({ error: error.errors });
+    }
+}
+
+const validateQueryProductIds = (req, res, next) => {
+    const schema = z.object({
+        product_id: z.union([
+            z.string().regex(/^\d+$/),
+            z.array(z.string().regex(/^\d+$/))
+        ])
+    });
+
+    const parsed = schema.safeParse(req.query);
+
+    if (!parsed.success) {
+        return res.status(400).json({
+            message: "Parámetros inválidos: product_id debe ser uno o más IDs numéricos",
+            errors: parsed.error.errors
+        });
+    }
+
+    // Normalizamos los IDs a array de enteros
+    req.productIds = Array.isArray(req.query.product_id)
+        ? req.query.product_id.map(id => parseInt(id))
+        : [parseInt(req.query.product_id)];
+
+    next();
+};
+
 module.exports = {
     validateRegister,
     validatePasswordUpdate,
     validateEmailUpdate,
     validateCustomization,
     productSchema, productDetailsSchema, validateAddItemToCart, validateDeleteItemFromCart,
-    validateSearchQuery, validateShippingAddress, validateIdParam, validateAddOneItemToCart
+    validateSearchQuery, validateShippingAddress, validateIdParam, validateAddOneItemToCart,
+    validateAddItemToCartWithPersonalzations,
+    validateQueryProductIds
 };

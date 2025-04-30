@@ -35,7 +35,9 @@ class ApiService extends BaseApiService {
     }
 
     async getProductImageById(id) {
-        return this.request(`/products/${id}/image`, 'GET');
+        return this.request(`/products/${id}/image`, 'GET', null, {
+            responseType: 'blob'
+        });
     }
 
     async getCartItems() {

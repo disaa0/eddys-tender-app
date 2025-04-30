@@ -20,7 +20,7 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
         }
 
         if (!product.status) {
-            throw new Error("El producto está inactivo y no se puede agregar al carrito");
+            throw new Error("El producto esta inactivo y no se puede agregar al carrito");
         }
 
 
@@ -43,19 +43,39 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
         }
         const cartId = cart.idCart;
 
+        const totalQuantity = await prisma.itemCart.aggregate({
+            where: { idCart: cartId, status: true },
+            _sum: { quantity: true },
+        });
+
+
+
         // 3. Verificar si el producto ya está en el carrito
         const existingItem = await prisma.itemCart.findFirst({
             where: {
                 idCart: cartId,
                 idProduct: parseInt(idProduct)
+            },
+            orderBy: {
+                idItemCart: 'desc'
             }
         });
+
+        const currentTotal = totalQuantity._sum.quantity || 0;
+
+        const newTotal = existingItem
+            ? currentTotal - existingItem.quantity + quantity
+            : currentTotal + quantity;
+
+        if (newTotal > 30) {
+            throw new Error("El carrito no puede contener mas de 30 productos");
+        }
 
         if (existingItem) {
             // 4. Si el producto ya existe en el carrito, actualizar la cantidad
             const updatedItem = await prisma.itemCart.update({
                 where: { idItemCart: existingItem.idItemCart },
-                data: { quantity: existingItem.quantity = quantity, status: existingItem.status = true }
+                data: { quantity: quantity, status: true }
             });
 
             return { cartId, item: updatedItem, updated: true };
@@ -80,59 +100,61 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
 
 const addOneItemToCartService = async (userId, idProduct) => {
     return await prisma.$transaction(async (prisma) => {
-
-        //Verificar si el producto existe y está activo
         const product = await prisma.product.findUnique({
             where: { idProduct: parseInt(idProduct) }
         });
 
-        if (!product) {
-            throw new Error("Producto no encontrado");
-        }
+        if (!product) throw new Error("Producto no encontrado");
+        if (!product.status) throw new Error("El producto está inactivo");
 
-        if (!product.status) {
-            throw new Error("El producto esta inactivo y no se puede agregar al carrito");
-        }
-        // 1. Buscar un carrito activo del usuario
         let cart = await prisma.cart.findFirst({
-            where: {
-                idUser: userId,
-                status: true
-            }
+            where: { idUser: userId, status: true }
         });
-        // 2. Si no existe, crear un nuevo carrito
+
         if (!cart) {
             cart = await prisma.cart.create({
-                data: {
-                    idUser: userId,
-                    status: true
-                }
+                data: { idUser: userId, status: true }
             });
         }
+
         const cartId = cart.idCart;
-        // 3. Verificar si el producto ya está en el carrito
+
+        const totalQuantity = await prisma.itemCart.aggregate({
+            where: { idCart: cartId, status: true },
+            _sum: { quantity: true },
+        });
+
+        const currentTotal = totalQuantity._sum.quantity || 0;
+        if (currentTotal + 1 > 30) {
+            throw new Error("El carrito no puede contener mas de 30 productos");
+        }
+
         const existingItem = await prisma.itemCart.findFirst({
             where: {
                 idCart: cartId,
                 idProduct: parseInt(idProduct)
+            },
+            orderBy: {
+                idItemCart: 'desc'
             }
-        }
-        );
+        });
 
-        //3.1 Si la cantidad es 100, no se puede agregar más
-        if (existingItem && existingItem.quantity >= 100) {
-            throw new Error("cantidad maxima alcanzada");
+        if (existingItem && existingItem.quantity >= 30) {
+            throw new Error("Cantidad maxima por producto alcanzada");
         }
 
         if (existingItem) {
-            // 4. Si el producto ya existe en el carrito, actualizar la cantidad
             const updatedItem = await prisma.itemCart.update({
                 where: { idItemCart: existingItem.idItemCart },
-                data: { quantity: existingItem.quantity + 1, status: existingItem.status = true }
+                data: {
+                    quantity: existingItem.quantity + 1,
+                    status: true
+                }
             });
+
             return { cartId, item: updatedItem, updated: true };
         }
-        // 5. Agregar el producto al carrito
+
         const newItem = await prisma.itemCart.create({
             data: {
                 idCart: cartId,
@@ -142,6 +164,156 @@ const addOneItemToCartService = async (userId, idProduct) => {
                 status: true
             }
         });
+
+        return { cartId, item: newItem, updated: false };
+    });
+};
+
+
+const addItemToCartServicePersonalizations = async (userId, idProduct, quantity, personalizations = []) => {
+    if (!quantity || quantity <= 0) {
+        throw new Error("La cantidad debe ser mayor a 0");
+    }
+
+    return await prisma.$transaction(async (prisma) => {
+        const product = await prisma.product.findUnique({
+            where: { idProduct: parseInt(idProduct) },
+        });
+
+        if (!product) {
+            throw new Error("Producto no encontrado");
+        }
+
+        if (!product.status) {
+            throw new Error("El producto está inactivo y no se puede agregar al carrito");
+        }
+
+        const personalizationsIds = (personalizations || []).map(p => parseInt(p));
+
+        // Validar que las personalizaciones existan, pertenezcan al producto y estén activas
+        if (personalizationsIds.length > 0) {
+            const validPersonalizations = await prisma.productPersonalization.findMany({
+                where: {
+                    idProductPersonalization: { in: personalizationsIds },
+                    idProduct: parseInt(idProduct),
+                    status: true
+                }
+            });
+
+            const validIds = validPersonalizations.map(p => p.idProductPersonalization);
+            const invalidIds = personalizationsIds.filter(id => !validIds.includes(id));
+
+            if (invalidIds.length > 0) {
+                throw new Error(`Las siguientes personalizaciones no son válidas o no están disponibles para este producto: [${invalidIds.join(', ')}]`);
+            }
+        }
+
+        let cart = await prisma.cart.findFirst({
+            where: {
+                idUser: userId,
+                status: true,
+            },
+        });
+
+        if (!cart) {
+            cart = await prisma.cart.create({
+                data: {
+                    idUser: userId,
+                    status: true,
+                },
+            });
+        }
+
+        const cartId = cart.idCart;
+
+        const totalQuantity = await prisma.itemCart.aggregate({
+            where: { idCart: cartId, status: true },
+            _sum: { quantity: true },
+        });
+
+        const currentTotal = totalQuantity._sum.quantity || 0;
+
+        const existingItems = await prisma.itemCart.findMany({
+            where: {
+                idCart: cartId,
+                idProduct: parseInt(idProduct),
+                status: true,
+            },
+            include: {
+                userProductPersonalize: {
+                    select: {
+                        idProductPersonalization: true
+                    }
+                }
+            },
+            orderBy: {
+                idItemCart: 'desc'
+            }
+        });
+
+        const areSamePersonalizations = (a, b) => {
+            const idsA = a.map(p => p.idProductPersonalization).sort();
+            const idsB = b.map(p => parseInt(p)).sort();
+            return idsA.length === idsB.length && idsA.every((val, i) => val === idsB[i]);
+        };
+
+        let matchedItem = null;
+
+        for (const item of existingItems) {
+            const itemPersonalizations = item.userProductPersonalize;
+
+            if (personalizationsIds.length === 0 && itemPersonalizations.length === 0) {
+                matchedItem = item;
+                break;
+            }
+
+            if (personalizationsIds.length > 0 && itemPersonalizations.length > 0) {
+                if (areSamePersonalizations(itemPersonalizations, personalizationsIds)) {
+                    matchedItem = item;
+                    break;
+                }
+            }
+        }
+
+        const newTotal = matchedItem
+            ? currentTotal - matchedItem.quantity + quantity
+            : currentTotal + quantity;
+
+        if (newTotal > 30) {
+            throw new Error("El carrito no puede contener más de 30 productos");
+        }
+
+        if (matchedItem) {
+            const updatedItem = await prisma.itemCart.update({
+                where: { idItemCart: matchedItem.idItemCart },
+                data: { quantity: quantity, status: true }
+            });
+
+            return { cartId, item: updatedItem, updated: true };
+        }
+
+        const newItem = await prisma.itemCart.create({
+            data: {
+                idCart: cartId,
+                idProduct: parseInt(idProduct),
+                quantity,
+                individualPrice: product.price,
+                status: true
+            }
+        });
+
+        if (personalizationsIds.length > 0) {
+            const personalizeEntries = personalizationsIds.map(id => ({
+                idItemCart: newItem.idItemCart,
+                idProductPersonalization: id,
+                status: true
+            }));
+
+            await prisma.userProductPersonalize.createMany({
+                data: personalizeEntries
+            });
+        }
+
         return { cartId, item: newItem, updated: false };
     });
 };
@@ -406,6 +578,84 @@ const getCartsByIdUserService = async (requestingUserId, targetUserId, requestin
     return carts;
 };
 
+const getLastItemCartForProductService = async (userId, idProduct) => {
+    return await prisma.$transaction(async (prisma) => {
+        const cart = await prisma.cart.findFirst({
+            where: {
+                idUser: userId,
+                status: true,
+            },
+        });
+
+        if (!cart) {
+            throw new Error("No se encontró un carrito activo para el usuario.");
+        }
+
+        const lastItem = await prisma.itemCart.findFirst({
+            where: {
+                idCart: cart.idCart,
+                idProduct: parseInt(idProduct),
+                status: true
+            },
+            orderBy: {
+                idItemCart: "desc",
+            },
+            include: {
+                product: {
+                    select: {
+                        name: true
+                    }
+                },
+                userProductPersonalize: {
+                    where: { status: true },
+                    select: {
+                        idUserProductPersonalize: true,
+                        idItemCart: true,
+                        idProductPersonalization: true,
+                        status: true,
+                        productPersonalization: {
+                            select: {
+                                personalization: {
+                                    select: {
+                                        idPersonalization: true,
+                                        name: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!lastItem) {
+            throw new Error("No se encontró ningún itemCart para este producto.");
+        }
+
+        const itemWithName = {
+            idItemCart: lastItem.idItemCart,
+            idCart: lastItem.idCart,
+            idProduct: lastItem.idProduct,
+            quantity: lastItem.quantity,
+            individualPrice: lastItem.individualPrice,
+            status: lastItem.status,
+            name: lastItem.product.name,
+            userProductPersonalize: lastItem.userProductPersonalize.map(p => ({
+                idUserProductPersonalize: p.idUserProductPersonalize,
+                idItemCart: p.idItemCart,
+                idProductPersonalization: p.idProductPersonalization,
+                status: p.status,
+                personalization: p.productPersonalization.personalization
+            }))
+        };
+
+        return {
+            cartId: cart.idCart,
+            item: itemWithName
+        };
+    });
+};
+
 
 module.exports = {
     addItemToCartService,
@@ -416,5 +666,7 @@ module.exports = {
     getItemsQuantityCartService,
     disableCartService,
     getCartByIdService,
-    getCartsByIdUserService
+    getCartsByIdUserService,
+    addItemToCartServicePersonalizations,
+    getLastItemCartForProductService
 };
