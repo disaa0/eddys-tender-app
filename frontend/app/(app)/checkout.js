@@ -15,12 +15,13 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [addresses, setAddresses] = useState([]);
-  const [selectedAddressId, setSelectedAddressId] = useState(0);
+  const [selectedAddressId, setSelectedAddressId] = useState(-1);
   const [shipmentType, setShipmentType] = useState(1);
   const [subtotal, setSubtotal] = useState(0.00);
   const [total, setTotal] = useState(0.00);
   const [delivery, setDelivery] = useState(0.00);
-  const [order, setOrder] = useState({})
+  const [order, setOrder] = useState({});
+  const [reload, setReload] = useState(0);
   const [purchaseSuccessfulDialogVisible, setPurchaseSuccessfulDialogVisible] = useState(false);
   const [purchaseErrorDialogVisible, setPurchaseErrorDialogVisible] = useState(false);
   const router = useRouter();
@@ -65,7 +66,7 @@ export default function Checkout() {
 
           // Set defaults
           setOrder({});
-          setSelectedAddressId(0);
+          setSelectedAddressId(-1);
           setAddress({
             street: '',
             houseNumber: '',
@@ -84,7 +85,7 @@ export default function Checkout() {
       };
 
       fetchData();
-    }, [])
+    }, [reload])
   );
 
   useEffect(() => {
@@ -95,7 +96,7 @@ export default function Checkout() {
     try {
       setLoading(true);
       const data = await apiService.addShippingAdresses(address.street, address.houseNumber, address.postalCode, address.neighborhood);
-      //console.log('nuevaDirección', data)
+      setReload(reload => reload + 1)
     } catch (err) {
       setError('Error al crear dirección.');
       setPurchaseErrorDialogVisible(true);
@@ -106,7 +107,8 @@ export default function Checkout() {
 
   const handleOnValueChangeAddressId = (value) => {
     setSelectedAddressId(value)
-    if (value == 0) {
+    console.log(value)
+    if (value == -1) {
       setDelivery(0);
       setShipmentType(2);
 
@@ -116,10 +118,10 @@ export default function Checkout() {
     }
   }
   const handlePlaceOrder = () => {
-    if (selectedAddressId == (addresses.length + 1)) {
-      createShippingAddress();
-    }
-    if (paymentMethod === 'card') {
+    if (selectedAddressId == (0)) {
+      setError('Seleccione una dirección de entrega válida.')
+      setPurchaseErrorDialogVisible(true)
+    } else if (paymentMethod === 'card') {
       handleStripePayment();
     } else {
       handleCashPayment();
@@ -133,7 +135,7 @@ export default function Checkout() {
       if (shipmentType == 2) {
         data = await apiService.createOrder(2, shipmentType, delivery);
       } else {
-        data = await apiService.createOrder(2, shipmentType, delivery, 1);
+        data = await apiService.createOrder(2, shipmentType, delivery, selectedAddressId);
       }
       setOrder(data);
       const { stripeClientSecret } = await data.order;
@@ -261,15 +263,15 @@ export default function Checkout() {
                     key={selectedAddressId}
                   >
                     <RadioButton.Item
-                      key={0}
-                      label={"Recoger orden."}
-                      value={0}
+                      key={-1}
+                      label={"Recoger orden"}
+                      value={-1}
                     />
                     <Divider style={styles.divider} />
                     <RadioButton.Item
-                      key={1}
+                      key={0}
                       label={"Añadir dirección"}
-                      value={1}
+                      value={0}
                     />
                   </RadioButton.Group>
                 ))
@@ -280,34 +282,37 @@ export default function Checkout() {
                     key={selectedAddressId}
                   >
                     <RadioButton.Item
-                      key={0}
-                      label={"Recoger orden."}
-                      value={0}
+                      key={-1}
+                      label={"Recoger orden"}
+                      value={-1}
                     />
-                    <Divider style={styles.divider} />
-                    {addresses.map((address) => (
+                    {addresses.map((address, index) => (
                       <View>
+                        <Divider style={styles.divider} />
                         <RadioButton.Item
                           key={address.idLocation}
-                          label={`${address.idLocation}. ${address.street} ${address.houseNumber}, ${address.neighborhood}, ${address.postalCode}`}
+                          label={`${address.street} ${address.houseNumber}, ${address.neighborhood}, ${address.postalCode}`}
                           value={address.idLocation}
                         />
-                        <Divider style={styles.divider} />
                       </View>
                     ))}
+                    <Divider style={styles.divider} />
                     <RadioButton.Item
-                      key={addresses.length + 1}
+                      key={0}
                       label={"Añadir dirección"}
-                      value={addresses.length + 1}
+                      value={0}
                     />
                   </RadioButton.Group>
                 )}
-            {(selectedAddressId == (addresses.length + 1)) && (
+            {(selectedAddressId == 0) && (
               <>
                 <TextInput mode="outlined" label="Calle" value={address.street} onChangeText={text => setAddress({ ...address, street: text })} style={styles.input} />
                 <TextInput mode="outlined" label="Número" value={address.houseNumber} onChangeText={text => setAddress({ ...address, houseNumber: text })} style={styles.input} keyboardType="number-pad" />
                 <TextInput mode="outlined" label="Colonia" value={address.neighborhood} onChangeText={text => setAddress({ ...address, neighborhood: text })} style={styles.input} />
                 <TextInput mode="outlined" label="Código Postal" value={address.postalCode} onChangeText={text => setAddress({ ...address, postalCode: text })} style={styles.input} keyboardType="number-pad" />
+                <Button mode="contained" onPress={() => { createShippingAddress() }} style={[styles.confirmButton, { marginBottom: '10' }]} disabled={loading}>
+                  <Text>Guardar</Text>
+                </Button>
               </>
             )}
           </Card.Content>
@@ -339,15 +344,15 @@ export default function Checkout() {
 
         {/* Botón de Confirmar Pedido */}
         <Button mode="contained" onPress={handlePlaceOrder} style={styles.confirmButton} disabled={loading}>
-          {loading ? "Procesando..." : "Continuar"}
+          <Text>{loading ? "Procesando..." : "Continuar"}</Text>
         </Button>
         <Button mode="contained" onPress={() => { router.push('/cart') }} style={[styles.confirmButton, { marginBottom: '10' }]} disabled={loading}>
-          Volver al carrito
+          <Text>Volver al carrito</Text>
         </Button>
 
         {/* Dialogs */}
         <ConfirmationDialog visible={purchaseSuccessfulDialogVisible} onDismiss={() => setPurchaseSuccessfulDialogVisible(false)} onConfirm={() => { setPurchaseSuccessfulDialogVisible(false); router.push('/orders'); }} title="Compra exitosa" message="Su orden se ha creado con éxito." confirmButtonLabel="Continuar" />
-        <ConfirmationDialog visible={purchaseErrorDialogVisible} onDismiss={() => { setPurchaseErrorDialogVisible(false); setError('') }} onConfirm={() => setError('')} title="Error en compra" message={"Ha ocurrido un error, favor de reintentar. " + error} confirmButtonLabel="Reintentar" />
+        <ConfirmationDialog visible={purchaseErrorDialogVisible} onDismiss={() => { setPurchaseErrorDialogVisible(false); }} onConfirm={() => setPurchaseErrorDialogVisible(false)} title="Error en compra" message={"Ha ocurrido un error, favor de reintentar. " + error} confirmButtonLabel="Reintentar" />
       </ScrollView>
     </SafeAreaView>
   );

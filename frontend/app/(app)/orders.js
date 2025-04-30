@@ -27,7 +27,6 @@ const getStatusColor = (status) => {
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
-  const [addresses, setAddresses] = useState([]);
   const [error, setError] = useState('')
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,11 +42,9 @@ export default function Orders() {
         try {
           setLoading(true);
           console.log('Cargando info')
-          const addressesData = await apiService.getShippingAdresses();
           const ordersDetailsData = await apiService.getUserOrdersDetails();
-          setAddresses(addressesData.data);
           setOrders(ordersDetailsData);
-          console.log(ordersDetailsData)
+          console.log('ordenes', ordersDetailsData)
         } catch (err) {
           setError('Error al cargar información')
         } finally {
@@ -97,14 +94,13 @@ export default function Orders() {
     return new Date(dateString).toLocaleDateString('es-MX', options);
   };
 
-  const formatAddress = (addressIdString) => {
-    if (!addressIdString) {
+  const formatAddress = (address) => {
+    if (!address) {
       return "Pedido para recoger en sucursal"
-    } else if (addressIdString) {
-      const addressId = Number(addressIdString);
-      const addressInfo = addresses[addressId - 1];
-      const addressInfoString = `${addressInfo.street} ${addressInfo.houseNumber}, ${addressInfo.neighborhood}, ${addressInfo.postalCode}`
-      return addressInfoString;
+    } else if (address) {
+      return address;
+    } else {
+      return 'Error al cargar dirección de entrega.'
     }
   };
   if (loading) {
@@ -193,7 +189,8 @@ export default function Orders() {
               {/* Detalles de entrega */}
               <List.Item
                 title="Dirección de entrega"
-                description={formatAddress(order.idLocation)}
+                description={formatAddress(order.locationFormatted)}
+                descriptionNumberOfLines={3}
                 left={props => <List.Icon {...props} icon="map-marker" />}
               />
 

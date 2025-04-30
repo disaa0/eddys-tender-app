@@ -43,7 +43,7 @@ export default function Register() {
       };
 
       await api.register(userData);
-      router.push('/registerCompleted');
+      router.push('/registerSuccesful');
     } catch (error) {
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
@@ -64,10 +64,10 @@ export default function Register() {
     <SafeAreaProvider>
       <SafeAreaView style={styles.safeAreaContainer}>
         <KeyboardAvoidingView
-          style={styles.container}
+          style={styles.keyboardContainer}
           behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         >
-          <ScrollView style={styles.container}>
+          <ScrollView style={styles.scrollViewContainer}>
             <View style={styles.logoContainer}>
               <Image
                 source={require('../../assets/eddys.png')}
@@ -200,10 +200,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: theme.colors.primary,
   },
-  container: {
+  keyboardContainer: {
     flex: 1,
-    alignContent: 'center',
-    padding: 10,
+    backgroundColor: theme.colors.surface,
+  },
+  scrollViewContainer: {
+    flex: 1,
+    paddingHorizontal: 55,
     backgroundColor: theme.colors.surface,
     width: '100%',
   },
