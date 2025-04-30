@@ -217,8 +217,6 @@ export default function Orders() {
         ))}
         <View style={styles.blank}>
         </View>
-        <View style={styles.blank}>
-        </View>
       </ScrollView>
 
 
@@ -337,6 +335,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   blank: {
-    height: 25,
+    height: 50,
   }
 }); 
