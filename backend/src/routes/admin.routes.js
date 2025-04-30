@@ -6,10 +6,10 @@ const { getProduct, addProduct, modifyProductDetails, getAllProductsPagination }
 const { toggleProductStatus, updateProductCustomization, uploadProductImage } = require('../controllers/admin.controller');
 const { getOrderHistory, getActiveOrders } = require('../controllers/order.controller');
 const { handleProductImageUpload } = require('../middlewares/upload.middleware');
-const { validateRegister } = require('../middlewares/validateInput');
+const { validateRegister, validateQueryProductIds } = require('../middlewares/validateInput');
 const { registerAdmin } = require('../controllers/auth.controller');
 const adminController = require('../controllers/admin.controller');
-const { getOrdersByDateRange, updateOrderStatus, getOrderById } = require('../controllers/adminOrder.controller');
+const { getOrdersByDateRange, updateOrderStatus, getOrderById, getOrdersByProducts } = require('../controllers/adminOrder.controller');
 const { getCartsByUserId } = require('../controllers/cart.controller');
 
 // Apply authentication middleware to all admin routes
@@ -32,6 +32,7 @@ router.post('/register', isAdmin, validateRegister, registerAdmin);
 // Admin order routes
 router.get('/orders/history', isAdmin, getOrderHistory);
 router.get('/orders/current', isAdmin, getActiveOrders);
+router.get('/orders/by-products', isAdmin, validateQueryProductIds, getOrdersByProducts);
 router.get('/orders', isAdmin, getOrdersByDateRange);
 router.get('/orders/:id', isAdmin, getOrderById);
 router.patch('/order/:id', isAdmin, updateOrderStatus);
