@@ -47,7 +47,8 @@ export default function Orders() {
           const ordersDetailsData = await apiService.getUserOrdersDetails();
           setAddresses(addressesData.data);
           setOrders(ordersDetailsData);
-          console.log(ordersDetailsData)
+          console.log('ordenes', ordersDetailsData)
+          console.log('direcciones', addressesData.data);
         } catch (err) {
           setError('Error al cargar información')
         } finally {
@@ -102,7 +103,7 @@ export default function Orders() {
       return "Pedido para recoger en sucursal"
     } else if (addressIdString) {
       const addressId = Number(addressIdString);
-      const addressInfo = addresses[addressId - 1];
+      const addressInfo = addresses.find(addr => addr.idLocation == addressId);
       const addressInfoString = `${addressInfo.street} ${addressInfo.houseNumber}, ${addressInfo.neighborhood}, ${addressInfo.postalCode}`
       return addressInfoString;
     }

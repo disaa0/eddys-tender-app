@@ -107,6 +107,7 @@ export default function Checkout() {
 
   const handleOnValueChangeAddressId = (value) => {
     setSelectedAddressId(value)
+    console.log(value)
     if (value == -1) {
       setDelivery(0);
       setShipmentType(2);
@@ -263,7 +264,7 @@ export default function Checkout() {
                   >
                     <RadioButton.Item
                       key={-1}
-                      label={"Recoger orden."}
+                      label={"Recoger orden"}
                       value={-1}
                     />
                     <Divider style={styles.divider} />
@@ -285,24 +286,6 @@ export default function Checkout() {
                       label={"Recoger orden"}
                       value={-1}
                     />
-                    <Divider style={styles.divider} />
-                    <RadioButton.Item
-                      key={0}
-                      label={"Añadir dirección"}
-                      value={0}
-                    />
-                    {(selectedAddressId == 0) && (
-                      <>
-                        <TextInput mode="outlined" label="Calle" value={address.street} onChangeText={text => setAddress({ ...address, street: text })} style={styles.input} />
-                        <TextInput mode="outlined" label="Número" value={address.houseNumber} onChangeText={text => setAddress({ ...address, houseNumber: text })} style={styles.input} keyboardType="number-pad" />
-                        <TextInput mode="outlined" label="Colonia" value={address.neighborhood} onChangeText={text => setAddress({ ...address, neighborhood: text })} style={styles.input} />
-                        <TextInput mode="outlined" label="Código Postal" value={address.postalCode} onChangeText={text => setAddress({ ...address, postalCode: text })} style={styles.input} keyboardType="number-pad" />
-                        <Button mode="contained" onPress={() => { createShippingAddress() }} style={[styles.confirmButton, { marginBottom: '10' }]} disabled={loading}>
-                          <Text>Guardar</Text>
-                        </Button>
-                      </>
-                    )}
-
                     {addresses.map((address, index) => (
                       <View>
                         <Divider style={styles.divider} />
@@ -313,8 +296,25 @@ export default function Checkout() {
                         />
                       </View>
                     ))}
+                    <Divider style={styles.divider} />
+                    <RadioButton.Item
+                      key={0}
+                      label={"Añadir dirección"}
+                      value={0}
+                    />
                   </RadioButton.Group>
                 )}
+            {(selectedAddressId == 0) && (
+              <>
+                <TextInput mode="outlined" label="Calle" value={address.street} onChangeText={text => setAddress({ ...address, street: text })} style={styles.input} />
+                <TextInput mode="outlined" label="Número" value={address.houseNumber} onChangeText={text => setAddress({ ...address, houseNumber: text })} style={styles.input} keyboardType="number-pad" />
+                <TextInput mode="outlined" label="Colonia" value={address.neighborhood} onChangeText={text => setAddress({ ...address, neighborhood: text })} style={styles.input} />
+                <TextInput mode="outlined" label="Código Postal" value={address.postalCode} onChangeText={text => setAddress({ ...address, postalCode: text })} style={styles.input} keyboardType="number-pad" />
+                <Button mode="contained" onPress={() => { createShippingAddress() }} style={[styles.confirmButton, { marginBottom: '10' }]} disabled={loading}>
+                  <Text>Guardar</Text>
+                </Button>
+              </>
+            )}
           </Card.Content>
         </Card>
 
