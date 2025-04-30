@@ -215,9 +215,12 @@ export default function Orders() {
             </Card.Content>
           </Card>
         ))}
+        <View style={styles.blank}>
+        </View>
+        <View style={styles.blank}>
+        </View>
       </ScrollView>
-      <View style={styles.container}>
-      </View>
+
 
 
       <ConfirmationDialog
@@ -333,4 +336,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  blank: {
+    height: 25,
+  }
 }); 
