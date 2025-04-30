@@ -36,7 +36,29 @@ class AuthService {
     }
 
     async logout() {
+        // Get the push token and user token before removing AsyncStorage items
+        const pushToken = await AsyncStorage.getItem('pushToken');
+        const userToken = await AsyncStorage.getItem('userToken');
+        
+        // If we have both push token and user token, unregister it when logging out
+        if (pushToken && userToken) {
+            try {
+                const notificationApiService = require('./NotificationApiService').default;
+                await notificationApiService.unregisterToken(pushToken);
+                console.log('Successfully unregistered push token on logout');
+            } catch (error) {
+                console.error('Failed to unregister push token:', error);
+                // Continue with logout even if token unregistration fails
+            }
+        }
+        
+        // Remove user data from AsyncStorage
         await AsyncStorage.multiRemove(['userToken', 'userData']);
+        
+        // Remove push token from AsyncStorage as well
+        if (pushToken) {
+            await AsyncStorage.removeItem('pushToken');
+        }
     }
 
     async updateEmail(email) {

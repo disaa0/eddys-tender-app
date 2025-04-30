@@ -6,7 +6,7 @@ import { theme } from './theme';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import ConfirmationDialog from './components/ConfirmationDialog';
-
+import NotificationHandler from '../components/NotificationHandler';
 
 // Combinar nuestro tema con el tema base de Paper
 const combinedTheme = {
@@ -22,7 +22,13 @@ const combinedTheme = {
 function useProtectedRoute(setMostrarPopUpSessionExpirada) {
   const segments = useSegments();
   const router = useRouter();
-  const { isAuthenticated, isLoading, isAdmin, sessionExpired, checkifIsAuthenticated } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading,
+    isAdmin,
+    sessionExpired,
+    checkifIsAuthenticated,
+  } = useAuth();
 
   useEffect(() => {
     if (isLoading) return;
@@ -46,21 +52,26 @@ function useProtectedRoute(setMostrarPopUpSessionExpirada) {
 
 // 🔹 Nuevo componente para manejar la autenticación
 function AppContent() {
-  const [mostrarPopUpSessionExpirada, setMostrarPopUpSessionExpirada] = useState(false);
+  const [mostrarPopUpSessionExpirada, setMostrarPopUpSessionExpirada] =
+    useState(false);
   const router = useRouter();
 
   useProtectedRoute(setMostrarPopUpSessionExpirada); // 🔥 Pasamos el estado al hook
 
   return (
-    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}>
+    <StripeProvider
+      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+    >
       <PaperProvider theme={combinedTheme}>
+        <NotificationHandler />
 
         {mostrarPopUpSessionExpirada && (
           <ConfirmationDialog
             message="Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
             onConfirm={() => {
               setMostrarPopUpSessionExpirada(false); // 🔹 Primero cerramos el popup
-              setTimeout(() => {  // 🔹 Esperamos un poco para actualizar el estado antes de redirigir
+              setTimeout(() => {
+                // 🔹 Esperamos un poco para actualizar el estado antes de redirigir
                 router.replace('/login');
               }, 100);
             }}
@@ -76,7 +87,6 @@ function AppContent() {
             confirmButtonLabel="Iniciar Sesión"
           />
         )}
-
 
         <Stack
           screenOptions={{

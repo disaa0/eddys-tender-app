@@ -2,14 +2,33 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middlewares/auth.middleware');
 const { isAdmin } = require('../middlewares/admin.middleware');
-const { getProduct, addProduct, modifyProductDetails, getAllProductsPagination } = require('../controllers/product.controller');
-const { toggleProductStatus, updateProductCustomization, uploadProductImage } = require('../controllers/admin.controller');
-const { getOrderHistory, getActiveOrders } = require('../controllers/order.controller');
-const { handleProductImageUpload } = require('../middlewares/upload.middleware');
+const {
+  getProduct,
+  addProduct,
+  modifyProductDetails,
+  getAllProductsPagination,
+} = require('../controllers/product.controller');
+const {
+  toggleProductStatus,
+  updateProductCustomization,
+  uploadProductImage,
+} = require('../controllers/admin.controller');
+const {
+  getOrderHistory,
+  getActiveOrders,
+} = require('../controllers/order.controller');
+const {
+  handleProductImageUpload,
+} = require('../middlewares/upload.middleware');
 const { validateRegister, validateQueryProductIds } = require('../middlewares/validateInput');
 const { registerAdmin } = require('../controllers/auth.controller');
 const adminController = require('../controllers/admin.controller');
-const { getOrdersByDateRange, updateOrderStatus, getOrderById, getOrdersByProducts } = require('../controllers/adminOrder.controller');
+const {
+  getOrdersByDateRange,
+  updateOrderStatus,
+  getOrderById,
+  getOrdersByProducts,
+} = require('../controllers/adminOrder.controller');
 const { getCartsByUserId } = require('../controllers/cart.controller');
 
 // Apply authentication middleware to all admin routes
@@ -38,6 +57,11 @@ router.get('/orders/:id', isAdmin, getOrderById);
 router.patch('/order/:id', isAdmin, updateOrderStatus);
 
 // New route for uploading product images
-router.post('/products/:id/image', isAdmin, handleProductImageUpload, uploadProductImage);
+router.post(
+  '/products/:id/image',
+  isAdmin,
+  handleProductImageUpload,
+  uploadProductImage
+);
 
-module.exports = router; 
+module.exports = router;
