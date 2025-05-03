@@ -127,7 +127,17 @@ export default function AddProduct() {
         });
         return;
       }
-
+      if (!image || image === "") {
+        setSnackbar({
+          visible: true,
+          message: 'Producto Guardado correctamente'
+        });
+        setTimeout(() => {
+          router.replace('/(appAdmin)/adminDashboard');
+        }, 1500);
+        return;
+      }
+      // Si no hay imagen, mostramos el snackbar y salimos
       const fileName = image.split('/').pop();
       const mimeType = getMimeType(fileName);
 
@@ -276,9 +286,9 @@ export default function AddProduct() {
                     </Menu>
                   </View>
 
-                  {error ? (
+                  {error && (
                     <Text style={styles.errorText}>{error}</Text>
-                  ) : null}
+                  )}
 
                   <Button
                     mode="contained"
