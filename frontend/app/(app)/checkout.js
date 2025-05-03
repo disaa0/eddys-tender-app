@@ -178,7 +178,7 @@ export default function Checkout() {
       }
 
     } catch (error) {
-      setError('Error en el pago.')
+      setError(error.message || 'Error en el pago');
       setPurchaseErrorDialogVisible(true);
       console.log(error)
     } finally {
@@ -222,7 +222,6 @@ export default function Checkout() {
   //   />
   // );
 
-
   const renderProduct = ({ item }) => {
     // console.log(item)
     // Filtrar personalizaciones para este item
@@ -241,11 +240,12 @@ export default function Checkout() {
             </View>
           )
         }
-        right={() => <Text>${(item.quantity * item.product.price).toFixed(2)}</Text>}
+        right={() => (
+          <Text>${(item.quantity * item.product.price).toFixed(2)}</Text>
+        )}
       />
     );
   };
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 12,
-    backgroundColor: theme.colors.surface
+    backgroundColor: theme.colors.surface,
   },
   cardInfo: {
     marginTop: 12,
@@ -398,4 +398,4 @@ const styles = StyleSheet.create({
     margin: 10,
     marginBottom: 0,
   },
-}); 
+});
