@@ -215,10 +215,18 @@ export default function AddProduct() {
                   </Button>
 
                   {image && (
-                    <Image
-                      source={{ uri: image }}
-                      style={styles.imagePreview}
-                    />
+                    <View>
+                      <Image
+                        source={{ uri: image }}
+                        style={styles.imagePreview}
+                      />
+                      <IconButton
+                        icon="close"
+                        size={24}
+                        style={{ position: 'absolute', top: 8, right: 8 }}
+                        onPress={() => setImage("")}
+                      />
+                    </View>
                   )}
 
                   <TextInput
