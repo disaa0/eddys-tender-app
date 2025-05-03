@@ -1,10 +1,11 @@
-import { View, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, ActivityIndicator, Image, Platform } from 'react-native';
 import { Button, Card, Text, TextInput, IconButton, Switch, Snackbar, List, Dialog, Portal } from 'react-native-paper';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import AdminApiService from '../../api/AdminApiService';
 import { theme } from '../../theme';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from "expo-image-picker";
 
 // Remove static data since we're using the API now
 export default function ProductDetails() {
@@ -24,6 +25,19 @@ export default function ProductDetails() {
   const [personalizations, setPersonalizations] = useState([]);
   const [personalizationDialog, setPersonalizationDialog] = useState(false);
   const [newPersonalization, setNewPersonalization] = useState({ name: '', status: true });
+  const [image, setImage] = useState("");
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      setImage(result.assets[0].uri);
+    }
+  }
 
   useEffect(() => {
     loadProduct();
@@ -307,7 +321,7 @@ export default function ProductDetails() {
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
         <View style={styles.container}>
-          {/* Add header with back button */}
+          {/* /* Add header with back button */}
           <View style={styles.header}>
             <IconButton
               icon="arrow-left"
@@ -320,6 +334,29 @@ export default function ProductDetails() {
           <ScrollView style={styles.scrollView}>
             <Card style={styles.card}>
               <Card.Content style={styles.content}>
+                <Button
+                  mode="contained"
+                  onPress={pickImage}
+                  style={styles.imageButton}
+                  icon="camera"
+                >
+                  Seleccionar Imagen
+                </Button>
+
+                {image && (
+                  <View>
+                    <Image
+                      source={{ uri: image }}
+                      style={styles.imagePreview}
+                    />
+                    <IconButton
+                      icon="close"
+                      size={24}
+                      style={{ position: 'absolute', top: 8, right: 8 }}
+                      onPress={() => setImage("")}
+                    />
+                  </View>
+                )}
                 <TextInput
                   mode="outlined"
                   label="Nombre del producto *"
@@ -399,7 +436,8 @@ export default function ProductDetails() {
                   (form.name === product.name &&
                     form.price === product.price.toString() &&
                     form.description === product.description &&
-                    form.status === product.status)
+                    form.status === product.status &&
+                    image === '')
                 }
               >
                 Guardar Cambios
@@ -516,5 +554,21 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  imageButton: {
+    marginBottom: 16,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    marginBottom: 16,
+    borderRadius: 8,
+  },
+  pickerContainer: {
+    marginBottom: 16,
+  },
+  pickerLabel: {
+    marginBottom: 8,
+    color: theme.colors.primary,
   },
 }); 
