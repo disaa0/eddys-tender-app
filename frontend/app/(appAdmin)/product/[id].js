@@ -6,6 +6,7 @@ import AdminApiService from '../../api/AdminApiService';
 import { theme } from '../../theme';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from "expo-image-picker";
+import adminApiService from '../../api/AdminApiService';
 
 // Remove static data since we're using the API now
 export default function ProductDetails() {
@@ -172,6 +173,8 @@ export default function ProductDetails() {
         form.price !== product.price.toString() ||
         form.description !== product.description ||
         form.status !== product.status
+        || image !== ''
+        || form.idProductType !== product.idProductType
       );
 
     if (hasUnsavedChanges) {
@@ -186,12 +189,32 @@ export default function ProductDetails() {
           {
             text: 'Descartar',
             style: 'destructive',
-            onPress: () => router.replace('/(appAdmin)/adminDashboard')
+            onPress: () => {
+              router.replace('/(appAdmin)/adminDashboard')
+              setImage("");
+            }
           }
         ]
       );
     } else {
       router.replace('/(appAdmin)/adminDashboard');
+    }
+  };
+
+  const getMimeType = (filename) => {
+    const extension = filename.split('.').pop().toLowerCase();
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'heic':
+        return 'image/heic'; // Por si usas fotos de iPhone
+      default:
+        return 'application/octet-stream'; // Tipo genérico si no sabemos
     }
   };
 
@@ -230,11 +253,50 @@ export default function ProductDetails() {
 
       console.log('Update Response:', response);
 
+      if (!image || image === "") {
+        if (response?.message === "Detalles del producto actualizados correctamente") {
+          setSnackbar({
+            visible: true,
+            message: 'Producto actualizado correctamente'
+          });
+
+          setImage("");
+
+          setTimeout(() => {
+            router.replace('/(appAdmin)/adminDashboard');
+          }, 1500);
+        } else {
+          throw new Error('Error al actualizar el producto');
+        }
+        return;
+      }
+
+      const fileName = image.split('/').pop();
+      const mimeType = getMimeType(fileName);
+
+      const formData = new FormData();
+      formData.append('productImage', {
+        uri: image,
+        type: mimeType,
+        name: fileName,
+      });;
+
+      const uploadResponse = await adminApiService.UploadProductImage(id, formData);
+      if (!uploadResponse) {
+        setSnackbar({
+          visible: true,
+          message: 'Error al subir la imagen del producto'
+        });
+        return;
+      }
+
       if (response?.message === "Detalles del producto actualizados correctamente") {
         setSnackbar({
           visible: true,
           message: 'Producto actualizado correctamente'
         });
+
+        setImage("");
 
         setTimeout(() => {
           router.replace('/(appAdmin)/adminDashboard');
@@ -551,6 +613,7 @@ const styles = StyleSheet.create({
   },
   snackbar: {
     position: 'absolute',
+    backgroundColor: theme.colors.primary,
     bottom: 0,
     left: 0,
     right: 0,
