@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { theme } from '../../theme';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
 import { ActivityIndicator, Card, Chip, IconButton, List, RadioButton } from 'react-native-paper';
 import { useAdminOrders } from '../../hooks/useAdminOrders';
 import adminApiService from '../../api/AdminApiService';

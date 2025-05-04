@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../../../theme';
 import useShippingAddresses from '../../../hooks/useShippingAddresses';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function AddAddress() {
     const [street, setStreet] = useState('');

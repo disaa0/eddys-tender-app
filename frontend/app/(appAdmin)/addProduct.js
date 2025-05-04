@@ -5,7 +5,8 @@ import { useState } from 'react';
 import * as ImagePicker from "expo-image-picker";
 import AdminApiService from '../api/AdminApiService';
 import { theme } from '../theme';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import adminApiService from '../api/AdminApiService';
 
 export default function AddProduct() {

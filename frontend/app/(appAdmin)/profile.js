@@ -7,7 +7,8 @@ import { useUserInfo } from '../hooks/useUserInfo';
 import { useState } from 'react';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 import AuthService from '../api/AuthService';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function Profile() {
   const router = useRouter();

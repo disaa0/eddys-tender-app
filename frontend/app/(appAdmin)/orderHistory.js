@@ -2,7 +2,7 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-
 import { Card, Text, Chip, List, IconButton, Searchbar, ActivityIndicator, Button } from 'react-native-paper';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useState, useCallback, useEffect } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker'; // Asegúrate de instalarlo
 import apiService from '../api/ApiService';
 import { theme } from '../theme';

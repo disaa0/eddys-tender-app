@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import AdminApiService from '../../api/AdminApiService';
 import { theme } from '../../theme';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as ImagePicker from "expo-image-picker";
 import adminApiService from '../../api/AdminApiService';
 

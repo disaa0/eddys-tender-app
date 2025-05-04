@@ -6,7 +6,7 @@ import { theme } from '../theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import ProductCard from '../components/ProductCard';
 import CategoryChips from '../components/CategoryChips';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
 import SortChips from '../components/SortChips';
 import { useFocusEffect } from '@react-navigation/native';
 import apiService from '../api/ApiService';
