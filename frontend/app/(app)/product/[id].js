@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons'; // Importar iconos de Expo
 import apiService from '../../api/ApiService';
-import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import PersonalizationList from '../../components/PersonalizationList';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
 
@@ -178,7 +179,7 @@ export default function ProductDetails() {
               <Card.Cover
                 source={
                   productImage
-                    ? { uri: productImage }
+                    ? { uri: productImage.toString() }
                     : defaultImage
                 }
                 style={styles.image}

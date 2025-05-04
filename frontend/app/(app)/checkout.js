@@ -7,7 +7,7 @@ import apiService from '../api/ApiService';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 import { useStripe } from '@stripe/stripe-react-native';
 import useCart from '../hooks/useCart';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
 import { useCartRefresh } from '../context/CartRefreshContext';
 
 export default function Checkout() {

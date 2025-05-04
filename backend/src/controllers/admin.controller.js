@@ -49,6 +49,29 @@ async function uploadProductImage(req, res) {
         if (!req.file) {
             return res.status(400).json({ message: "No se ha subido ninguna imagen" });
         }
+        
+        // Check for and remove existing image files with different extensions
+        const uploadDir = path.join(__dirname, '../../uploads/products');
+        const fileNameBase = `product-${productId}`;
+        const possibleExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+        
+        try {
+            const files = fs.readdirSync(uploadDir);
+            for (const file of files) {
+                // Check if file matches our product ID pattern but has a different extension
+                const filePath = path.join(uploadDir, file);
+                const parsedFile = path.parse(file);
+                
+                if (parsedFile.name === fileNameBase && 
+                    path.join(uploadDir, file) !== path.join(uploadDir, req.file.filename)) {
+                    console.log(`Removing old image file: ${filePath}`);
+                    fs.unlinkSync(filePath);
+                }
+            }
+        } catch (fsError) {
+            console.error('Error managing existing files:', fsError);
+            // Continue processing even if file cleanup fails
+        }
 
         // Get the filename that was created
         const filename = path.basename(req.file.path);

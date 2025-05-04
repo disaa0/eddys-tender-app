@@ -211,69 +211,15 @@ async function updateOrderStatus(req, res) {
     try {
         const { id } = req.params;
         const { idOrderStatus } = req.body;
-
-        // Validate order ID
-        if (!id || isNaN(parseInt(id))) {
-            return res.status(400).json({
-                message: 'ID de orden inválido'
-            });
-        }
-
-        // Validate order status ID
-        if (!idOrderStatus || isNaN(parseInt(idOrderStatus))) {
-            return res.status(400).json({
-                message: 'Se requiere un ID de estado de orden válido'
-            });
-        }
-
-        // Check if the order exists
-        const orderExists = await prisma.order.findUnique({
-            where: { idOrder: parseInt(id) }
-        });
-
-        if (!orderExists) {
-            return res.status(404).json({
-                message: 'Orden no encontrada'
-            });
-        }
-
-        // Check if the order status exists
-        const statusExists = await prisma.orderStatus.findUnique({
-            where: { idOrderStatus: parseInt(idOrderStatus) }
-        });
-
-        if (!statusExists) {
-            return res.status(404).json({
-                message: 'Estado de orden no encontrado'
-            });
-        }
-
-        // Update the order status
-        const updatedOrder = await prisma.order.update({
-            where: { idOrder: parseInt(id) },
-            data: { idOrderStatus: parseInt(idOrderStatus) },
-            include: {
-                orderStatus: true,
-                paymentType: true,
-                shipmentType: true
-            }
-        });
-
-        // If the order status changed to "Delivered" (assuming idOrderStatus 5 is for delivered)
-        if (parseInt(idOrderStatus) === 5) {  // Replace with your actual "Delivered" status ID
-            updatedOrder.deliveryAt = new Date();
-
-            await prisma.order.update({
-                where: { idOrder: parseInt(id) },
-                data: { deliveryAt: updatedOrder.deliveryAt }
-            });
-        }
-
-        return res.status(200).json({
-            message: 'Estado de orden actualizado correctamente',
-            data: updatedOrder
-        });
-
+        
+        // Use the adminOrderNotification controller to handle the update
+        // This way we ensure the notification is sent and use the same validation logic
+        const adminOrderNotificationController = require('./adminOrderNotification.controller');
+        
+        // We need to adapt the request parameters to match the controller's expectations
+        req.params.orderId = id;
+        
+        return adminOrderNotificationController.updateOrderStatus(req, res);
     } catch (error) {
         console.error('Error updating order status:', error);
         return res.status(500).json({

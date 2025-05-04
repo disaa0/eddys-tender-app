@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { theme } from '../theme';
 import { useRouter } from 'expo-router';
 import api from '../api/ApiService';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function Register() {
   const [name, setName] = useState('');

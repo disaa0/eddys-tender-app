@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { theme } from '../../theme';
 import AdminApiService from '../../api/AdminApiService';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function ProductsList() {
     const [products, setProducts] = useState([]);

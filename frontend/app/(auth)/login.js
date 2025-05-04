@@ -8,7 +8,8 @@ import { ActivityIndicator } from 'react-native-paper';
 import { API_URL } from '../config';
 import { useRouter } from 'expo-router';
 import ConfirmationDialog from '../components/ConfirmationDialog';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function Login() {
   const { login, isAdmin } = useAuth();

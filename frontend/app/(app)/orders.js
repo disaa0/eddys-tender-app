@@ -2,7 +2,7 @@ import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Card, Text, Chip, List, IconButton, Searchbar, ActivityIndicator } from 'react-native-paper';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useState, useCallback } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
 import apiService from '../api/ApiService';
 import { theme } from '../theme';
 import ConfirmationDialog from '../components/ConfirmationDialog'

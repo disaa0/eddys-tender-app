@@ -42,7 +42,17 @@ services:
       - ./mysql/conf:/etc/mysql/conf.d
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "-puser_password"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "user",
+          "-puser_password",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5

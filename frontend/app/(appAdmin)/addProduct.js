@@ -1,11 +1,28 @@
-import { View, Alert, StyleSheet, ScrollView, Image, KeyboardAvoidingView, Platform } from 'react-native';
-import { Button, TextInput, IconButton, Text, Card, Snackbar, Menu } from 'react-native-paper';
+import {
+  View,
+  Alert,
+  StyleSheet,
+  ScrollView,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import {
+  Button,
+  TextInput,
+  IconButton,
+  Text,
+  Card,
+  Snackbar,
+  Menu,
+} from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import * as ImagePicker from "expo-image-picker";
+import * as ImagePicker from 'expo-image-picker';
 import AdminApiService from '../api/AdminApiService';
 import { theme } from '../theme';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import adminApiService from '../api/AdminApiService';
 
 export default function AddProduct() {
@@ -13,18 +30,17 @@ export default function AddProduct() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
-    name: "",
-    price: "",
-    description: "",
-    idProductType: "",
-    status: true
+    name: '',
+    price: '',
+    description: '',
+    idProductType: '',
+    status: true,
   });
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState('');
   const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
   const [visible, setVisible] = useState(false);
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState('');
   const [anchor, setAnchor] = useState(null);
-
 
   // Validate form data
   const validateForm = () => {
@@ -94,7 +110,6 @@ export default function AddProduct() {
     }
   };
 
-
   const handleAddProduct = async () => {
     try {
       const validationErrors = validateForm();
@@ -123,14 +138,14 @@ export default function AddProduct() {
       if (!idProduct) {
         setSnackbar({
           visible: true,
-          message: 'Error al agregar el producto'
+          message: 'Error al agregar el producto',
         });
         return;
       }
-      if (!image || image === "") {
+      if (!image || image === '') {
         setSnackbar({
           visible: true,
-          message: 'Producto Guardado correctamente'
+          message: 'Producto Guardado correctamente',
         });
         setTimeout(() => {
           router.replace('/(appAdmin)/adminDashboard');
@@ -146,20 +161,23 @@ export default function AddProduct() {
         uri: image,
         type: mimeType,
         name: fileName,
-      });;
+      });
 
-      const uploadResponse = await adminApiService.UploadProductImage(idProduct, formData);
+      const uploadResponse = await adminApiService.UploadProductImage(
+        idProduct,
+        formData
+      );
       if (!uploadResponse) {
         setSnackbar({
           visible: true,
-          message: 'Error al subir la imagen del producto'
+          message: 'Error al subir la imagen del producto',
         });
         return;
       }
       // Si la respuesta es exitosa, mostramos el snackbar
       setSnackbar({
         visible: true,
-        message: 'Producto con imagen Guardado correctamente'
+        message: 'Producto con imagen Guardado correctamente',
       });
 
       // if (response) {
@@ -174,13 +192,12 @@ export default function AddProduct() {
       // }
 
       setForm({
-        name: "",
-        price: "",
-        description: "",
-        idProductType: "",
-        status: true
+        name: '',
+        price: '',
+        description: '',
+        idProductType: '',
+        status: true,
       });
-
     } catch (err) {
       setError(err.message || 'Error al agregar el producto');
     } finally {
@@ -192,15 +209,16 @@ export default function AddProduct() {
     setSelected(label);
     setForm({ ...form, idProductType: value });
     setVisible(false);
-  }
+  };
 
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView style={{ flex: 1 }}
-          behavior={
-            Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={styles.container}>
             <View style={styles.header}>
               <IconButton
@@ -208,7 +226,9 @@ export default function AddProduct() {
                 size={24}
                 onPress={() => router.back()}
               />
-              <Text variant="titleLarge" style={styles.title}>Agregar Producto</Text>
+              <Text variant="titleLarge" style={styles.title}>
+                Agregar Producto
+              </Text>
               <View style={{ width: 48 }} /> {/* Spacer */}
             </View>
 
@@ -234,7 +254,7 @@ export default function AddProduct() {
                         icon="close"
                         size={24}
                         style={{ position: 'absolute', top: 8, right: 8 }}
-                        onPress={() => setImage("")}
+                        onPress={() => setImage('')}
                       />
                     </View>
                   )}
@@ -243,7 +263,7 @@ export default function AddProduct() {
                     mode="outlined"
                     label="Nombre del producto *"
                     value={form.name}
-                    onChangeText={(text) => handleChange("name", text)}
+                    onChangeText={(text) => handleChange('name', text)}
                     style={styles.input}
                     maxLength={50}
                   />
@@ -252,7 +272,7 @@ export default function AddProduct() {
                     mode="outlined"
                     label="Precio *"
                     value={form.price}
-                    onChangeText={(text) => handleChange("price", text)}
+                    onChangeText={(text) => handleChange('price', text)}
                     keyboardType="decimal-pad"
                     style={styles.input}
                     left={<TextInput.Affix text="$" />}
@@ -262,7 +282,7 @@ export default function AddProduct() {
                     mode="outlined"
                     label="Descripción *"
                     value={form.description}
-                    onChangeText={(text) => handleChange("description", text)}
+                    onChangeText={(text) => handleChange('description', text)}
                     multiline
                     numberOfLines={3}
                     style={styles.input}
@@ -275,20 +295,30 @@ export default function AddProduct() {
                       visible={visible}
                       onDismiss={() => setVisible(false)}
                       anchor={
-                        <Button mode="outlined" onPress={() => setVisible(true)}>
-                          {selected || "Seleccione un tipo"}
+                        <Button
+                          mode="outlined"
+                          onPress={() => setVisible(true)}
+                        >
+                          {selected || 'Seleccione un tipo'}
                         </Button>
                       }
                     >
-                      <Menu.Item title="Comida" onPress={() => handleSelect("1", "Comida")} />
-                      <Menu.Item title="Bebida" onPress={() => handleSelect("2", "Bebida")} />
-                      <Menu.Item title="Extra" onPress={() => handleSelect("3", "Extra")} />
+                      <Menu.Item
+                        title="Comida"
+                        onPress={() => handleSelect('1', 'Comida')}
+                      />
+                      <Menu.Item
+                        title="Bebida"
+                        onPress={() => handleSelect('2', 'Bebida')}
+                      />
+                      <Menu.Item
+                        title="Extra"
+                        onPress={() => handleSelect('3', 'Extra')}
+                      />
                     </Menu>
                   </View>
 
-                  {error && (
-                    <Text style={styles.errorText}>{error}</Text>
-                  )}
+                  {error && <Text style={styles.errorText}>{error}</Text>}
 
                   <Button
                     mode="contained"
@@ -374,22 +404,22 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: theme.colors.primary,
-  }
+  },
 });
 
 const pickerSelectStyles = {
   inputIOS: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     padding: 16,
     borderRadius: 5,
-    marginTop: 10
+    marginTop: 10,
   },
   inputAndroid: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     padding: 16,
     borderRadius: 5,
-    marginTop: 10
+    marginTop: 10,
   },
 };

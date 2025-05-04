@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import AdminApiService from '../../api/AdminApiService';
 import { theme } from '../../theme';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as ImagePicker from "expo-image-picker";
 import adminApiService from '../../api/AdminApiService';
 
@@ -275,19 +276,31 @@ export default function ProductDetails() {
       const mimeType = getMimeType(fileName);
 
       const formData = new FormData();
+      // Handle platform differences for file URIs
+      let fileUri = image;
+      // iOS needs the 'file://' prefix removed
+      if (Platform.OS === 'ios' && fileUri.startsWith('file://')) {
+        fileUri = fileUri.replace('file://', '');
+      }
+      
       formData.append('productImage', {
-        uri: image,
+        uri: fileUri,
         type: mimeType,
         name: fileName,
-      });;
+      });
 
-      const uploadResponse = await adminApiService.UploadProductImage(id, formData);
-      if (!uploadResponse) {
+      try {
+        const uploadResponse = await adminApiService.UploadProductImage(id, formData);
+        if (!uploadResponse) {
+          throw new Error('No response from server');
+        }
+      } catch (imageError) {
+        console.error('Image upload error:', imageError);
         setSnackbar({
           visible: true,
-          message: 'Error al subir la imagen del producto'
+          message: 'Error al subir la imagen, pero el producto fue actualizado'
         });
-        return;
+        // Continue execution to allow the product update to complete
       }
 
       if (response?.message === "Detalles del producto actualizados correctamente") {
