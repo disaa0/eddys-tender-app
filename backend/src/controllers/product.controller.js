@@ -117,14 +117,12 @@ async function getProduct(req, res) {
             });
         }
 
-        // Check if product image exists
+        // Check if product image exists (only jpg now)
         const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
-        const imagePng = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.png`);
-        const imageWebp = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.webp`);
         
         let productWithImage = {...product};
         
-        if (fs.existsSync(imagePath) || fs.existsSync(imagePng) || fs.existsSync(imageWebp)) {
+        if (fs.existsSync(imagePath)) {
             // Add image URL only if the image exists
             productWithImage.image_url = `/api/products/${product.idProduct}/image`;
         }
@@ -587,27 +585,18 @@ async function getProductImage(req, res) {
             });
         }
 
-        // Look for the product image with exact filename pattern
+        // Now all images are JPG format
         const uploadDir = path.join(__dirname, '../../uploads/products');
-        const expectedFilename = `product-${productId}`;
-
-        // Get all files in the directory
-        const files = fs.readdirSync(uploadDir);
-
-        // Find the file that matches our pattern (allowing for any extension)
-        const productImage = files.find(file => {
-            const filename = path.parse(file).name; // Get filename without extension
-            return filename === expectedFilename;
-        });
-
-        if (!productImage) {
+        const imagePath = path.join(uploadDir, `product-${productId}.jpg`);
+        
+        if (!fs.existsSync(imagePath)) {
             return res.status(404).json({
                 message: "Este producto no tiene una imagen"
             });
         }
 
         // Send the image file
-        res.sendFile(path.join(uploadDir, productImage));
+        res.sendFile(imagePath);
 
     } catch (error) {
         console.error('Error getting product image:', error);
@@ -678,14 +667,12 @@ const searchProducts = async (req, res) => {
             }
         });
         
-        // Add image URL to each product only if image exists
+        // Add image URL to each product only if image exists (only jpg now)
         const productsWithImages = await Promise.all(products.map(async product => {
             const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
-            const imagePng = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.png`); 
-            const imageWebp = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.webp`);
             
             let productWithImage = {...product};
-            if (fs.existsSync(imagePath) || fs.existsSync(imagePng) || fs.existsSync(imageWebp)) {
+            if (fs.existsSync(imagePath)) {
                 // Add image URL only if the image exists
                 productWithImage.image_url = `/api/products/${product.idProduct}/image`;
             }
@@ -749,8 +736,6 @@ async function getPopularProducts(req, res) {
         // Format the response with image URLs if they exist
         const formattedProducts = await Promise.all(popularProducts.map(async product => {
             const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
-            const imagePng = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.png`); 
-            const imageWebp = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.webp`);
             
             const productObj = {
                 ...product,
@@ -758,7 +743,7 @@ async function getPopularProducts(req, res) {
                 _count: undefined // Remove the _count field from response
             };
             
-            if (fs.existsSync(imagePath) || fs.existsSync(imagePng) || fs.existsSync(imageWebp)) {
+            if (fs.existsSync(imagePath)) {
                 // Add image URL only if the image exists
                 productObj.image_url = `/api/products/${product.idProduct}/image`;
             }

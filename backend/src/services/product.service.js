@@ -15,13 +15,11 @@ const getProductDetailsService = async (productId, userType) => {
         throw new Error("Producto no encontrado");
     }
 
-    // Check if product image exists
+    // Check if product image exists (only jpg now)
     const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
-    const imagePng = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.png`);
-    const imageWebp = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.webp`);
     
     let productWithImage = {...product};
-    if (fs.existsSync(imagePath) || fs.existsSync(imagePng) || fs.existsSync(imageWebp)) {
+    if (fs.existsSync(imagePath)) {
         // Add image URL only if the image exists
         productWithImage.image_url = `/api/products/${product.idProduct}/image`;
     }
@@ -42,14 +40,12 @@ async function getProducts(userType) {
         orderBy: { createdAt: 'desc' },
     });
 
-    // Add image URL to each product only if image exists
+    // Add image URL to each product only if image exists (only jpg now)
     const productsWithImages = await Promise.all(products.map(async product => {
         const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
-        const imagePng = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.png`); 
-        const imageWebp = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.webp`);
         
         let productWithImage = {...product};
-        if (fs.existsSync(imagePath) || fs.existsSync(imagePng) || fs.existsSync(imageWebp)) {
+        if (fs.existsSync(imagePath)) {
             // Add image URL only if the image exists
             productWithImage.image_url = `/api/products/${product.idProduct}/image`;
         }

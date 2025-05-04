@@ -3511,7 +3511,210 @@ El cuerpo es un objeto de evento generado por Stripe. Aquí hay un ejemplo simpl
 
 El sistema de notificaciones permite enviar mensajes push a los usuarios de la aplicación utilizando el servicio Expo Push Notifications.
 
-### 15.1 Registro de Token de Dispositivo
+### 15.1 Obtener Todas las Notificaciones (Solo Administradores)
+
+**GET /api/admin/notifications**
+
+Obtiene todas las notificaciones generadas en el sistema con paginación.
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Query:**
+| Parámetro | Tipo | Descripción | Requerido |
+|-----------|------|-------------|-----------|
+| page | number | Número de página | No (default: 1) |
+| limit | number | Elementos por página | No (default: 10) |
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Notificaciones obtenidas correctamente",
+  "data": {
+    "notifications": [
+      {
+        "id": 42,
+        "title": "Nuevo pedido #123",
+        "body": "Se ha recibido un nuevo pedido",
+        "type": "ORDER_CREATED",
+        "data": {
+          "orderId": 123
+        },
+        "read": false,
+        "createdAt": "2025-05-03T18:35:12Z"
+      },
+      {
+        "id": 41,
+        "title": "Pago procesado",
+        "body": "Pago exitoso para el pedido #122",
+        "type": "PAYMENT_SUCCESS",
+        "data": {
+          "orderId": 122
+        },
+        "read": true,
+        "createdAt": "2025-05-03T16:22:45Z"
+      }
+    ],
+    "pagination": {
+      "totalItems": 42,
+      "totalPages": 5,
+      "currentPage": 1,
+      "itemsPerPage": 10
+    }
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 15.2 Obtener Notificaciones No Leídas (Solo Administradores)
+
+**GET /api/admin/notifications/unread**
+
+Obtiene todas las notificaciones no leídas para los administradores.
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros de Query:**
+| Parámetro | Tipo | Descripción | Requerido |
+|-----------|------|-------------|-----------|
+| limit | number | Máximo número de notificaciones a retornar | No (default: 10) |
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Notificaciones no leídas obtenidas correctamente",
+  "data": {
+    "count": 3,
+    "notifications": [
+      {
+        "id": 42,
+        "title": "Nuevo pedido #123",
+        "body": "Se ha recibido un nuevo pedido",
+        "type": "ORDER_CREATED",
+        "data": {
+          "orderId": 123
+        },
+        "read": false,
+        "createdAt": "2025-05-03T18:35:12Z"
+      },
+      {
+        "id": 40,
+        "title": "Problema con pago",
+        "body": "Pago fallido para el pedido #121",
+        "type": "PAYMENT_FAILED",
+        "data": {
+          "orderId": 121,
+          "errorReason": "insufficient_funds"
+        },
+        "read": false,
+        "createdAt": "2025-05-03T15:10:23Z"
+      },
+      {
+        "id": 38,
+        "title": "Stock bajo",
+        "body": "El producto 'Hamburguesa Clásica' tiene stock bajo",
+        "type": "LOW_STOCK",
+        "data": {
+          "productId": 1,
+          "currentStock": 5
+        },
+        "read": false,
+        "createdAt": "2025-05-03T12:45:19Z"
+      }
+    ]
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 15.3 Marcar Notificación como Leída (Solo Administradores)
+
+**PATCH /api/admin/notifications/:id/read**
+
+Marca una notificación específica como leída.
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Parámetros URL:**
+| Parámetro | Tipo | Descripción | Requerido |
+|-----------|------|-------------|-----------|
+| id | number | ID de la notificación | Sí |
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Notificación marcada como leída",
+  "data": {
+    "id": 42,
+    "read": true,
+    "updatedAt": "2025-05-04T09:15:33Z"
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 400: ID de notificación inválido
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 404: Notificación no encontrada
+- 500: Error del servidor
+
+### 15.4 Marcar Todas las Notificaciones como Leídas (Solo Administradores)
+
+**PATCH /api/admin/notifications/read-all**
+
+Marca todas las notificaciones no leídas como leídas.
+
+**Headers Requeridos:**
+
+```
+Authorization: Bearer <token>
+```
+
+**Respuesta Exitosa (200):**
+
+```json
+{
+  "message": "Todas las notificaciones marcadas como leídas",
+  "data": {
+    "count": 3,
+    "updatedAt": "2025-05-04T09:20:45Z"
+  }
+}
+```
+
+**Errores Posibles:**
+
+- 401: Token no proporcionado
+- 403: Usuario no es administrador
+- 500: Error del servidor
+
+### 15.5 Registro de Token de Dispositivo
 
 **POST /api/notifications/register**
 
