@@ -24,6 +24,7 @@ async function createOrder(userId, orderData) {
   }
 
   let orderResult;
+  let userInfo;
 
   // Execute the order creation in a transaction
   await prisma.$transaction(async (tx) => {
@@ -34,6 +35,7 @@ async function createOrder(userId, orderData) {
         status: true,
       },
       include: {
+        user: true,
         itemsCart: {
           where: { status: true },
           include: { product: true },
@@ -44,6 +46,9 @@ async function createOrder(userId, orderData) {
     if (!cart || cart.itemsCart.length === 0) {
       throw new Error('No hay productos en el carrito');
     }
+
+    // Store user info for notification
+    userInfo = cart.user;
 
     // 2. Calculate total price from cart items
     const itemsTotal = cart.itemsCart.reduce((sum, item) => {
@@ -74,6 +79,27 @@ async function createOrder(userId, orderData) {
   });
 
   // Now that the transaction has committed, the order is visible in the database
+
+  // 4. Send notification to all admin users about the new order
+  const notificationService = require('./notification.service');
+  const userName = userInfo.username;
+  
+  // Check if it's cash payment (typically idPaymentType = 1)
+  if (idPaymentType === 1) {
+    // For cash payments, notify admins immediately
+    await notificationService.sendNotificationsToAdmins({
+      title: '¡Nuevo pedido en efectivo!',
+      body: `El usuario ${userName} ha realizado el pedido #${orderResult.idOrder} por $${orderResult.totalPrice} a pagar en efectivo.`,
+      data: {
+        type: 'NEW_CASH_ORDER',
+        orderId: orderResult.idOrder,
+        userId: userInfo.idUser,
+        userName: userName,
+        amount: orderResult.totalPrice,
+        paymentType: 'cash'
+      }
+    });
+  }
 
   // 5. If it's a card payment (PaymentType 2 or 3), create payment intent
   if (idPaymentType === 2 || idPaymentType === 3) {
@@ -228,7 +254,13 @@ async function handlePaymentSucceeded(paymentIntent) {
     // Find order by payment intent ID
     const order = await prisma.order.findUnique({
       where: { stripePaymentIntentId: paymentIntent.id },
-      include: { cart: true },
+      include: { 
+        cart: { 
+          include: { 
+            user: true 
+          } 
+        } 
+      },
     });
 
     if (!order) {
@@ -275,6 +307,21 @@ async function handlePaymentSucceeded(paymentIntent) {
     console.log(
       `Order ${order.idOrder} paid successfully and cart ${order.idCart} disabled`
     );
+
+    // 4. Send notification to all admin users about the new paid order
+    const notificationService = require('./notification.service');
+    const userName = `${order.cart.user.username}`;
+    await notificationService.sendNotificationsToAdmins({
+      title: '¡Nuevo pedido pagado!',
+      body: `El usuario ${userName} ha realizado el pedido #${order.idOrder} por $${order.totalPrice}.`,
+      data: {
+        type: 'NEW_PAID_ORDER',
+        orderId: order.idOrder,
+        userId: order.cart.user.idUser,
+        userName: userName,
+        amount: order.totalPrice
+      }
+    });
 
     return {
       success: true,

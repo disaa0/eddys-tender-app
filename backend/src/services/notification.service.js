@@ -99,6 +99,36 @@ class NotificationService {
     const pushTokens = tokens.map(t => t.token);
     return this.sendNotifications(pushTokens, message);
   }
+  
+  /**
+   * Send notifications to all admin users (userType = 1)
+   * @param {Object} message - The notification message object
+   * @returns {Promise} Result of the send operation
+   */
+  async sendNotificationsToAdmins(message) {
+    console.log('Sending notifications to all admin users');
+    
+    // Find all admin users (userType = 1)
+    const adminUsers = await prisma.user.findMany({
+      where: {
+        idUserType: 1, // Admin user type
+        status: true   // Only active users
+      },
+      select: {
+        idUser: true
+      }
+    });
+    
+    const adminUserIds = adminUsers.map(admin => admin.idUser);
+    console.log(`Found ${adminUserIds.length} admin users:`, adminUserIds);
+    
+    if (adminUserIds.length === 0) {
+      console.log('No admin users found to notify');
+      return { success: false, message: 'No admin users found' };
+    }
+    
+    return this.sendNotificationsToUsers(adminUserIds, message);
+  }
 
   /**
    * Send notification to a single user

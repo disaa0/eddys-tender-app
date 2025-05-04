@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 
 // Ensure the upload directory exists
 const uploadDir = path.join(__dirname, '../../uploads/products');
@@ -8,27 +9,17 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configure storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        // Use the product ID for the filename
-        const productId = req.params.id;
-        const ext = path.extname(file.originalname);
-        cb(null, `product-${productId}${ext}`);
-    }
-});
+// Configure multer storage to use memory storage (temporary)
+const storage = multer.memoryStorage();
 
 // File filter to accept only images
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Solo se permiten archivos de imagen (jpeg, jpg, png, webp)'), false);
+        cb(new Error('Solo se permiten archivos de imagen (jpeg, jpg, png, webp, gif)'), false);
     }
 };
 
@@ -41,7 +32,37 @@ const upload = multer({
     }
 }).single('productImage');
 
-// Wrapper to handle multer errors
+// Process image using Sharp and convert to JPG
+const processImage = async (req, res, next) => {
+    if (!req.file) {
+        return next();
+    }
+
+    try {
+        const productId = req.params.id;
+        const outputFilename = `product-${productId}.jpg`;
+        const outputPath = path.join(uploadDir, outputFilename);
+
+        // Process with Sharp: resize and convert to jpg format
+        await sharp(req.file.buffer)
+            .resize(800) // Resize to max width of 800px (maintains aspect ratio)
+            .jpeg({ quality: 85 }) // Convert to JPG with 85% quality
+            .toFile(outputPath);
+
+        // Update the file information in the request
+        req.file.filename = outputFilename;
+        req.file.path = outputPath;
+        
+        next();
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error al procesar la imagen",
+            error: error.message
+        });
+    }
+};
+
+// Wrapper to handle multer errors and process image
 const handleProductImageUpload = (req, res, next) => {
     upload(req, res, function (err) {
         if (err instanceof multer.MulterError) {
@@ -56,7 +77,9 @@ const handleProductImageUpload = (req, res, next) => {
                 error: err.message
             });
         }
-        next();
+        
+        // Process image before continuing
+        processImage(req, res, next);
     });
 };
 

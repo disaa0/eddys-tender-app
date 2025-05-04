@@ -30,6 +30,7 @@ const {
   getOrdersByProducts,
 } = require('../controllers/adminOrder.controller');
 const { getCartsByUserId } = require('../controllers/cart.controller');
+const adminOrderNotificationController = require('../controllers/adminOrderNotification.controller');
 
 // Apply authentication middleware to all admin routes
 router.use(authenticateToken);
@@ -63,5 +64,11 @@ router.post(
   handleProductImageUpload,
   uploadProductImage
 );
+
+// Admin notification routes
+router.get('/notifications/tokens', isAdmin, adminOrderNotificationController.getAdminTokens);
+router.post('/notifications/test', isAdmin, adminOrderNotificationController.testAdminNotification);
+router.get('/orders/:orderId/notifications', isAdmin, adminOrderNotificationController.getOrderNotifications);
+router.post('/orders/:orderId/notifications', isAdmin, adminOrderNotificationController.sendCustomOrderNotification);
 
 module.exports = router;
