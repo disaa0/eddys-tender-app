@@ -11,6 +11,7 @@ const cartRoutes = require('./routes/cart.routes');
 const shippingAddressRoutes = require('./routes/shippingAddress.routes');
 const orderRoutes = require('./routes/order.routes');
 const webhookRoutes = require('./routes/webhook.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 // Configurar CORS
 app.use(cors({
@@ -46,6 +47,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/shipping-address', shippingAddressRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Rutas de ejemplo
 app.get("/", (req, res) => {

@@ -106,7 +106,9 @@ class AdminApiService extends BaseApiService {
 
     async UploadProductImage(idProduct, imageFormData) {
         return this.request(`/admin/products/${idProduct}/image`, 'POST', imageFormData, {
-            'Content-Type': 'multipart/form-data',
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
         });
     }
 }

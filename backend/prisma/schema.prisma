@@ -31,6 +31,7 @@ model User {
   carts       Cart[]
   personalizations Personalization[]
   productPersonalizations ProductPersonalization[]
+  notificationTokens NotificationToken[]
 
   // Nombre de la tabla
   @@map("user")
@@ -267,4 +268,19 @@ model Notification{
 
   // Nombre de la tabla
   @@map("notification")
+}
+
+model NotificationToken {
+  idNotificationToken Int @id @default(autoincrement())
+  idUser Int
+  token String @unique
+  deviceInfo Json?
+  createdAt DateTime @default(now())
+  lastUsed DateTime @default(now())
+
+  // Relaciones
+  user User @relation(fields: [idUser], references: [idUser])
+
+  // Nombre de la tabla
+  @@map("notificationToken")
 }

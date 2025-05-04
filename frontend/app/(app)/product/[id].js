@@ -179,7 +179,7 @@ export default function ProductDetails() {
               <Card.Cover
                 source={
                   productImage
-                    ? { uri: productImage }
+                    ? { uri: productImage.toString() }
                     : defaultImage
                 }
                 style={styles.image}
