@@ -11,14 +11,15 @@ export default function ConfirmationDialog({
     confirmButtonDisabled = false,
     confirmButtonLoading = false,
     cancelButtonLabel = 'Cancelar',
-    confirmButtonLabel = 'Eliminar'
+    confirmButtonLabel = 'Eliminar',
+    customContent = null,
 }) {
     return (
         <Portal>
             <Dialog style={styles.container} visible={visible} onDismiss={onDismiss}>
                 <Dialog.Title>{title}</Dialog.Title>
                 <Dialog.Content>
-                    <Text variant="bodyMedium">{message}</Text>
+                    {customContent || <Text variant="bodyMedium">{message}</Text>}
                 </Dialog.Content>
                 <Dialog.Actions>
                     <Button

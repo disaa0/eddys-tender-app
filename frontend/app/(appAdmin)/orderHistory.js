@@ -41,6 +41,12 @@ export default function OrdersHistory() {
     const [dialogMsg, setDialogMsg] = useState('');
     const router = useRouter();
     const isAndroid = Platform.OS === 'android';
+    const [products, setProducts] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [loadingProducts, setLoadingProducts] = useState(false);
+    const [customContent, setCustomContent] = useState(null);
+    const [customTittle, setCustomTittle] = useState(null);
+    const [showingOrdersByProduct, setShowingOrdersByProduct] = useState(false);
 
     useFocusEffect(
         useCallback(() => {
@@ -81,6 +87,38 @@ export default function OrdersHistory() {
             ? `${addressInfo.street} ${addressInfo.houseNumber}, ${addressInfo.neighborhood}, ${addressInfo.postalCode}`
             : "Dirección no encontrada";
     };
+
+    const handleSearchOrdersByProduct = async (productId) => {
+        try {
+            // setOrders([]);
+            // setStartDate(null);
+            // setEndDate(null);
+            setLoading(true);
+            const resAdminGetOrdersByProduct = await adminApiService.getOrdersByProduct(productId);
+            setOrders(resAdminGetOrdersByProduct);
+            setCustomContent(null);
+            setCustomTittle(null);
+            setShowDialog(false);
+            setDialogMsg(null);
+            setError(null);
+            setLoadingProducts(false);
+            setLoading(false);
+            setShowStartPicker(false);
+            setShowEndPicker(false);
+            setShowingOrdersByProduct(true);
+            // setSelectedProduct(null);
+        } catch (err) {
+            setDialogMsg(err.message);
+            setShowDialog(true);
+            setCustomContent(null);
+            setCustomTittle('Error');
+            console.error(err);
+        } finally {
+            setLoading(false);
+            setLoadingProducts(false);
+            // setShowingOrdersByProduct(false);
+        }
+    }
 
     const handleStartDateChange = (event, selectedDate) => {
         setShowStartPicker(false);
@@ -134,10 +172,87 @@ export default function OrdersHistory() {
         }
     }
 
+    const handleSelectProduct = async () => {
+        try {
+            // setShowingOrdersByProduct(true);
+            setLoadingProducts(true);
+            const resAdminGetProductos = await adminApiService.getProducts();
+            setProducts(resAdminGetProductos.data.products);
+            setCustomTittle("Selecciona un producto");
+            setCustomContent(
+                <View style={{ padding: 20 }}>
+                    {/* <Text style={{ fontSize: 18, marginBottom: 10 }}>Selecciona un producto:</Text> */}
+                    {resAdminGetProductos.data.products.map((product) => (
+                        <TouchableOpacity
+                            key={product.idProduct}
+                            onPress={() => {
+                                setSelectedProduct(product.idProduct);
+                                setCustomTittle("Producto Seleccionado");
+                                setCustomContent(
+                                    <View style={{ padding: 20 }}>
+                                        {/* <Text style={{ fontSize: 18, marginBottom: 10 }}>Producto Seleccionado:</Text> */}
+                                        <Text style={{ fontSize: 16 }}>{product.name}</Text>
+                                        <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginTop: 15 }} />
+                                    </View>
+                                );
+                                setShowDialog(true);
+                                setDialogMsg(product.name);
+                                handleSearchOrdersByProduct(product.idProduct);
+                            }}
+                            style={{
+                                paddingVertical: 12,
+                                paddingHorizontal: 16,
+                                backgroundColor: '#fff',
+                                borderRadius: 10,
+                                borderWidth: 2,
+                                borderColor: selectedProduct === product.idProduct ? theme.colors.primary : '#ccc',
+                                marginBottom: 12,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                            }}
+                        >
+                            <Text style={{
+                                fontSize: 16,
+                                color: selectedProduct === product.idProduct ? theme.colors.primary : '#333',
+                                fontWeight: selectedProduct === product.idProduct ? 'bold' : 'normal',
+                            }}>
+                                {product.name}
+                            </Text>
+
+                            {/* Puedes agregar un check o un círculo para marcar la selección */}
+                            {selectedProduct === product.idProduct && (
+                                <View style={{
+                                    width: 20,
+                                    height: 20,
+                                    borderRadius: 10,
+                                    backgroundColor: theme.colors.primary,
+                                }} />
+                            )}
+                        </TouchableOpacity>
+
+                    ))}
+                </View>
+            );
+            setShowDialog(true);
+        } catch (err) {
+            setError(err.message);
+            setShowingOrdersByProduct(false);
+            console.error(err);
+        } finally {
+            setLoadingProducts(false);
+        }
+    }
+
+
     useEffect(() => {
         if (startDate && endDate) {
             reloadData();
         }
+        // else {
+        //     setOrders([]);
+        //     setAddresses([]);
+        // }
     }, [startDate, endDate]);
 
 
@@ -162,6 +277,22 @@ export default function OrdersHistory() {
     //         </View>
     //     );
     // }
+
+    const handleGoBack = () => {
+        setStartDate(null);
+        setEndDate(null);
+        setOrders([]);
+        setAddresses([]);
+        setError('');
+        setLoading(false);
+        setShowStartPicker(false);
+        setShowEndPicker(false);
+        setShowDialog(false);
+        setShowingOrdersByProduct(false);
+        setDialogMsg('');
+        setSearchQuery('');
+        router.push('/profile');
+    }
 
     if (error) {
         return (
@@ -234,8 +365,15 @@ export default function OrdersHistory() {
                     />
                 )}
 
+                {/* Mostrar Boton para filtrar por productos */}
+                <Button
+                    mode="contained"
+                    icon="magnify"
+                    onPress={handleSelectProduct}
+                    style={styles.productFilterButton}>Mostrar Ordenes Por Producto</Button>
 
-                {(startDate && endDate) && (
+
+                {(startDate && endDate || showingOrdersByProduct) && (
                     <>
                         {/* <Searchbar
                             placeholder="Buscar"
@@ -253,9 +391,9 @@ export default function OrdersHistory() {
                         ) : (
                             orders.length === 0 ? (
                                 <View style={styles.errorContainer}>
-                                    <Text style={styles.errorText}>No hay pedidos en este rango de fechas</Text>
+                                    <Text style={styles.errorText}>No hay pedidos registrados.</Text>
                                     <TouchableOpacity
-                                        onPress={() => router.push('/profile')}
+                                        onPress={() => handleGoBack()}
                                         style={styles.goBackButton}
                                     >
                                         <Text style={styles.goBackButtonText}>Regresar</Text>
@@ -324,11 +462,33 @@ export default function OrdersHistory() {
             <ConfirmationDialog
                 visible={showDialog}
                 message={dialogMsg || error}
-                onConfirm={() => { setShowDialog(false); }}
-                onDismiss={() => setShowDialog(false)}
-                title="Aviso"
+                onConfirm={() => {
+                    setCustomContent(null);
+                    setCustomTittle(null);
+                    setSelectedProduct(null);
+                    setDialogMsg(null);
+                    setError(null);
+                    setLoadingProducts(false);
+                    setLoading(false);
+                    setShowDialog(false);
+                    setShowingOrdersByProduct(false);
+
+                }}
+                onDismiss={() => {
+                    setShowDialog(false)
+                    setCustomContent(null);
+                    setCustomTittle(null);
+                    setSelectedProduct(null);
+                    setDialogMsg(null);
+                    setError(null);
+                    setLoadingProducts(false);
+                    setLoading(false);
+                    setShowingOrdersByProduct(false);
+                }}
+                title={customTittle ? customTittle : "Aviso"}
                 cancelButtonLabel=""
                 confirmButtonLabel="Cerrar"
+                customContent={customContent || null}
             />
         </SafeAreaView>
     );
@@ -452,5 +612,10 @@ const styles = StyleSheet.create({
     dateLabel: {
         fontSize: 14,
         color: theme.colors.primary,
+    },
+    productFilterButton: {
+        margin: 16,
+        borderRadius: 12,
+        backgroundColor: theme.colors.primary,
     },
 }); 
