@@ -101,6 +101,7 @@ export default function Orders() {
                             <View style={styles.orderHeader}>
                                 <View>
                                     <Text variant="titleMedium">Pedido #{order.idOrder}</Text>
+                                    <Text variant="titleMedium">{order.clientName || 'Nombre no encontrado'}</Text>
                                     <Text variant="bodySmall">{formatDate(order.createdAt)}</Text>
                                 </View>
                                 <Chip
@@ -155,9 +156,10 @@ export default function Orders() {
                         </Card.Content>
                     </Card>
                 ))}
+                <View style={styles.container}>
+                </View>
             </ScrollView>
-            <View style={styles.container}>
-            </View>
+
 
 
             <ConfirmationDialog
@@ -169,7 +171,6 @@ export default function Orders() {
                 cancelButtonLabel=''
                 confirmButtonLabel='Cerrar'
             />
-
 
         </SafeAreaView >
     );
@@ -273,4 +274,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    container: {
+        height: 80,
+        backgroundColor: theme.colors.surface
+    }
 }); 

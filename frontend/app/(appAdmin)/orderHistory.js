@@ -412,6 +412,7 @@ export default function OrdersHistory() {
                                         <View style={styles.orderHeader}>
                                             <View>
                                                 <Text variant="titleMedium">Pedido #{order.idOrder}</Text>
+                                                <Text variant="titleMedium">{order.clientName || 'Nombre no encontrado'}</Text>
                                                 <Text variant="bodySmall">{formatDate(order.createdAt)}</Text>
                                             </View>
                                             <Chip
@@ -457,6 +458,8 @@ export default function OrdersHistory() {
                         )}
                     </>
                 )}
+                <View style={styles.container}>
+                </View>
             </ScrollView>
 
             <ConfirmationDialog
@@ -618,4 +621,8 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: theme.colors.primary,
     },
+    container: {
+        height: 80,
+        backgroundColor: theme.colors.surface
+    }
 }); 

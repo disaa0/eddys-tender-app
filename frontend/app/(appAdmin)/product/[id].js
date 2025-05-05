@@ -44,6 +44,7 @@ export default function ProductDetails() {
   useEffect(() => {
     loadProduct();
     loadPersonalizations();
+
   }, [id]);
 
   const loadProduct = async () => {
@@ -282,7 +283,7 @@ export default function ProductDetails() {
       if (Platform.OS === 'ios' && fileUri.startsWith('file://')) {
         fileUri = fileUri.replace('file://', '');
       }
-      
+
       formData.append('productImage', {
         uri: fileUri,
         type: mimeType,
@@ -542,6 +543,7 @@ export default function ProductDetails() {
           <Portal>
             <Dialog
               visible={personalizationDialog}
+              style={styles.dialogNewP}
               onDismiss={() => setPersonalizationDialog(false)}
             >
               <Dialog.Title>Nueva Personalización</Dialog.Title>
@@ -569,7 +571,7 @@ export default function ProductDetails() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.surface,
   },
   header: {
     flexDirection: 'row',
@@ -585,15 +587,20 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    backgroundColor: theme.colors.surface,
   },
   card: {
     margin: 16,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
   },
   content: {
     padding: 16,
+    backgroundColor: theme.colors.surface,
   },
   input: {
     marginVertical: 8,
+    backgroundColor: theme.colors.surface,
 
   },
   buttonContainer: {
@@ -647,4 +654,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: theme.colors.primary,
   },
+  dialogNewP: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20
+  }
 }); 
