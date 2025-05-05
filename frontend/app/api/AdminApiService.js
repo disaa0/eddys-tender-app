@@ -111,6 +111,10 @@ class AdminApiService extends BaseApiService {
             }
         });
     }
+
+    async getOrdersByProduct(idProduct) {
+        return this.request(`/admin/orders/by-products?product_id=${idProduct}`, 'GET');
+    }
 }
 
 // Export a single instance
