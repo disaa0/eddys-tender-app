@@ -15,9 +15,10 @@ import {
   Card,
   Snackbar,
   Menu,
+  Divider,
 } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import AdminApiService from '../api/AdminApiService';
 import { theme } from '../theme';
@@ -150,6 +151,16 @@ export default function AddProduct() {
         setTimeout(() => {
           router.replace('/(appAdmin)/adminDashboard');
         }, 1500);
+        setError('')
+        setForm({
+          name: '',
+          price: '',
+          description: '',
+          idProductType: '',
+          status: true,
+        })
+        setImage('')
+        setSelected('')
         return;
       }
       // Si no hay imagen, mostramos el snackbar y salimos
@@ -294,6 +305,7 @@ export default function AddProduct() {
                     <Menu
                       visible={visible}
                       onDismiss={() => setVisible(false)}
+                      contentStyle={{ backgroundColor: theme.colors.surface }}
                       anchor={
                         <Button
                           mode="outlined"
@@ -307,10 +319,12 @@ export default function AddProduct() {
                         title="Comida"
                         onPress={() => handleSelect('1', 'Comida')}
                       />
+                      <Divider />
                       <Menu.Item
                         title="Bebida"
                         onPress={() => handleSelect('2', 'Bebida')}
                       />
+                      <Divider />
                       <Menu.Item
                         title="Extra"
                         onPress={() => handleSelect('3', 'Extra')}
@@ -344,14 +358,14 @@ export default function AddProduct() {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </SafeAreaProvider>
+    </SafeAreaProvider >
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.surface,
   },
   header: {
     flexDirection: 'row',
@@ -367,12 +381,15 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    backgroundColor: theme.colors.surface,
   },
   card: {
     margin: 16,
+    backgroundColor: theme.colors.surface,
   },
   input: {
     marginBottom: 16,
+    backgroundColor: theme.colors.surface,
   },
   imageButton: {
     marginBottom: 16,
@@ -385,6 +402,7 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     marginBottom: 16,
+    backgroundColor: theme.colors.surface,
   },
   pickerLabel: {
     marginBottom: 8,

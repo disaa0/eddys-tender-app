@@ -159,13 +159,6 @@ export default function Profile() {
             />
             <Divider />
             <List.Item
-              title="Métodos de Pago"
-              left={(props) => <List.Icon {...props} icon="credit-card" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => router.push('/profile/payment-methods')}
-            />
-            <Divider />
-            <List.Item
               title="Cerrar Sesión"
               left={(props) => (
                 <List.Icon {...props} icon="logout" color={theme.colors.error} />
@@ -200,28 +193,6 @@ export default function Profile() {
             </Surface>
           )}
 
-          <Surface style={[styles.infoSection]} elevation={1}>
-            <List.Item
-              title="Eliminar Cuenta"
-              description="Esta acción no se puede deshacer"
-              left={(props) => (
-                <List.Icon {...props} icon="delete" color={theme.colors.error} />
-              )}
-              onPress={() => setDeleteDialogVisible(true)}
-              disabled={isDeleting}
-              titleStyle={{ color: theme.colors.error }}
-            />
-          </Surface>
-
-          <ConfirmationDialog
-            visible={deleteDialogVisible}
-            onDismiss={() => !isDeleting && setDeleteDialogVisible(false)}
-            onConfirm={handleDeleteAccount}
-            title="Eliminar Cuenta"
-            message="¿Estás seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer y perderás todo tu historial y datos."
-            confirmButtonDisabled={isDeleting}
-            confirmButtonLoading={isDeleting}
-          />
         </ScrollView>
 
         <Snackbar
@@ -271,7 +242,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 8,
-    overflow: 'hidden',
   },
   sectionTitle: {
     padding: 16,

@@ -42,8 +42,13 @@ async function getOrdersByDateRange(req, res) {
                     include: {
                         user: {
                             select: {
+                                idUser: true,
+                                idUserType: true,
                                 email: true,
                                 username: true,
+                                status: true,
+                                createdAt: true,
+                                updatedAt: true,
                                 userInformation: {
                                     select: {
                                         name: true,

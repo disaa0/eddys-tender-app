@@ -5,6 +5,8 @@ import { useRouter } from 'expo-router';
 import { theme } from '../../theme';
 import AuthService from '../../api/AuthService';
 import { MaterialIcons, Octicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function EditPassword() {
     const [oldPassword, setOldPassword] = useState('');
@@ -55,72 +57,75 @@ export default function EditPassword() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text variant="titleLarge" style={styles.title}>
-                Actualizar Contraseña
-            </Text>
-            <View style={styles.buttonContainer}>
-                <TextInput
-                    mode="outlined"
-                    label="Ingrese su contraseña actual"
-                    value={oldPassword}
-                    onChangeText={handleOldPasswordChange}
-                    style={styles.input}
-                    keyboardType="password"
-                    autoCapitalize="none"
-                    error={!!error}
-                    disabled={loading}
-                    secureTextEntry={!showOldPassword}
-                />
-                <TouchableOpacity onPress={() => setShowOldPassword(!showOldPassword)} style={styles.hideShowButton}>
-                    {showOldPassword ? <Octicons name='eye-closed' size={28} /> : <Octicons name='eye' size={28} />}
-                </TouchableOpacity>
-            </View>
+        <SafeAreaProvider>
+            <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }}>
+                <View style={styles.container}>
+                    <Text variant="titleLarge" style={styles.title}>
+                        Actualizar Contraseña
+                    </Text>
+                    <View style={styles.buttonContainer}>
+                        <TextInput
+                            mode="outlined"
+                            label="Ingrese su contraseña actual"
+                            value={oldPassword}
+                            onChangeText={handleOldPasswordChange}
+                            style={styles.input}
+                            autoCapitalize="none"
+                            error={!!error}
+                            disabled={loading}
+                            secureTextEntry={!showOldPassword}
+                        />
+                        <TouchableOpacity onPress={() => setShowOldPassword(!showOldPassword)} style={styles.hideShowButton}>
+                            {showOldPassword ? <Octicons name='eye-closed' size={28} /> : <Octicons name='eye' size={28} />}
+                        </TouchableOpacity>
+                    </View>
 
-            <View style={styles.buttonContainer}>
-                <TextInput
-                    mode="outlined"
-                    label="Nueva contraseña"
-                    value={newPassword}
-                    onChangeText={handleNewPasswordChange}
-                    style={styles.input}
-                    keyboardType="password"
-                    autoCapitalize="none"
-                    error={!!error}
-                    disabled={loading}
-                    secureTextEntry={!showNewPassword}
-                />
-                <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)} style={styles.hideShowButton}>
-                    {showNewPassword ? <Octicons name='eye-closed' size={28} /> : <Octicons name='eye' size={28} />}
-                </TouchableOpacity>
-            </View>
+                    <View style={styles.buttonContainer}>
+                        <TextInput
+                            mode="outlined"
+                            label="Nueva contraseña"
+                            value={newPassword}
+                            onChangeText={handleNewPasswordChange}
+                            style={styles.input}
+                            autoCapitalize="none"
+                            error={!!error}
+                            disabled={loading}
+                            secureTextEntry={!showNewPassword}
+                        />
+                        <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)} style={styles.hideShowButton}>
+                            {showNewPassword ? <Octicons name='eye-closed' size={28} /> : <Octicons name='eye' size={28} />}
+                        </TouchableOpacity>
+                    </View>
 
 
-            {error.length > 0 ? (
-                error.map((err, index) => (
-                    <Text key={index} style={styles.error}>{err}</Text>
-                ))
-            ) : null}
+                    {error.length > 0 ? (
+                        error.map((err, index) => (
+                            <Text key={index} style={styles.error}>{err}</Text>
+                        ))
+                    ) : null}
 
-            <Button
-                mode="contained"
-                onPress={handleUpdatePassword}
-                style={[styles.button]}
-                loading={loading}
-                disabled={loading || !newPassword.trim()}
-            >
-                Actualizar
-            </Button>
+                    <Button
+                        mode="contained"
+                        onPress={handleUpdatePassword}
+                        style={[styles.button]}
+                        loading={loading}
+                        disabled={loading || !newPassword.trim()}
+                    >
+                        Actualizar
+                    </Button>
 
-            <Button
-                mode="text"
-                onPress={() => router.push('profile')}
-                style={styles.cancelButton}
-                disabled={loading}
-            >
-                Cancelar
-            </Button>
-        </View>
+                    <Button
+                        mode="text"
+                        onPress={() => router.push('profile')}
+                        style={styles.cancelButton}
+                        disabled={loading}
+                    >
+                        Cancelar
+                    </Button>
+                </View>
+            </SafeAreaView>
+        </SafeAreaProvider>
+
     );
 }
 
