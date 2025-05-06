@@ -63,43 +63,29 @@ const addItemToCartPersonalized = async (req, res) => {
 
 
 const addOneItemToCart = async (req, res) => {
-    const { idProduct } = req.params;
-    const userId = req.user.userId; // Se obtiene del middleware de autenticación
-
     try {
+        const userId = req.user.userId;
+        const idProduct = parseInt(req.params.idProduct);
+
         const result = await addOneItemToCartService(userId, idProduct);
 
-        return res.status(200).json({
-            message: "Cantidad del producto actualizada en el carrito",
-            cartId: result.cartId,
-            item: result.item
+        return res.status(result.statusCode).json({
+            message: result.message,
+            data: result.data
         });
-    } catch (error) {
-        let status = 400;
-        let message = error.message;
 
-        // Customize error messages based on the error
-        switch (error.message) {
-            case 'Producto no encontrado':
-                status = 404;
-                message = 'Producto no encontrado';
-                break;
-            case 'El producto esta inactivo y no se puede agregar al carrito':
-                status = 403;
-                message = 'El producto esta inactivo y no se puede agregar al carrito';
-                break;
-            case 'cantidad maxima alcanzada':
-                status = 406;
-                message = 'No se puede agregar más de 30 unidades del mismo producto';
-                break;
-            case 'El carrito no puede contener mas de 30 productos':
-                status = 409;
-                message = 'El carrito no puede contener mas de 30 productos';
-                break;
-            default:
-                message = 'Error en la peticion';
-        }
-        return res.status(status).json({ message });
+    } catch (error) {
+        let message = error.message;
+        let status = 500;
+
+        if (message === 'Producto no encontrado') status = 404;
+        else if (message === 'El producto está inactivo') status = 400;
+        else if (message === 'El carrito no puede contener más de 30 productos') status = 409;
+
+        console.error('Error al agregar producto al carrito:', error);
+        return res.status(status).json({
+            message: message || 'Error interno del servidor'
+        });
     }
 }
 
