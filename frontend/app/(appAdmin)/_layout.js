@@ -76,7 +76,7 @@ export default function AdminLayout() {
             options={{
               tabBarIcon: ({ color }) => (
                 <View style={styles.tabBarIconStyle}>
-                  <MaterialIcons name="person-outline" size={28} color={color} />
+                  <MaterialIcons name="person-outline" size={20} color={color} />
                 </View>
               ),
             }}
