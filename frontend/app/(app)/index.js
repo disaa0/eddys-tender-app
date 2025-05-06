@@ -121,6 +121,7 @@ export default function Index() {
   };
 
   const renderProduct = ({ item, index }) => {
+    const isLastItem = index === getSortedProducts().length - 1;
     let image_url = item.image_url;
     if (image_url) {
       image_url = API_URL + image_url.replace('/api', '');
@@ -140,6 +141,7 @@ export default function Index() {
               imageSource: image_url,
             }}
             onPress={() => router.push(`/product/${item.idProduct}`)}
+            isLastItem={isLastItem}
           />
         </View>
       </View>
@@ -276,13 +278,12 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   productList: {
-    padding: 4,
     paddingBottom: 85,
   },
   productContainer: {
     flex: 1, // Ocupa el espacio disponible
-    padding: 0, // Margen entre productos
     maxWidth: '100%', // Máximo 50% del ancho para 2 columnas
+    margin: 0,
   },
   centered: {
     flex: 1,

@@ -7,7 +7,7 @@ import apiService from '../api/ApiService';
 import ConfirmationDialog from './ConfirmationDialog';
 import { useCartRefresh } from '../context/CartRefreshContext';
 
-export default function ProductCard({ product, onPress }) {
+export default function ProductCard({ product, onPress, isLastItem }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState('');
   const { name, price, description, imageSource } = product;
@@ -38,7 +38,7 @@ export default function ProductCard({ product, onPress }) {
   }
 
   return (
-    <Surface style={styles.card} elevation={1}>
+    <Surface style={isLastItem ? styles.lastCard : styles.card} elevation={1}>
       <TouchableRipple onPress={onPress} style={styles.touchable}>
         <View style={styles.cardContainer}>
           {/* Envolver el contenido en un View separado con overflow hidden */}
@@ -94,14 +94,16 @@ export default function ProductCard({ product, onPress }) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    marginTop: 0,
-    marginHorizontal: 5,
+    margin: 0,
     borderRadius: 12,
     backgroundColor: '#fff',
+    height: 300,
+    width: '100%'
   },
   contentWrapper: {
-    overflow: 'hidden', // Mover overflow a este View
+    overflow: 'hidden',
     borderRadius: 12,
+    flex: 1
   },
   touchable: {
     flex: 1,
@@ -153,5 +155,14 @@ const styles = StyleSheet.create({
   cardContentWrapper: {
     flex: 1,
     overflow: 'hidden',
+  },
+  lastCard: {
+    flexGrow: 1,
+    width: '48%', // Mantiene el mismo ancho que los demás
+    margin: 4,
+    borderRadius: 12,
+    overflow: 'hidden',
+    height: 300,
+    backgroundColor: '#fff',
   },
 });
