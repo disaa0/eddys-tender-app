@@ -18,11 +18,8 @@ export default function ProductCard({ product, onPress, isLastItem }) {
   const onAddToCart = async (product) => {
     try {
       setLoading(true)
-      // console.log(product.idProduct)
       const response = await apiService.addOneToCartItem(product.idProduct)
-      console.log("CartID", response.cartId)
-
-      if (response.status === 200 || response?.cartId > 0) {
+      if (response.data.item.status === 200 || response?.data.cartId > 0) {
         reloadCart(); // Actualizar carrito
         setDialogVisible(true);
         setDialogMessage(response.message);
