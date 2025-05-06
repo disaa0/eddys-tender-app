@@ -30,7 +30,9 @@ export default function ProductDetails() {
       setLoading(true)
       console.log(product.idProduct)
       quantity = parseInt(quantity)
-      const response = await apiService.addCartItem(idprod, quantity);
+      console.log('personalizaciones Seleccionadas', selectedPersonalizations)
+
+      const response = await apiService.addCartItemNew(idprod, quantity, selectedPersonalizations);
       console.log(response)
 
 
@@ -38,24 +40,27 @@ export default function ProductDetails() {
       console.log('idItemCart', idItemCart)
 
       // iterar en las personalizaciones seleccionadas para agregarlas al idItemCart
-      console.log('personalizaciones Seleccionadas', selectedPersonalizations)
-      if (selectedPersonalizations.length > 0) {
-        for (let i = 0; i < selectedPersonalizations.length; i++) {
-          const response = await apiService.addPersonalizationsToCartItem(idItemCart, selectedPersonalizations[i]);
-          console.log('Respuesta de agregar personalización al carrito:', response);
-        }
-      }
+      // if (selectedPersonalizations.length > 0) {
+      //   for (let i = 0; i < selectedPersonalizations.length; i++) {
+      //     const response = await apiService.addPersonalizationsToCartItem(idItemCart, selectedPersonalizations[i]);
+      //     console.log('Respuesta de agregar personalización al carrito:', response);
+      //   }
+      // }
       // return;
 
-      router.push('/cart')
-      // setProduct(null);
-      setProductImage(defaultImage);
-      setQuantity('1');
-      // setSelectedPersonalizations([]);
-      setShowPersonalizations(false);
-      setShowPopUpPersonalizationsEmpty(false);
-      setErrorPersonalization(null);
-      // setPersonalizations([]);
+      if (idItemCart) {
+
+        router.push('/cart')
+        // setProduct(null);
+        setProductImage(defaultImage);
+        setQuantity('1');
+        setSelectedPersonalizations([]);
+        setShowPersonalizations(false);
+        setShowPopUpPersonalizationsEmpty(false);
+        setErrorPersonalization(null);
+        // setPersonalizations([]);
+      }
+
     } catch (error) {
       console.error(error);
     } finally {
