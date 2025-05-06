@@ -1721,7 +1721,7 @@ Authorization: Bearer <token>
 
 **Parámetros URL:**
 
-- id: ID del producto a eliminar en el carrito
+- id: ID del producto a eliminar en el carrito `idItemCart`
 
 **Respuesta Exitosa (200):**
 

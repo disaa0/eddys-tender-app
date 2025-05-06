@@ -347,7 +347,7 @@ const addItemToCartServicePersonalizations = async (userId, idProduct, quantity,
     });
 };
 
-const softDeleteItemFromCartService = async (userId, idProduct) => {
+const softDeleteItemFromCartService = async (userId, idItemCart) => {
     return await prisma.$transaction(async (prisma) => {
         const cart = await prisma.cart.findFirst({
             where: {
@@ -363,7 +363,7 @@ const softDeleteItemFromCartService = async (userId, idProduct) => {
         const itemCart = await prisma.itemCart.findFirst({
             where: {
                 idCart: cart.idCart,
-                idProduct: parseInt(idProduct),
+                idItemCart: parseInt(idItemCart),
                 status: true
             }
         });
