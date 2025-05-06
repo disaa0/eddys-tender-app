@@ -83,7 +83,7 @@ async function createOrder(userId, orderData) {
   // 4. Send notification to all admin users about the new order
   const notificationService = require('./notification.service');
   const userName = userInfo.username;
-  
+
   // Check if it's cash payment (typically idPaymentType = 1)
   if (idPaymentType === 1) {
     // For cash payments, notify admins immediately
@@ -254,12 +254,12 @@ async function handlePaymentSucceeded(paymentIntent) {
     // Find order by payment intent ID
     const order = await prisma.order.findUnique({
       where: { stripePaymentIntentId: paymentIntent.id },
-      include: { 
-        cart: { 
-          include: { 
-            user: true 
-          } 
-        } 
+      include: {
+        cart: {
+          include: {
+            user: true
+          }
+        }
       },
     });
 
@@ -469,7 +469,7 @@ async function searchOrders(userId, filters) {
 }
 
 // Get all active orders from all users for the admin panel (where order status could be set to multiple numbers from 1 to 7) with pagination
-async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
+async function getOrdersByStatus({ status, page = 1, limit = 10, sortSequence }) {
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const where = {
     idOrderStatus: status,
@@ -497,7 +497,7 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
     skip,
     take: parseInt(limit),
     orderBy: {
-      createdAt: 'desc',
+      createdAt: sortSequence, // Order by createdAt based on sortSequence
     },
   });
 
