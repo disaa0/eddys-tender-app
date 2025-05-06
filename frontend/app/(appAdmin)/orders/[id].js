@@ -24,6 +24,7 @@ const OrderDetail = () => {
   const [error, setError] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [dialogMsg, setDialogMsg] = useState('');
+  const [loadingChangingStatus, setLoadingChangingStatus] = useState(false);
 
   // Función para obtener el color según el estado
   const getStatusColor = (status) => {
@@ -69,6 +70,7 @@ const OrderDetail = () => {
     console.log(`Updating order status to: ${newStatus}`);
     // setOrder((prevOrder) => ({ ...prevOrder, orderStatus: { ...prevOrder.orderStatus, status: newStatus } }));
     try {
+      setLoadingChangingStatus(true);
       const resUpdate = await adminApiService.updateOrderStatus(id, newStatus);
       console.log('Response from update:', resUpdate);
       if (resUpdate?.data?.idOrder) {
@@ -82,12 +84,9 @@ const OrderDetail = () => {
     } catch (error) {
       setError(error.message);
       setShowDialog(true);
+    } finally {
+      setLoadingChangingStatus(false);
     }
-  };
-
-  const handleOnClickOrder = (orderId) => {
-    console.log(`Order clicked: ${orderId}`);
-    // Aquí podrías navegar o mostrar más detalles
   };
 
   if (loading) {
@@ -192,13 +191,13 @@ const OrderDetail = () => {
               }
               value={String(order.orderStatus.idOrderStatus)}
             >
-              <RadioButton.Item label="Pendiente" value="1" />
-              <RadioButton.Item label="Procesando" value="2" />
-              <RadioButton.Item label="Listo para recoger" value="3" />
-              <RadioButton.Item label="Listo para enviar" value="4" />
-              <RadioButton.Item label="Enviado" value="5" />
-              <RadioButton.Item label="Entregado" value="6" />
-              <RadioButton.Item label="Cancelado" value="7" />
+              <RadioButton.Item label="Pendiente" disabled={loadingChangingStatus} value="1" />
+              <RadioButton.Item label="Procesando" disabled={loadingChangingStatus} value="2" />
+              <RadioButton.Item label="Listo para recoger" disabled={loadingChangingStatus} value="3" />
+              <RadioButton.Item label="Listo para enviar" disabled={loadingChangingStatus} value="4" />
+              <RadioButton.Item label="Enviado" disabled={loadingChangingStatus} value="5" />
+              <RadioButton.Item label="Entregado" disabled={loadingChangingStatus} value="6" />
+              <RadioButton.Item label="Cancelado" disabled={loadingChangingStatus} value="7" />
             </RadioButton.Group>
           </Card.Content>
         </Card>
