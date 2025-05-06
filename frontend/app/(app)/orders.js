@@ -176,13 +176,14 @@ export default function Orders() {
               <List.Section>
                 <List.Subheader>Productos</List.Subheader>
                 {order.cart.itemsCart.map((item, index) => (
-                  <List.Item
-                    key={index}
-                    title={`${item.product.name}`}
-                    description={`Cantidad: ${item.quantity}`}
-                    left={props => <List.Icon {...props} icon="food" />}
-                    right={props => <Text {...props}>{`$${(item.quantity * item.product.price).toFixed(2)}`}</Text>}
-                  />
+                  item.quantity > 0 ? (
+                    <List.Item
+                      key={index}
+                      title={`${item.product.name}`}
+                      description={`Cantidad: ${item.quantity}`}
+                      left={props => <List.Icon {...props} icon="food" />}
+                      right={props => <Text {...props}>{`$${(item.quantity * item.product.price).toFixed(2)}`}</Text>}
+                    />) : null
                 ))}
               </List.Section>
 
@@ -215,9 +216,10 @@ export default function Orders() {
             </Card.Content>
           </Card>
         ))}
+        <View style={styles.container}>
+        </View>
       </ScrollView>
-      <View style={styles.container}>
-      </View>
+
 
 
       <ConfirmationDialog
@@ -333,4 +335,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  container: {
+    height: 80,
+    backgroundColor: theme.colors.surface
+  }
 }); 

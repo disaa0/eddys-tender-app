@@ -31,12 +31,31 @@ export default function AdminDashboard() {
   const CATEGORIES = ['Todos', 'Comida', 'Bebida'];
   const FILTERS = ['A-Z', 'Z-A', 'Más pedidos'];
 
+  // const loadProducts = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await AdminApiService.getProducts(page);
+  //     console.log(response)
+  //     setProducts(response.data.products);
+  //     setTotalPages(response.data.totalPages);
+  //   } catch (err) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const loadProducts = async () => {
     try {
       setLoading(true);
       const response = await AdminApiService.getProducts(page);
-      console.log(response)
-      setProducts(response.data.products);
+      const newProducts = response.data.products;
+
+      setProducts((prevProducts) => {
+        if (page === 1) return newProducts;
+        return [...prevProducts, ...newProducts];
+      });
+
       setTotalPages(response.data.totalPages);
     } catch (err) {
       setError(err.message);
@@ -44,6 +63,13 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+
+
+
+
+
+
+
 
   const loadPopularProducts = async () => {
     try {
@@ -226,9 +252,7 @@ export default function AdminDashboard() {
               )
             }
             onEndReached={() => {
-              if (!loading && page < totalPages) {
-                setPage((prevPage) => prevPage + 1);
-              }
+              if (!loading && page < totalPages) setPage((prevPage) => prevPage + 1);
             }}
             onEndReachedThreshold={0.5}
             ListFooterComponent={loading && page > 1 ? <ActivityIndicator style={styles.loadingMore} /> : null}

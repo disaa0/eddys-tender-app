@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         paddingBottom: 80,
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.surface,
     },
     title: {
         marginBottom: 20,
