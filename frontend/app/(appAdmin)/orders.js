@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { Card, Text, Chip, List, IconButton, Searchbar, ActivityIndicator } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -94,68 +94,68 @@ export default function Orders() {
                     icon="magnify"
                     placeholderTextColor="#666"
                 />
-                {orders.map((order) => (
-                    <Card key={order.idOrder} style={styles.orderCard}>
-                        <Card.Content>
-                            {/* Encabezado del pedido */}
-                            <View style={styles.orderHeader}>
-                                <View>
-                                    <Text variant="titleMedium">Pedido #{order.idOrder}</Text>
-                                    <Text variant="titleMedium">{order.clientName || 'Nombre no encontrado'}</Text>
-                                    <Text variant="bodySmall">{formatDate(order.createdAt)}</Text>
-                                </View>
-                                <Chip
-                                    style={[
-                                        styles.statusChip,
-                                        { backgroundColor: getStatusColor(order.orderStatus.idOrderStatus) }
-                                    ]}
-                                >
-                                    <Text style={styles.statusText}>{order.orderStatus.status}</Text>
-                                </Chip>
-                            </View>
-
-                            {/* Lista de productos */}
-                            <List.Section>
-                                <List.Subheader>Productos</List.Subheader>
-                                {order.cart.itemsCart.map((item, index) => (
-                                    <List.Item
-                                        key={index}
-                                        title={`${item.product.name}`} //
-                                        description={`Cantidad: ${item.quantity}`}
-                                        left={props => <List.Icon {...props} icon="food" />}
-                                        right={props => <Text {...props}>{`$${(item.quantity * item.individualPrice).toFixed(2)}`}</Text>}
-                                    />
-                                ))}
-                            </List.Section>
-
-                            {/* Detalles de entrega */}
-                            <List.Item
-                                title="Dirección de entrega"
-                                description={formatAddress(order.idLocation)}
-                                left={props => <List.Icon {...props} icon="map-marker" />}
-                            />
-
-                            {/* Método de pago y total */}
-                            <View style={styles.orderFooter}>
-                                <View>
-                                    <Text variant="bodyMedium">Método de pago: {order.paymentType.type}</Text>
-                                    <Text variant="titleMedium" style={styles.total}>
-                                        Total: ${order.totalPrice.toFixed(2)}
-                                    </Text>
+                <FlatList
+                    data={orders}
+                    keyExtractor={(item) => item.idOrder.toString()}
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                    renderItem={({ item }) => (
+                        <Card style={styles.orderCard}>
+                            <Card.Content>
+                                <View style={styles.orderHeader}>
+                                    <View>
+                                        <Text variant="titleMedium">Pedido #{item.idOrder}</Text>
+                                        <Text variant="titleMedium">{item.clientName || 'Nombre no encontrado'}</Text>
+                                        <Text variant="bodySmall">{formatDate(item.createdAt)}</Text>
+                                    </View>
+                                    <Chip
+                                        style={[
+                                            styles.statusChip,
+                                            { backgroundColor: getStatusColor(item.orderStatus.idOrderStatus) }
+                                        ]}
+                                    >
+                                        <Text style={styles.statusText}>{item.orderStatus.status}</Text>
+                                    </Chip>
                                 </View>
 
-                                <IconButton
-                                    icon="eye"
-                                    mode="contained"
-                                    onPress={() => handleOnClickOrder(order.idOrder)}
-                                    iconColor="#fff"         // flecha blanca
-                                    containerColor="#000"    // fondo negro
+                                <List.Section>
+                                    <List.Subheader>Productos</List.Subheader>
+                                    {item.cart.itemsCart.map((product, index) => (
+                                        <List.Item
+                                            key={index}
+                                            title={product.product.name}
+                                            description={`Cantidad: ${product.quantity}`}
+                                            left={(props) => <List.Icon {...props} icon="food" />}
+                                            right={(props) => <Text {...props}>{`$${(product.quantity * product.individualPrice).toFixed(2)}`}</Text>}
+                                        />
+                                    ))}
+                                </List.Section>
+
+                                <List.Item
+                                    title="Dirección de entrega"
+                                    description={formatAddress(item.idLocation)}
+                                    left={(props) => <List.Icon {...props} icon="map-marker" />}
                                 />
 
-                            </View>
-                        </Card.Content>
-                    </Card>
-                ))}
+                                <View style={styles.orderFooter}>
+                                    <View>
+                                        <Text variant="bodyMedium">Método de pago: {item.paymentType.type}</Text>
+                                        <Text variant="titleMedium" style={styles.total}>
+                                            Total: ${item.totalPrice.toFixed(2)}
+                                        </Text>
+                                    </View>
+
+                                    <IconButton
+                                        icon="eye"
+                                        mode="contained"
+                                        onPress={() => handleOnClickOrder(item.idOrder)}
+                                        iconColor="#fff"
+                                        containerColor="#000"
+                                    />
+                                </View>
+                            </Card.Content>
+                        </Card>
+                    )}
+                />
                 <View style={styles.container}>
                 </View>
             </ScrollView>
