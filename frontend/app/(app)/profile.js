@@ -151,13 +151,13 @@ export default function Profile() {
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => router.push('/orders')}
             />
-            <Divider />
+            {/* <Divider />
             <List.Item
               title="Métodos de Pago"
               left={(props) => <List.Icon {...props} icon="credit-card" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => router.push('/profile/payment-methods')}
-            />
+            /> */}
             <Divider />
             <List.Item
               title="Cerrar Sesión"

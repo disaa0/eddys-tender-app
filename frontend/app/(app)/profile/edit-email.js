@@ -93,7 +93,7 @@ export default function EditEmail() {
 
                     <Button
                         mode="text"
-                        onPress={() => router.back()}
+                        onPress={() => router.push('/profile')}
                         style={styles.cancelButton}
                         disabled={loading}
                     >

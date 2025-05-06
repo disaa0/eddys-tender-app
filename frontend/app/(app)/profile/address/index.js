@@ -71,6 +71,7 @@ export default function AddressList() {
                 message="¿Estás seguro de que deseas eliminar esta dirección?"
             />
             <Button mode="contained" onPress={() => router.push('profile/address/add-address')} style={styles.button}>Agregar Dirección</Button>
+            <Button mode="outlined" onPress={() => router.push('profile')} style={styles.buttonCancel}>Volver</Button>
         </View>
     );
 }
@@ -79,8 +80,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        paddingBottom: 80,
-        backgroundColor: theme.colors.background,
+        paddingBottom: 100,
+        backgroundColor: theme.colors.surface,
     },
     title: {
         marginBottom: 20,
@@ -88,10 +89,15 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     card: {
+        margin: 4,
         marginBottom: 10,
         backgroundColor: theme.colors.surface,
     },
     button: {
         marginTop: 20,
+    },
+    buttonCancel: {
+        marginTop: 10,
+        backgroundColor: theme.colors.surface,
     },
 });
