@@ -124,7 +124,17 @@ class AdminOrderNotificationController {
           orderStatus: true,
           cart: {
             include: {
-              user: true
+              user: {
+                select: {
+                  idUser: true,
+                  idUserType: true,
+                  email: true,
+                  username: true,
+                  status: true,
+                  createdAt: true,
+                  updatedAt: true
+                }
+              }
             }
           },
           paymentType: true,

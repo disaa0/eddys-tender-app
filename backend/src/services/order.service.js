@@ -83,7 +83,7 @@ async function createOrder(userId, orderData) {
   // 4. Send notification to all admin users about the new order
   const notificationService = require('./notification.service');
   const userName = userInfo.username;
-  
+
   // Check if it's cash payment (typically idPaymentType = 1)
   if (idPaymentType === 1) {
     // For cash payments, notify admins immediately
@@ -96,8 +96,8 @@ async function createOrder(userId, orderData) {
         userId: userInfo.idUser,
         userName: userName,
         amount: orderResult.totalPrice,
-        paymentType: 'cash'
-      }
+        paymentType: 'cash',
+      },
     });
   }
 
@@ -154,6 +154,13 @@ async function getOrderDetails(orderId, userId) {
     throw new Error('Orden no encontrada');
   }
 
+  // Filter out items with quantity <= 0
+  if (order.cart && order.cart.itemsCart) {
+    order.cart.itemsCart = order.cart.itemsCart.filter(
+      (item) => item.quantity > 0
+    );
+  }
+
   return order;
 }
 
@@ -204,23 +211,28 @@ async function getUserOrdersDetailsService(userId) {
     throw new Error('Ordenes no encontrada');
   }
 
-  // Add formatted location string to each order
-  const ordersWithFormattedLocation = orders.map(order => {
+  // Add formatted location string to each order and filter out items with quantity <= 0
+  const ordersWithFormattedLocation = orders.map((order) => {
     let locationFormatted = null;
     if (order.location) {
       locationFormatted = `${order.location.street}, ${order.location.houseNumber}\n${order.location.neighborhood}\n${order.location.postalCode}`;
     }
 
+    // Filter out items with quantity <= 0
+    if (order.cart && order.cart.itemsCart) {
+      order.cart.itemsCart = order.cart.itemsCart.filter(
+        (item) => item.quantity > 0
+      );
+    }
+
     return {
       ...order,
-      locationFormatted
+      locationFormatted,
     };
   });
 
   return ordersWithFormattedLocation;
 }
-
-
 
 /**
  * Process Stripe webhook events
@@ -254,12 +266,12 @@ async function handlePaymentSucceeded(paymentIntent) {
     // Find order by payment intent ID
     const order = await prisma.order.findUnique({
       where: { stripePaymentIntentId: paymentIntent.id },
-      include: { 
-        cart: { 
-          include: { 
-            user: true 
-          } 
-        } 
+      include: {
+        cart: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
@@ -319,8 +331,8 @@ async function handlePaymentSucceeded(paymentIntent) {
         orderId: order.idOrder,
         userId: order.cart.user.idUser,
         userName: userName,
-        amount: order.totalPrice
-      }
+        amount: order.totalPrice,
+      },
     });
 
     return {
@@ -486,6 +498,18 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
       location: true, // Include location details
       cart: {
         include: {
+          user: {
+            select: {
+              idUser: true,
+              idUserType: true,
+              email: true,
+              username: true,
+              status: true,
+              createdAt: true,
+              updatedAt: true,
+              userInformation: true, // Include user details to get name and lastName
+            },
+          },
           itemsCart: {
             include: {
               product: true,
@@ -505,15 +529,38 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
   const sanitizedOrders = orders.map((order) => {
     const { stripeClientSecret, ...rest } = order;
 
+    // Filter out items with quantity <= 0
+    if (order.cart && order.cart.itemsCart) {
+      order.cart.itemsCart = order.cart.itemsCart.filter(
+        (item) => item.quantity > 0
+      );
+    }
+
     // Add formatted location string if location exists
     let locationFormatted = null;
     if (order.location) {
       locationFormatted = `${order.location.street}, ${order.location.houseNumber}\n${order.location.neighborhood}\n${order.location.postalCode}`;
     }
 
+    // Add client name and phone number from user information
+    let clientName = 'Usuario desconocido';
+    let phoneNumber = null;
+    if (order.cart.user) {
+      // Check if userInformation is included and has name/lastName
+      if (order.cart.user.userInformation) {
+        clientName = `${order.cart.user.userInformation.name} ${order.cart.user.userInformation.lastName}`;
+        phoneNumber = order.cart.user.userInformation.phone;
+      } else {
+        // Fallback to username if userInformation not available
+        clientName = order.cart.user.username;
+      }
+    }
+
     return {
       ...rest,
-      locationFormatted
+      clientName,
+      phoneNumber,
+      locationFormatted,
     };
   });
 
