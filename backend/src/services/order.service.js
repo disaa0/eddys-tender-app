@@ -481,7 +481,7 @@ async function searchOrders(userId, filters) {
 }
 
 // Get all active orders from all users for the admin panel (where order status could be set to multiple numbers from 1 to 7) with pagination
-async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
+async function getOrdersByStatus({ status, page = 1, limit = 10, sortSequence }) {
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const where = {
     idOrderStatus: status,
@@ -521,7 +521,7 @@ async function getOrdersByStatus({ status, page = 1, limit = 10 }) {
     skip,
     take: parseInt(limit),
     orderBy: {
-      createdAt: 'desc',
+      createdAt: sortSequence, // Order by createdAt based on sortSequence
     },
   });
 

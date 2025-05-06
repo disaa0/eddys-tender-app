@@ -99,74 +99,103 @@ const addItemToCartService = async (userId, idProduct, quantity) => {
 };
 
 const addOneItemToCartService = async (userId, idProduct) => {
-    return await prisma.$transaction(async (prisma) => {
-        const product = await prisma.product.findUnique({
-            where: { idProduct: parseInt(idProduct) }
-        });
-
-        if (!product) throw new Error("Producto no encontrado");
-        if (!product.status) throw new Error("El producto está inactivo");
-
-        let cart = await prisma.cart.findFirst({
-            where: { idUser: userId, status: true }
-        });
-
-        if (!cart) {
-            cart = await prisma.cart.create({
-                data: { idUser: userId, status: true }
-            });
-        }
-
-        const cartId = cart.idCart;
-
-        const totalQuantity = await prisma.itemCart.aggregate({
-            where: { idCart: cartId, status: true },
-            _sum: { quantity: true },
-        });
-
-        const currentTotal = totalQuantity._sum.quantity || 0;
-        if (currentTotal + 1 > 30) {
-            throw new Error("El carrito no puede contener mas de 30 productos");
-        }
-
-        const existingItem = await prisma.itemCart.findFirst({
-            where: {
-                idCart: cartId,
-                idProduct: parseInt(idProduct)
-            },
-            orderBy: {
-                idItemCart: 'desc'
-            }
-        });
-
-        if (existingItem && existingItem.quantity >= 30) {
-            throw new Error("Cantidad maxima por producto alcanzada");
-        }
-
-        if (existingItem) {
-            const updatedItem = await prisma.itemCart.update({
-                where: { idItemCart: existingItem.idItemCart },
-                data: {
-                    quantity: existingItem.quantity + 1,
-                    status: true
-                }
-            });
-
-            return { cartId, item: updatedItem, updated: true };
-        }
-
-        const newItem = await prisma.itemCart.create({
-            data: {
-                idCart: cartId,
-                idProduct: parseInt(idProduct),
-                quantity: 1,
-                individualPrice: product.price,
-                status: true
-            }
-        });
-
-        return { cartId, item: newItem, updated: false };
+    const product = await prisma.product.findUnique({
+        where: { idProduct }
     });
+
+    if (!product) {
+        throw new Error('Producto no encontrado');
+    }
+
+    if (!product.status) {
+        throw new Error('El producto está inactivo');
+    }
+
+    let cart = await prisma.cart.findFirst({
+        where: {
+            idUser: userId,
+            status: true,
+        },
+    });
+
+    if (!cart) {
+        cart = await prisma.cart.create({
+            data: {
+                idUser: userId,
+                status: true,
+            },
+        });
+    }
+
+    const cartId = cart.idCart;
+
+    const totalQuantity = await prisma.itemCart.aggregate({
+        where: { idCart: cartId, status: true },
+        _sum: { quantity: true },
+    });
+
+    const currentTotal = totalQuantity._sum.quantity || 0;
+
+    const existingItems = await prisma.itemCart.findMany({
+        where: {
+            idCart: cartId,
+            idProduct,
+            status: true,
+        },
+        include: {
+            userProductPersonalize: true
+        },
+        orderBy: {
+            idItemCart: 'desc'
+        }
+    });
+
+    let matchedItem = existingItems.find(item => item.userProductPersonalize.length === 0);
+
+    const newTotal = matchedItem
+        ? currentTotal - matchedItem.quantity + (matchedItem.quantity + 1)
+        : currentTotal + 1;
+
+    if (newTotal > 30) {
+        throw new Error('El carrito no puede contener mas de 30 productos');
+    }
+
+    if (matchedItem) {
+        const updatedItem = await prisma.itemCart.update({
+            where: { idItemCart: matchedItem.idItemCart },
+            data: { quantity: matchedItem.quantity + 1 }
+        });
+
+        return {
+            message: 'Cantidad incrementada correctamente',
+            statusCode: 200,
+            data: {
+                cartId,
+                item: updatedItem,
+                updated: true
+            }
+        };
+    }
+
+    const newItem = await prisma.itemCart.create({
+        data: {
+            idCart: cartId,
+            idProduct,
+            quantity: 1,
+            individualPrice: product.price,
+            status: true
+        }
+    });
+
+    return {
+        message: 'Producto agregado al carrito correctamente',
+        statusCode: 201,
+        data: {
+            cartId,
+            item: newItem,
+            updated: false
+        }
+    };
 };
 
 
@@ -320,7 +349,6 @@ const addItemToCartServicePersonalizations = async (userId, idProduct, quantity,
 
 const softDeleteItemFromCartService = async (userId, idProduct) => {
     return await prisma.$transaction(async (prisma) => {
-        // Buscar el carrito activo del usuario
         const cart = await prisma.cart.findFirst({
             where: {
                 idUser: userId,
@@ -332,7 +360,6 @@ const softDeleteItemFromCartService = async (userId, idProduct) => {
             throw new Error("No se encontró un carrito activo para el usuario.");
         }
 
-        // Buscar el producto en el carrito
         const itemCart = await prisma.itemCart.findFirst({
             where: {
                 idCart: cart.idCart,
@@ -345,13 +372,30 @@ const softDeleteItemFromCartService = async (userId, idProduct) => {
             throw new Error("El producto no está en el carrito o ya ha sido eliminado.");
         }
 
-        // Marcar el producto como inactivo (soft delete)
+        // Eliminar lógicamente el itemCart
         const updatedItem = await prisma.itemCart.update({
             where: { idItemCart: itemCart.idItemCart },
-            data: { quantity: 0, status: false }
+            data: {
+                quantity: 0,
+                status: false
+            }
         });
 
-        return { cartId: cart.idCart, item: updatedItem };
+        // Soft delete de las personalizaciones asociadas
+        await prisma.userProductPersonalize.updateMany({
+            where: {
+                idItemCart: itemCart.idItemCart,
+                status: true
+            },
+            data: {
+                status: false
+            }
+        });
+
+        return {
+            cartId: cart.idCart,
+            item: updatedItem
+        };
     });
 };
 
