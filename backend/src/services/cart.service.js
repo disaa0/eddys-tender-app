@@ -349,7 +349,6 @@ const addItemToCartServicePersonalizations = async (userId, idProduct, quantity,
 
 const softDeleteItemFromCartService = async (userId, idProduct) => {
     return await prisma.$transaction(async (prisma) => {
-        // Buscar el carrito activo del usuario
         const cart = await prisma.cart.findFirst({
             where: {
                 idUser: userId,
@@ -361,7 +360,6 @@ const softDeleteItemFromCartService = async (userId, idProduct) => {
             throw new Error("No se encontró un carrito activo para el usuario.");
         }
 
-        // Buscar el producto en el carrito
         const itemCart = await prisma.itemCart.findFirst({
             where: {
                 idCart: cart.idCart,
@@ -374,13 +372,30 @@ const softDeleteItemFromCartService = async (userId, idProduct) => {
             throw new Error("El producto no está en el carrito o ya ha sido eliminado.");
         }
 
-        // Marcar el producto como inactivo (soft delete)
+        // Eliminar lógicamente el itemCart
         const updatedItem = await prisma.itemCart.update({
             where: { idItemCart: itemCart.idItemCart },
-            data: { quantity: 0, status: false }
+            data: {
+                quantity: 0,
+                status: false
+            }
         });
 
-        return { cartId: cart.idCart, item: updatedItem };
+        // Soft delete de las personalizaciones asociadas
+        await prisma.userProductPersonalize.updateMany({
+            where: {
+                idItemCart: itemCart.idItemCart,
+                status: true
+            },
+            data: {
+                status: false
+            }
+        });
+
+        return {
+            cartId: cart.idCart,
+            item: updatedItem
+        };
     });
 };
 
