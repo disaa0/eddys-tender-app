@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import PersonalizationList from '../../components/PersonalizationList';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
+import { theme } from '../../theme';
 
 const defaultImage = require('../../../assets/products/tenders.png');
 
@@ -173,7 +174,7 @@ export default function ProductDetails() {
       <SafeAreaView style={[styles.safeArea,]} edges={['top']}>
         <View style={styles.mainContainer}>
           {/* <ScrollView style={styles.scrollContainer} > */}
-          <Card style={{ borderRadius: 20, overflow: 'hidden', flex: 1 }}>
+          <Card style={{ borderRadius: 0, overflow: 'hidden', flex: 1, backgroundColor: theme.colors.surface }}>
             {/* Contenedor de imagen con botón de regreso */}
             <View style={styles.imageContainer}>
               <Card.Cover
@@ -291,13 +292,12 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.primary,
   },
   mainContainer: {
     flex: 1, // Para que ocupe toda la pantalla
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.surface,
     paddingTop: StatusBar.currentHeight,
-    paddingHorizontal: 10,
 
   },
   content: {
@@ -318,20 +318,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     left: 15,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: theme.colors.primary,
     padding: 10,
     borderRadius: 20,
   },
   bottomContainer: {
     width: "100%",
-    backgroundColor: "white",
+    backgroundColor: theme.colors.surface,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   priceButton: {
-    backgroundColor: '#E74C3C', // Color rojo similar a la imagen
+    backgroundColor: theme.colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -345,11 +345,11 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'white',
+    color: theme.colors.surface,
   },
 
   cartButton: {
-    backgroundColor: '#2D221D', // Color oscuro similar al botón de la imagen
+    backgroundColor: theme.colors.text, // Color oscuro similar al botón de la imagen
     flex: 1, // Para que ocupe más espacio
     marginLeft: 10,
     paddingVertical: 12,
@@ -360,12 +360,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
+    color: theme.colors.surface
   },
 
   cartText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'white',
+    color: theme.colors.surface,
     textAlign: 'center',
   },
   descripcionContainer: {
@@ -380,7 +381,7 @@ const styles = StyleSheet.create({
 
   },
   quantityButton: {
-    backgroundColor: '#E74C3C', // Color rojo similar a la imagen
+    backgroundColor: theme.colors.primary, // Color rojo similar a la imagen
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
 
   quantityText: {
     fontSize: 24,
-    color: 'white',
+    color: theme.colors.surface,
     fontWeight: 'bold',
   },
 
