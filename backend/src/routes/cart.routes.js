@@ -8,7 +8,7 @@ router.put('/items/addOneItem/:idProduct', authenticateToken, validateAddOneItem
 router.put('/items/new/:id', authenticateToken, validateAddItemToCartWithPersonalzations, addItemToCartPersonalized);
 router.get('/items/last/:idProduct', authenticateToken, getLastItemCartForProduct);
 router.put('/items/:idProduct', authenticateToken, validateAddItemToCart, addItemToCart);
-router.delete('/items/:idProduct', authenticateToken, softDeleteItemFromCart)
+router.delete('/items/:idItemCart', authenticateToken, softDeleteItemFromCart);
 router.get('/', authenticateToken, getItemsCart);
 router.get('/total', authenticateToken, getTotalAmountCart);
 router.get('/quantity', authenticateToken, getItemsQuantityCart);

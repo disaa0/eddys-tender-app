@@ -90,11 +90,11 @@ const addOneItemToCart = async (req, res) => {
 }
 
 const softDeleteItemFromCart = async (req, res) => {
-    const { idProduct } = req.params;
+    const { idItemCart } = req.params;
     const userId = req.user.userId; // Obtenido del middleware de autenticación
 
     try {
-        const result = await softDeleteItemFromCartService(userId, idProduct);
+        const result = await softDeleteItemFromCartService(userId, idItemCart);
 
         return res.status(200).json({
             message: "Producto eliminado del carrito",
