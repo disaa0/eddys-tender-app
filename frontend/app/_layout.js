@@ -38,7 +38,8 @@ function useProtectedRoute(setMostrarPopUpSessionExpirada) {
     checkifIsAuthenticated();
 
     if (sessionExpired && !inAuthGroup) {
-      setMostrarPopUpSessionExpirada(true); // 🔹 Ahora el estado está en AppContent
+      router.push("/login")
+      //setMostrarPopUpSessionExpirada(true); // 🔹 Ahora el estado está en AppContent
       return;
     }
 

@@ -105,6 +105,7 @@ export default function Orders() {
                                     <View>
                                         <Text variant="titleMedium">Pedido #{item.idOrder}</Text>
                                         <Text variant="titleMedium">{item.clientName || 'Nombre no encontrado'}</Text>
+                                        <Text variant="titleMedium">{item.phoneNumber || 'Teléfono no encontrado'}</Text>
                                         <Text variant="bodySmall">{formatDate(item.createdAt)}</Text>
                                     </View>
                                     <Chip
