@@ -119,9 +119,9 @@ async function getProduct(req, res) {
 
         // Check if product image exists (only jpg now)
         const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
-        
-        let productWithImage = {...product};
-        
+
+        let productWithImage = { ...product };
+
         if (fs.existsSync(imagePath)) {
             // Add image URL only if the image exists
             productWithImage.image_url = `/api/products/${product.idProduct}/image`;
@@ -588,7 +588,7 @@ async function getProductImage(req, res) {
         // Now all images are JPG format
         const uploadDir = path.join(__dirname, '../../uploads/products');
         const imagePath = path.join(uploadDir, `product-${productId}.jpg`);
-        
+
         if (!fs.existsSync(imagePath)) {
             return res.status(404).json({
                 message: "Este producto no tiene una imagen"
@@ -666,12 +666,12 @@ const searchProducts = async (req, res) => {
                 name: 'asc'
             }
         });
-        
+
         // Add image URL to each product only if image exists (only jpg now)
         const productsWithImages = await Promise.all(products.map(async product => {
             const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
-            
-            let productWithImage = {...product};
+
+            let productWithImage = { ...product };
             if (fs.existsSync(imagePath)) {
                 // Add image URL only if the image exists
                 productWithImage.image_url = `/api/products/${product.idProduct}/image`;
@@ -733,28 +733,62 @@ async function getPopularProducts(req, res) {
             },
             take: limitNum
         });
-        // Format the response with image URLs if they exist
-        const formattedProducts = await Promise.all(popularProducts.map(async product => {
+
+        // Get unrequested products 
+        const unrequestedProducts = await prisma.product.findMany({
+            where: {
+                status: true,
+                itemsCart: {
+                    none: {} // No items in cart
+                }
+            },
+            include: {
+                productType: {
+                    select: { type: true }
+                }
+            },
+            orderBy: {
+                name: 'asc'
+            }
+        });
+
+        // Format popular products
+        const formattedPopular = await Promise.all(popularProducts.map(async product => {
             const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
-            
+
             const productObj = {
                 ...product,
                 popularity: product._count.itemsCart,
-                _count: undefined // Remove the _count field from response
+                _count: undefined // Exclude _count from the response
             };
-            
             if (fs.existsSync(imagePath)) {
-                // Add image URL only if the image exists
                 productObj.image_url = `/api/products/${product.idProduct}/image`;
             }
-            
             return productObj;
         }));
+
+        // Format unrequested products
+        const formattedUnrequested = await Promise.all(unrequestedProducts.map(async product => {
+            const imagePath = path.join(__dirname, '../../uploads/products', `product-${product.idProduct}.jpg`);
+            const productObj = {
+                ...product,
+                popularity: 0
+            };
+            if (fs.existsSync(imagePath)) {
+                // Add image URL only if the image exist
+                productObj.image_url = `/api/products/${product.idProduct}/image`;
+            }
+
+            return productObj;
+        }));
+
+        // Combine both arrays
+        const allProducts = [...formattedPopular, ...formattedUnrequested];
 
         return res.status(200).json({
             message: "Productos populares obtenidos correctamente",
             data: {
-                products: formattedProducts
+                products: allProducts
             }
         });
 

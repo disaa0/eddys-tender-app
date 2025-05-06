@@ -2326,15 +2326,32 @@ limit: Número de productos a retornar (default: 5)
   "data": {
     "products": [
       {
-        "idProduct": 1,
-        "name": "Hamburguesa Clásica",
-        "description": "Hamburguesa con carne, lechuga y tomate",
-        "price": 120.0,
+        "idProduct": 2,
+        "idProductType": 1,
+        "idUserAdded": 1,
+        "name": "Pizza Pepperoni",
+        "description": "Pizza con pepperoni, queso y salsa de tomate",
+        "price": 149.99,
         "status": true,
+        "createdAt": "2025-05-05T23:04:18.818Z",
         "productType": {
           "type": "Comida"
         },
-        "popularity": 25
+        "popularity": 2
+      },
+      {
+        "idProduct": 3,
+        "idProductType": 2,
+        "idUserAdded": 1,
+        "name": "Refresco Cola",
+        "description": "Refresco de cola 600ml",
+        "price": 25,
+        "status": true,
+        "createdAt": "2025-05-05T23:04:18.818Z",
+        "productType": {
+          "type": "Bebidas"
+        },
+        "popularity": 0
       }
       // ... más productos
     ]
@@ -2347,6 +2364,7 @@ limit: Número de productos a retornar (default: 5)
 - Solo retorna productos activos (status = true)
 - El campo "popularity" indica cuántas veces el producto ha sido agregado a carritos
 - Los productos están ordenados por popularidad de mayor a menor
+- Aquellos productos que no han sido agregados a algun carrito todavia, se incluyen al final del arreglo ordenados alfabeticamente.
 - Se requiere autenticación
 
 **Errores Posibles:**
