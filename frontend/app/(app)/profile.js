@@ -12,7 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function Profile() {
   const router = useRouter();
-  const { logout, user } = useAuth();
+  const { logout, user, isAdmin } = useAuth();
   // hook personalizado para obtener la información del usuario
   // Descomentar para usar el hook personalizado
 
@@ -179,10 +179,10 @@ export default function Profile() {
             confirmButtonLoading={isDeleting}
           />
 
-          <Surface style={styles.infoSection} elevation={1}>
+          {isAdmin && (<Surface style={styles.infoSection} elevation={1}>
             <List.Item
               title="Panel de Administrador"
-              description="Acceder al panel de control"
+              description={"Acceder al panel de control"}
               left={(props) => (
                 <List.Icon {...props} icon="shield-account" color={theme.colors.primary} />
               )}
@@ -190,7 +190,7 @@ export default function Profile() {
               onPress={() => router.push('/(appAdmin)/adminDashboard')}
             />
           </Surface>
-
+          )}
 
           <Surface style={[styles.infoSection, styles.dangerSection]} elevation={1}>
             <List.Item

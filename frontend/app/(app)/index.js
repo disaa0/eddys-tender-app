@@ -121,7 +121,7 @@ export default function Index() {
   };
 
   const renderProduct = ({ item, index }) => {
-    const isLastItem = index === getSortedProducts().length - 1;
+    const isLastItem = (index === getSortedProducts().length - 1 && (getSortedProducts % 2 == 1));
     let image_url = item.image_url;
     if (image_url) {
       image_url = API_URL + image_url.replace('/api', '');
