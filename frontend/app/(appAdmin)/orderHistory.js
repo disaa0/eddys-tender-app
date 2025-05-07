@@ -162,6 +162,7 @@ export default function OrdersHistory() {
             setLoading(true);
             const addressesData = await apiService.getShippingAdresses();
             const activeOrders = await adminApiService.getOrderHistory(startDate, endDate);
+            console.log(activeOrders.data.orders)
             setOrders(activeOrders.data.orders || []);
             setAddresses(addressesData.data || []);
         } catch (err) {
@@ -412,7 +413,8 @@ export default function OrdersHistory() {
                                         <View style={styles.orderHeader}>
                                             <View>
                                                 <Text variant="titleMedium">Pedido #{order.idOrder}</Text>
-                                                <Text variant="titleMedium">{order.clientName || 'Nombre no encontrado'}</Text>
+                                                <Text variant="titleMedium">{order.cart.user.username || 'Nombre no encontrado'}</Text>
+                                                <Text variant="titleMedium">{order.cart.user.userInformation.phone || 'Télefono no encontrado'}</Text>
                                                 <Text variant="bodySmall">{formatDate(order.createdAt)}</Text>
                                             </View>
                                             <Chip
@@ -430,8 +432,9 @@ export default function OrdersHistory() {
                                             {order.cart.itemsCart.map((item, index) => (
                                                 <List.Item
                                                     key={index}
-                                                    title="nombre del producto"
-                                                    description={`Cantidad: ${item.quantity}`}
+                                                    title={`${item.quantity} x ${item.product.name}`}
+                                                    descriptionNumberOfLines={3}
+                                                    description={`${item.userProductPersonalize ? item.userProductPersonalize.map(item => ` ${item.productPersonalization.personalization.name}`) : null}`}
                                                     left={props => <List.Icon {...props} icon="food" />}
                                                     right={props => <Text {...props}>{`$${(item.quantity * item.individualPrice).toFixed(2)}`}</Text>}
                                                 />
