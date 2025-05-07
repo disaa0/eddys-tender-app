@@ -140,7 +140,18 @@ async function getOrderDetails(orderId, userId) {
       cart: {
         include: {
           itemsCart: {
-            include: { product: true },
+            include: { 
+              product: true,
+              userProductPersonalize: {
+                include: {
+                  productPersonalization: {
+                    include: {
+                      personalization: true
+                    }
+                  }
+                }
+              }
+            },
           },
         },
       },
@@ -154,14 +165,37 @@ async function getOrderDetails(orderId, userId) {
     throw new Error('Orden no encontrada');
   }
 
-  // Filter out items with quantity <= 0
+  // Format cart items to include personalization details
+  let formattedItems = [];
+  
   if (order.cart && order.cart.itemsCart) {
-    order.cart.itemsCart = order.cart.itemsCart.filter(
-      (item) => item.quantity > 0
-    );
+    // Filter out items with quantity <= 0
+    const validItems = order.cart.itemsCart.filter(item => item.quantity > 0);
+    
+    // Format each item to include its personalizations
+    formattedItems = validItems.map(item => {
+      // Extract personalization information
+      const personalizations = item.userProductPersonalize?.map(upp => ({
+        idPersonalization: upp.productPersonalization.personalization.idPersonalization,
+        name: upp.productPersonalization.personalization.name
+      })) || [];
+      
+      return {
+        idItemCart: item.idItemCart,
+        idProduct: item.idProduct,
+        quantity: item.quantity,
+        individualPrice: item.individualPrice,
+        product: item.product,
+        personalizations: personalizations
+      };
+    });
   }
 
-  return order;
+  // Return the order with formatted items
+  return {
+    ...order,
+    items: formattedItems
+  };
 }
 
 /**
@@ -178,11 +212,65 @@ async function getUserOrders(userId) {
       orderStatus: true,
       shipmentType: true,
       paymentType: true,
+      cart: {
+        include: {
+          itemsCart: {
+            where: { status: true },
+            include: { 
+              product: true,
+              userProductPersonalize: {
+                include: {
+                  productPersonalization: {
+                    include: {
+                      personalization: true
+                    }
+                  }
+                }
+              }
+            },
+          },
+        },
+      },
     },
     orderBy: { createdAt: 'desc' },
   });
 
-  return orders;
+  // Filter out items with quantity <= 0 and restructure response
+  const formattedOrders = orders.map(order => {
+    // Format cart items to include personalization details
+    let formattedItems = [];
+    
+    if (order.cart && order.cart.itemsCart) {
+      // Filter out items with quantity <= 0
+      const validItems = order.cart.itemsCart.filter(item => item.quantity > 0);
+      
+      // Format each item to include its personalizations
+      formattedItems = validItems.map(item => {
+        // Extract personalization information
+        const personalizations = item.userProductPersonalize.map(upp => ({
+          idPersonalization: upp.productPersonalization.personalization.idPersonalization,
+          name: upp.productPersonalization.personalization.name
+        }));
+        
+        return {
+          idItemCart: item.idItemCart,
+          idProduct: item.idProduct,
+          quantity: item.quantity,
+          individualPrice: item.individualPrice,
+          product: item.product,
+          personalizations: personalizations
+        };
+      });
+    }
+    
+    // Return formatted order
+    return {
+      ...order,
+      items: formattedItems,
+    };
+  });
+
+  return formattedOrders;
 }
 
 async function getUserOrdersDetailsService(userId) {
@@ -195,7 +283,18 @@ async function getUserOrdersDetailsService(userId) {
       cart: {
         include: {
           itemsCart: {
-            include: { product: true },
+            include: { 
+              product: true,
+              userProductPersonalize: {
+                include: {
+                  productPersonalization: {
+                    include: {
+                      personalization: true
+                    }
+                  }
+                }
+              }
+            },
           },
         },
       },
@@ -211,27 +310,48 @@ async function getUserOrdersDetailsService(userId) {
     throw new Error('Ordenes no encontrada');
   }
 
-  // Add formatted location string to each order and filter out items with quantity <= 0
-  const ordersWithFormattedLocation = orders.map((order) => {
+  // Add formatted location string to each order and format items with personalization details
+  const formattedOrders = orders.map((order) => {
+    // Format location
     let locationFormatted = null;
     if (order.location) {
       locationFormatted = `${order.location.street}, ${order.location.houseNumber}\n${order.location.neighborhood}\n${order.location.postalCode}`;
     }
 
-    // Filter out items with quantity <= 0
+    // Format cart items to include personalization details
+    let formattedItems = [];
+    
     if (order.cart && order.cart.itemsCart) {
-      order.cart.itemsCart = order.cart.itemsCart.filter(
-        (item) => item.quantity > 0
-      );
+      // Filter out items with quantity <= 0
+      const validItems = order.cart.itemsCart.filter(item => item.quantity > 0);
+      
+      // Format each item to include its personalizations
+      formattedItems = validItems.map(item => {
+        // Extract personalization information
+        const personalizations = item.userProductPersonalize?.map(upp => ({
+          idPersonalization: upp.productPersonalization.personalization.idPersonalization,
+          name: upp.productPersonalization.personalization.name
+        })) || [];
+        
+        return {
+          idItemCart: item.idItemCart,
+          idProduct: item.idProduct,
+          quantity: item.quantity,
+          individualPrice: item.individualPrice,
+          product: item.product,
+          personalizations: personalizations
+        };
+      });
     }
 
     return {
       ...order,
       locationFormatted,
+      items: formattedItems
     };
   });
 
-  return ordersWithFormattedLocation;
+  return formattedOrders;
 }
 
 /**
@@ -513,6 +633,15 @@ async function getOrdersByStatus({ status, page = 1, limit = 10, sortSequence })
           itemsCart: {
             include: {
               product: true,
+              userProductPersonalize: {
+                include: {
+                  productPersonalization: {
+                    include: {
+                      personalization: true
+                    }
+                  }
+                }
+              }
             },
           },
         },
@@ -529,11 +658,30 @@ async function getOrdersByStatus({ status, page = 1, limit = 10, sortSequence })
   const sanitizedOrders = orders.map((order) => {
     const { stripeClientSecret, ...rest } = order;
 
-    // Filter out items with quantity <= 0
+    // Format cart items to include personalization details
+    let formattedItems = [];
+    
     if (order.cart && order.cart.itemsCart) {
-      order.cart.itemsCart = order.cart.itemsCart.filter(
-        (item) => item.quantity > 0
-      );
+      // Filter out items with quantity <= 0
+      const validItems = order.cart.itemsCart.filter(item => item.quantity > 0);
+      
+      // Format each item to include its personalizations
+      formattedItems = validItems.map(item => {
+        // Extract personalization information
+        const personalizations = item.userProductPersonalize?.map(upp => ({
+          idPersonalization: upp.productPersonalization.personalization.idPersonalization,
+          name: upp.productPersonalization.personalization.name
+        })) || [];
+        
+        return {
+          idItemCart: item.idItemCart,
+          idProduct: item.idProduct,
+          quantity: item.quantity,
+          individualPrice: item.individualPrice,
+          product: item.product,
+          personalizations: personalizations
+        };
+      });
     }
 
     // Add formatted location string if location exists
@@ -561,6 +709,7 @@ async function getOrdersByStatus({ status, page = 1, limit = 10, sortSequence })
       clientName,
       phoneNumber,
       locationFormatted,
+      items: formattedItems
     };
   });
 

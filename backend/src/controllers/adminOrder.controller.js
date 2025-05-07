@@ -61,7 +61,18 @@ async function getOrdersByDateRange(req, res) {
                         },
                         itemsCart: {
                             where: { status: true },
-                            include: { product: true }
+                            include: { 
+                                product: true,
+                                userProductPersonalize: {
+                                    include: {
+                                        productPersonalization: {
+                                            include: {
+                                                personalization: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -97,7 +108,18 @@ const getOrdersByProducts = async (req, res) => {
                     include: {
                         itemsCart: {
                             where: { status: true },
-                            include: { product: true }
+                            include: { 
+                                product: true,
+                                userProductPersonalize: {
+                                    include: {
+                                        productPersonalization: {
+                                            include: {
+                                                personalization: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -176,7 +198,18 @@ async function getOrderById(req, res) {
                         },
                         itemsCart: {
                             where: { status: true },
-                            include: { product: true }
+                            include: { 
+                                product: true,
+                                userProductPersonalize: {
+                                    include: {
+                                        productPersonalization: {
+                                            include: {
+                                                personalization: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },

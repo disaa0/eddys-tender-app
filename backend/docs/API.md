@@ -390,7 +390,29 @@ Authorization: Bearer <token>
           "houseNumber": "10",
           "postalCode": "83000",
           "neighborhood": "Centro"
-        }
+        },
+        "items": [
+          {
+            "idItemCart": 57,
+            "quantity": 2,
+            "individualPrice": 129,
+            "product": {
+              "idProduct": 12,
+              "name": "Tender Box",
+              "description": "Exquisito paquete..."
+            },
+            "personalizations": [
+              {
+                "idPersonalization": 1,
+                "name": "Sin Cebolla"
+              },
+              {
+                "idPersonalization": 5,
+                "name": "Sin Picante"
+              }
+            ]
+          }
+        ]
       }
     ],
     "count": 1
@@ -488,7 +510,29 @@ Authorization: Bearer <token>
       "houseNumber": "10",
       "postalCode": "83000",
       "neighborhood": "Centro"
-    }
+    },
+    "items": [
+      {
+        "idItemCart": 57,
+        "quantity": 2,
+        "individualPrice": 129,
+        "product": {
+          "idProduct": 12,
+          "name": "Tender Box",
+          "description": "Exquisito paquete..."
+        },
+        "personalizations": [
+          {
+            "idPersonalization": 1,
+            "name": "Sin Cebolla"
+          },
+          {
+            "idPersonalization": 2,
+            "name": "Extra Queso"
+          }
+        ]
+      }
+    ]
   }
 }
 ```
@@ -999,7 +1043,40 @@ limit: Resultados por página (default: 10)
           "postalCode": "83000",
           "neighborhood": "Centro"
         },
-        "locationFormatted": "Av. Luis Encinas, 10\nCentro\n83000"
+        "locationFormatted": "Av. Luis Encinas, 10\nCentro\n83000",
+        "items": [
+          {
+            "idItemCart": 4,
+            "idProduct": 1,
+            "quantity": 3,
+            "individualPrice": 89.99,
+            "product": {
+              "idProduct": 1,
+              "name": "Hamburguesa Clásica",
+              "description": "Hamburguesa con carne, lechuga, tomate y queso",
+              "price": 89.99
+            },
+            "personalizations": [
+              {
+                "idPersonalization": 1,
+                "name": "Sin Cebolla"
+              }
+            ]
+          },
+          {
+            "idItemCart": 5,
+            "idProduct": 2,
+            "quantity": 1,
+            "individualPrice": 149.99,
+            "product": {
+              "idProduct": 2,
+              "name": "Pizza Pepperoni",
+              "description": "Pizza con pepperoni, queso y salsa de tomate",
+              "price": 149.99
+            },
+            "personalizations": []
+          }
+        ]
       },
       {
         "idOrder": 3,
@@ -1033,7 +1110,44 @@ limit: Resultados por página (default: 10)
           "postalCode": "83000",
           "neighborhood": "Centro"
         },
-        "locationFormatted": "Av. Luis Encinas, 10\nCentro\n83000"
+        "locationFormatted": "Av. Luis Encinas, 10\nCentro\n83000",
+        "items": [
+          {
+            "idItemCart": 3,
+            "idProduct": 1,
+            "quantity": 3,
+            "individualPrice": 89.99,
+            "product": {
+              "idProduct": 1,
+              "name": "Hamburguesa Clásica",
+              "description": "Hamburguesa con carne, lechuga, tomate y queso",
+              "price": 89.99
+            },
+            "personalizations": [
+              {
+                "idPersonalization": 1,
+                "name": "Sin Cebolla"
+              },
+              {
+                "idPersonalization": 2,
+                "name": "Extra Queso"
+              }
+            ]
+          },
+          {
+            "idItemCart": 2,
+            "idProduct": 2,
+            "quantity": 1,
+            "individualPrice": 149.99,
+            "product": {
+              "idProduct": 2,
+              "name": "Pizza Pepperoni",
+              "description": "Pizza con pepperoni, queso y salsa de tomate",
+              "price": 149.99
+            },
+            "personalizations": []
+          }
+        ]
       }
     ],
     "pagination": {
@@ -1137,9 +1251,9 @@ limit: Resultados por página (default: 10)
 - 401: Token no proporcionado
 - 500: Error del servidor
 
-### 8.7 Obtner orodenes filtradas por productos
+### 8.7 Obtener órdenes filtradas por productos
 
-** GET /api/admin/orders/by-products **
+**GET /api/admin/orders/by-products**
 
 Permite a administradores obtener pedidos de todos los usuarios filtrando por productos, con orden descendente.
 
@@ -1156,90 +1270,132 @@ product_id: ID de los productos
 ```
 
 **Respuesta (200 OK):**
+```json
 [
-{
-"idOrder": 1,
-"idCart": 1,
-"idPaymentType": 1,
-"idShipmentType": 1,
-"idOrderStatus": 1,
-"idLocation": 1,
-"createdAt": "2025-04-29T20:18:58.341Z",
-"deliveryAt": null,
-"totalPrice": 719.94,
-"shipmentValue": 0,
-"paid": false,
-"paidAt": null,
-"stripePaymentIntentId": null,
-"stripeClientSecret": null,
-"stripePaymentStatus": null,
-"cart": {
-"idCart": 1,
-"idUser": 2,
-"status": false,
-"createdAt": "2025-04-29T20:18:38.253Z",
-"itemsCart": [
-{
-"idItemCart": 1,
-"idCart": 1,
-"idProduct": 1,
-"quantity": 3,
-"individualPrice": 89.99,
-"status": true,
-"product": {
-"idProduct": 1,
-"idProductType": 1,
-"idUserAdded": 1,
-"name": "Hamburguesa Clásica",
-"description": "Hamburguesa con carne, lechuga, tomate y queso",
-"price": 89.99,
-"status": true,
-"createdAt": "2025-04-29T20:17:37.039Z"
-}
-},
-{
-"idItemCart": 2,
-"idCart": 1,
-"idProduct": 2,
-"quantity": 3,
-"individualPrice": 149.99,
-"status": true,
-"product": {
-"idProduct": 2,
-"idProductType": 1,
-"idUserAdded": 1,
-"name": "Pizza Pepperoni",
-"description": "Pizza con pepperoni, queso y salsa de tomate",
-"price": 149.99,
-"status": true,
-"createdAt": "2025-04-29T20:17:37.039Z"
-}
-}
+  {
+    "idOrder": 1,
+    "idCart": 1,
+    "idPaymentType": 1,
+    "idShipmentType": 1,
+    "idOrderStatus": 1,
+    "idLocation": 1,
+    "createdAt": "2025-04-29T20:18:58.341Z",
+    "deliveryAt": null,
+    "totalPrice": 719.94,
+    "shipmentValue": 0,
+    "paid": false,
+    "paidAt": null,
+    "stripePaymentIntentId": null,
+    "stripeClientSecret": null,
+    "stripePaymentStatus": null,
+    "items": [
+      {
+        "idItemCart": 1,
+        "idCart": 1,
+        "idProduct": 1,
+        "quantity": 3,
+        "individualPrice": 89.99,
+        "product": {
+          "idProduct": 1,
+          "idProductType": 1,
+          "idUserAdded": 1,
+          "name": "Hamburguesa Clásica",
+          "description": "Hamburguesa con carne, lechuga, tomate y queso",
+          "price": 89.99
+        },
+        "personalizations": [
+          {
+            "idPersonalization": 1,
+            "name": "Sin Cebolla"
+          }
+        ]
+      },
+      {
+        "idItemCart": 2,
+        "idCart": 1,
+        "idProduct": 2,
+        "quantity": 3,
+        "individualPrice": 149.99,
+        "product": {
+          "idProduct": 2,
+          "idProductType": 1,
+          "idUserAdded": 1,
+          "name": "Pizza Pepperoni",
+          "description": "Pizza con pepperoni, queso y salsa de tomate",
+          "price": 149.99
+        },
+        "personalizations": []
+      }
+    ],
+    "cart": {
+      "idCart": 1,
+      "idUser": 2,
+      "status": false,
+      "createdAt": "2025-04-29T20:18:38.253Z",
+      "itemsCart": [
+        {
+          "idItemCart": 1,
+          "idCart": 1,
+          "idProduct": 1,
+          "quantity": 3,
+          "individualPrice": 89.99,
+          "status": true,
+          "product": {
+            "idProduct": 1,
+            "idProductType": 1,
+            "idUserAdded": 1,
+            "name": "Hamburguesa Clásica",
+            "description": "Hamburguesa con carne, lechuga, tomate y queso",
+            "price": 89.99,
+            "status": true,
+            "createdAt": "2025-04-29T20:17:37.039Z"
+          }
+        },
+        {
+          "idItemCart": 2,
+          "idCart": 1,
+          "idProduct": 2,
+          "quantity": 3,
+          "individualPrice": 149.99,
+          "status": true,
+          "product": {
+            "idProduct": 2,
+            "idProductType": 1,
+            "idUserAdded": 1,
+            "name": "Pizza Pepperoni",
+            "description": "Pizza con pepperoni, queso y salsa de tomate",
+            "price": 149.99,
+            "status": true,
+            "createdAt": "2025-04-29T20:17:37.039Z"
+          }
+        }
+      ]
+    },
+    "paymentType": {
+      "idPaymentType": 1,
+      "type": "Efectivo"
+    },
+    "shipmentType": {
+      "idShipmentType": 1,
+      "type": "Envío a domicilio"
+    },
+    "orderStatus": {
+      "idOrderStatus": 1,
+      "status": "Pendiente"
+    },
+    "location": {
+      "idLocation": 1,
+      "idUserInformation": 1,
+      "street": "Nouvel",
+      "houseNumber": "18",
+      "postalCode": "83288",
+      "neighborhood": "Jardines de Mónaco",
+      "status": true
+    },
+    "locationFormatted": "Nouvel, 18\nJardines de Mónaco\n83288"
+  }
 ]
-},
-"paymentType": {
-"idPaymentType": 1,
-"type": "Efectivo"
-},
-"shipmentType": {
-"idShipmentType": 1,
-"type": "Envío a domicilio"
-},
-"orderStatus": {
-"idOrderStatus": 1,
-"status": "Pendiente"
-},
-"location": {
-"idLocation": 1,
-"idUserInformation": 1,
-"street": "Nouvel",
-"houseNumber": "18",
-"postalCode": "83288",
-"neighborhood": "Jardines de Mónaco",
-"status": true
-},
-"locationFormatted": "Nouvel, 18\nJardines de Mónaco\n83288"
-}
+```
 ]
 
 **Errores Posibles:**
@@ -3215,6 +3371,29 @@ Authorization: Bearer <token>
     "idShipmentType": 1,
     "type": "Envío a domicilio"
   },
+  "items": [
+    {
+      "idItemCart": 57,
+      "quantity": 2,
+      "individualPrice": 129,
+      "product": {
+        "idProduct": 12,
+        "name": "Tender Box",
+        "description": "Exquisito paquete...",
+        "price": 129
+      },
+      "personalizations": [
+        {
+          "idPersonalization": 1,
+          "name": "Sin Cebolla"
+        },
+        {
+          "idPersonalization": 2,
+          "name": "Extra Queso"
+        }
+      ]
+    }
+  ],
   "cart": {
     "idCart": 23,
     "idUser": 5,
@@ -3400,6 +3579,35 @@ Authorization: Bearer <token>
         "stripePaymentIntentId": null,
         "stripeClientSecret": null,
         "stripePaymentStatus": null,
+        "items": [
+            {
+                "idItemCart": 1,
+                "idCart": 1,
+                "idProduct": 2,
+                "quantity": 1,
+                "individualPrice": 149,
+                "product": {
+                    "idProduct": 2,
+                    "idProductType": 1,
+                    "idUserAdded": 1,
+                    "name": "Pizza Pepperoni",
+                    "description": "Pizza con pepperoni, queso y salsa de tomate",
+                    "price": 149.99,
+                    "status": true,
+                    "createdAt": "2025-04-13T22:08:08.840Z"
+                },
+                "personalizations": [
+                    {
+                        "idPersonalization": 2,
+                        "name": "Extra Queso"
+                    },
+                    {
+                        "idPersonalization": 3,
+                        "name": "Sin Gluten"
+                    }
+                ]
+            }
+        ],
         "cart": {
             "idCart": 1,
             "idUser": 2,
