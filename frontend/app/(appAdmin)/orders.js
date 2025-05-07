@@ -128,14 +128,16 @@ export default function Orders() {
 
                                 <List.Section>
                                     <List.Subheader>Productos</List.Subheader>
-                                    {item.cart.itemsCart.map((product, index) => (
-                                        <List.Item
-                                            key={index}
-                                            title={product.product.name}
-                                            description={`Cantidad: ${product.quantity}`}
-                                            left={(props) => <List.Icon {...props} icon="food" />}
-                                            right={(props) => <Text {...props}>{`$${(product.quantity * product.individualPrice).toFixed(2)}`}</Text>}
-                                        />
+                                    {item.items.map((item, index) => (
+                                        item.quantity > 0 ? (
+                                            <List.Item
+                                                key={index}
+                                                title={`${item.quantity} x ${item.product.name}`}
+                                                descriptionNumberOfLines={3}
+                                                description={`${item.personalizations ? item.personalizations.map(item => ` ${item.name}`) : null}`}
+                                                left={props => <List.Icon {...props} icon="food" />}
+                                                right={props => <Text {...props}>{`$${(item.quantity * item.product.price).toFixed(2)}`}</Text>}
+                                            />) : null
                                     ))}
                                 </List.Section>
 

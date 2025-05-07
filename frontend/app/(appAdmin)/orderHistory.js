@@ -427,7 +427,7 @@ export default function OrdersHistory() {
 
                                         <List.Section>
                                             <List.Subheader>Productos</List.Subheader>
-                                            {order.cart.itemsCart.map((item, index) => (
+                                            {/* {order.cart.itemsCart.map((item, index) => (
                                                 <List.Item
                                                     key={index}
                                                     title="nombre del producto"
@@ -435,6 +435,17 @@ export default function OrdersHistory() {
                                                     left={props => <List.Icon {...props} icon="food" />}
                                                     right={props => <Text {...props}>{`$${(item.quantity * item.individualPrice).toFixed(2)}`}</Text>}
                                                 />
+                                            ))} */}
+                                            {order.items.map((item, index) => (
+                                                item.quantity > 0 ? (
+                                                    <List.Item
+                                                        key={index}
+                                                        title={`${item.quantity} x ${item.product.name}`}
+                                                        descriptionNumberOfLines={3}
+                                                        description={`${item.personalizations ? item.personalizations.map(item => ` ${item.name}`) : null}`}
+                                                        left={props => <List.Icon {...props} icon="food" />}
+                                                        right={props => <Text {...props}>{`$${(item.quantity * item.product.price).toFixed(2)}`}</Text>}
+                                                    />) : null
                                             ))}
                                         </List.Section>
 
