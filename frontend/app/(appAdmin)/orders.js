@@ -36,9 +36,9 @@ export default function Orders() {
         loading,
         page,
         totalPages,
+        formatAddress,
         setPage,
         reloadData,
-        formatAddress,
         formatDate,
     } = useAdminOrders();
 
@@ -143,7 +143,7 @@ export default function Orders() {
 
                                 <List.Item
                                     title="Dirección de entrega"
-                                    description={formatAddress(item.idLocation)}
+                                    description={formatAddress(item.locationFormatted)}
                                     left={(props) => <List.Icon {...props} icon="map-marker" />}
                                 />
 

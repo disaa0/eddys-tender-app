@@ -15,11 +15,13 @@ export const useAdminOrders = () => {
         useCallback(() => {
             const fetchData = async () => {
                 try {
+
                     setLoading(true);
                     const activeOrders = await adminApiService.getActiveOrders(page);
-                    setOrders((prevProducts) => {
+                    console.log(activeOrders.data.orders)
+                    setOrders(() => {
                         if (page === 1) return (activeOrders.data.orders || []);
-                        return [...prevProducts, ...(activeOrders.data.orders || [])];
+                        return [...orders, ...(activeOrders.data.orders || [])];
                     });
                     setTotalPages(activeOrders?.data?.pagination?.totalPages || 1);
                 } catch (err) {
@@ -39,17 +41,6 @@ export const useAdminOrders = () => {
 
     const reloadData = () => setReload(true);
 
-    const formatAddress = (addressIdString) => {
-        if (!addressIdString) {
-            return "Pedido para recoger en sucursal";
-        }
-        const addressId = Number(addressIdString);
-        const addressInfo = addresses[addressId - 1];
-        return addressInfo
-            ? `${addressInfo.street} ${addressInfo.houseNumber}, ${addressInfo.neighborhood}, ${addressInfo.postalCode}`
-            : "Dirección no encontrada";
-    };
-
     const formatDate = (dateString) => {
         const options = {
             year: 'numeric',
@@ -60,16 +51,24 @@ export const useAdminOrders = () => {
         };
         return new Date(dateString).toLocaleDateString('es-MX', options);
     };
-
+    const formatAddress = (address) => {
+        if (!address) {
+            return "Pedido para recoger en sucursal"
+        } else if (address) {
+            return address;
+        } else {
+            return 'Error al cargar dirección de entrega'
+        }
+    };
     return {
         orders,
         error,
         loading,
         page,
         totalPages,
+        formatAddress,
         setPage,
         reloadData,
-        formatAddress,
         formatDate,
     };
 };
