@@ -3274,7 +3274,7 @@ Para pagos en efectivo (tipo 1):
 
 **GET /api/orders**
 
-Recupera todos los pedidos para el usuario autenticado.
+Recupera todos los pedidos para el usuario autenticado con paginación.
 
 **Encabezados Requeridos:**
 
@@ -3282,51 +3282,69 @@ Recupera todos los pedidos para el usuario autenticado.
 Authorization: Bearer <token>
 ```
 
-**Respuesta (200 OK):**
+**Parámetros de Consulta:**
 
 ```
-[
-  {
-    "idOrder": 42,
-    "totalPrice": 258.00,
-    "paid": true,
-    "paidAt": "2023-07-15T14:35:12Z",
-    "createdAt": "2023-07-15T14:30:45Z",
-    "deliveryAt": null,
-    "orderStatus": {
-      "idOrderStatus": 2,
-      "status": "Procesando"
-    },
-    "paymentType": {
-      "idPaymentType": 2,
-      "type": "Tarjeta de crédito"
-    },
-    "shipmentType": {
-      "idShipmentType": 1,
-      "type": "Envío a domicilio"
-    }
-  },
-  {
-    "idOrder": 38,
-    "totalPrice": 475.50,
-    "paid": true,
-    "paidAt": "2023-07-12T11:24:18Z",
-    "createdAt": "2023-07-12T11:20:33Z",
-    "deliveryAt": "2023-07-12T13:45:00Z",
-    "orderStatus": {
-      "idOrderStatus": 6,
-      "status": "Entregado"
-    },
-    "paymentType": {
-      "idPaymentType": 1,
-      "type": "Efectivo"
-    },
-    "shipmentType": {
-      "idShipmentType": 1,
-      "type": "Envío a domicilio"
+page: Número de página (default: 1)
+limit: Resultados por página (default: 10)
+```
+
+**Respuesta (200 OK):**
+
+```json
+{
+  "message": "Pedidos obtenidos correctamente",
+  "data": {
+    "orders": [
+      {
+        "idOrder": 42,
+        "totalPrice": 258.00,
+        "paid": true,
+        "paidAt": "2023-07-15T14:35:12Z",
+        "createdAt": "2023-07-15T14:30:45Z",
+        "deliveryAt": null,
+        "orderStatus": {
+          "idOrderStatus": 2,
+          "status": "Procesando"
+        },
+        "paymentType": {
+          "idPaymentType": 2,
+          "type": "Tarjeta de crédito"
+        },
+        "shipmentType": {
+          "idShipmentType": 1,
+          "type": "Envío a domicilio"
+        }
+      },
+      {
+        "idOrder": 38,
+        "totalPrice": 475.50,
+        "paid": true,
+        "paidAt": "2023-07-12T11:24:18Z",
+        "createdAt": "2023-07-12T11:20:33Z",
+        "deliveryAt": "2023-07-12T13:45:00Z",
+        "orderStatus": {
+          "idOrderStatus": 6,
+          "status": "Entregado"
+        },
+        "paymentType": {
+          "idPaymentType": 1,
+          "type": "Efectivo"
+        },
+        "shipmentType": {
+          "idShipmentType": 1,
+          "type": "Envío a domicilio"
+        }
+      }
+    ],
+    "pagination": {
+      "totalItems": 15,
+      "totalPages": 2,
+      "currentPage": 1,
+      "itemsPerPage": 10
     }
   }
-]
+}
 ```
 
 **Respuestas de Error:**
@@ -3547,11 +3565,11 @@ Authorization: Bearer <token>
 - 409: El carrito ya contiene los mismos productos
 - 500: Error del servidor
 
-### 14.6 Obtener Detalles de Pedidos perteneciantes a un usaurio.
+### 14.6 Obtener Detalles de Pedidos pertenecientes a un usuario.
 
-**GET /api/orders/datails**
+**GET /api/orders/details**
 
-Recupera información detallada sobre pedidos correspondientes a un usuario autenticado.
+Recupera información detallada sobre pedidos correspondientes a un usuario autenticado, con paginación.
 
 **Encabezados Requeridos:**
 
@@ -3559,11 +3577,21 @@ Recupera información detallada sobre pedidos correspondientes a un usuario aute
 Authorization: Bearer <token>
 ```
 
-**Respuesta (200 OK):**
+**Parámetros de Consulta:**
 
 ```
-[
-    {
+page: Número de página (default: 1)
+limit: Resultados por página (default: 10)
+```
+
+**Respuesta (200 OK):**
+
+```json
+{
+  "message": "Pedidos detallados obtenidos correctamente",
+  "data": {
+    "orders": [
+      {
         "idOrder": 1,
         "idCart": 1,
         "idPaymentType": 1,
@@ -3580,81 +3608,89 @@ Authorization: Bearer <token>
         "stripeClientSecret": null,
         "stripePaymentStatus": null,
         "items": [
-            {
-                "idItemCart": 1,
-                "idCart": 1,
-                "idProduct": 2,
-                "quantity": 1,
-                "individualPrice": 149,
-                "product": {
-                    "idProduct": 2,
-                    "idProductType": 1,
-                    "idUserAdded": 1,
-                    "name": "Pizza Pepperoni",
-                    "description": "Pizza con pepperoni, queso y salsa de tomate",
-                    "price": 149.99,
-                    "status": true,
-                    "createdAt": "2025-04-13T22:08:08.840Z"
-                },
-                "personalizations": [
-                    {
-                        "idPersonalization": 2,
-                        "name": "Extra Queso"
-                    },
-                    {
-                        "idPersonalization": 3,
-                        "name": "Sin Gluten"
-                    }
-                ]
-            }
+          {
+            "idItemCart": 1,
+            "idCart": 1,
+            "idProduct": 2,
+            "quantity": 1,
+            "individualPrice": 149,
+            "product": {
+              "idProduct": 2,
+              "idProductType": 1,
+              "idUserAdded": 1,
+              "name": "Pizza Pepperoni",
+              "description": "Pizza con pepperoni, queso y salsa de tomate",
+              "price": 149.99,
+              "status": true,
+              "createdAt": "2025-04-13T22:08:08.840Z"
+            },
+            "personalizations": [
+              {
+                "idPersonalization": 2,
+                "name": "Extra Queso"
+              },
+              {
+                "idPersonalization": 3,
+                "name": "Sin Gluten"
+              }
+            ]
+          }
         ],
         "cart": {
-            "idCart": 1,
-            "idUser": 2,
-            "status": false,
-            "createdAt": "2025-04-13T22:09:09.499Z",
-            "itemsCart": [
-                {
-                    "idItemCart": 1,
-                    "idCart": 1,
-                    "idProduct": 2,
-                    "quantity": 1,
-                    "individualPrice": 149,
-                    "status": true,
-                    "product": {
-                        "idProduct": 2,
-                        "idProductType": 1,
-                        "idUserAdded": 1,
-                        "name": "Pizza Pepperoni",
-                        "description": "Pizza con pepperoni, queso y salsa de tomate",
-                        "price": 149.99,
-                        "status": true,
-                        "createdAt": "2025-04-13T22:08:08.840Z"
-                    }
-                }
-            ]
+          "idCart": 1,
+          "idUser": 2,
+          "status": false,
+          "createdAt": "2025-04-13T22:09:09.499Z",
+          "itemsCart": [
+            {
+              "idItemCart": 1,
+              "idCart": 1,
+              "idProduct": 2,
+              "quantity": 1,
+              "individualPrice": 149,
+              "status": true,
+              "product": {
+                "idProduct": 2,
+                "idProductType": 1,
+                "idUserAdded": 1,
+                "name": "Pizza Pepperoni",
+                "description": "Pizza con pepperoni, queso y salsa de tomate",
+                "price": 149.99,
+                "status": true,
+                "createdAt": "2025-04-13T22:08:08.840Z"
+              }
+            }
+          ]
         },
         "paymentType": {
-            "idPaymentType": 1,
-            "type": "Efectivo"
+          "idPaymentType": 1,
+          "type": "Efectivo"
         },
         "shipmentType": {
-            "idShipmentType": 1,
-            "type": "Envío a domicilio"
+          "idShipmentType": 1,
+          "type": "Envío a domicilio"
         },
         "orderStatus": {
-            "idOrderStatus": 1,
-            "status": "Pendiente"
+          "idOrderStatus": 1,
+          "status": "Pendiente"
         },
         "location": {
-            "street": "Av. Luis Encinas",
-            "houseNumber": "10",
-            "postalCode": "83000",
-            "neighborhood": "Centro"
+          "street": "Av. Luis Encinas",
+          "houseNumber": "10",
+          "postalCode": "83000",
+          "neighborhood": "Centro"
         },
         "locationFormatted": "Av. Luis Encinas, 10\nCentro\n83000"
+      }
+    ],
+    "pagination": {
+      "totalItems": 15,
+      "totalPages": 2,
+      "currentPage": 1,
+      "itemsPerPage": 10
     }
-]
+  }
+}
 ```
 
 **Respuestas de Error:**

@@ -199,7 +199,7 @@ async function getOrderDetails(orderId, userId) {
 }
 
 /**
- * Get all orders for a user
+ * Get all orders for a user (without pagination)
  * @param {number} userId - The user ID
  * @returns {Array} - List of user's orders
  */
@@ -273,7 +273,115 @@ async function getUserOrders(userId) {
   return formattedOrders;
 }
 
-async function getUserOrdersDetailsService(userId) {
+/**
+ * Get all orders for a user with pagination
+ * @param {number} userId - The user ID
+ * @param {number} page - Page number (default: 1)
+ * @param {number} limit - Items per page (default: 10) 
+ * @returns {Object} - List of user's orders with pagination info
+ */
+async function getUserOrdersWithPagination(userId, page = 1, limit = 10) {
+  // Calculate skip value for pagination
+  const skip = (page - 1) * limit;
+  
+  // Get total count for pagination
+  const totalCount = await prisma.order.count({
+    where: {
+      cart: { idUser: userId },
+    }
+  });
+
+  // Get orders with pagination
+  const orders = await prisma.order.findMany({
+    where: {
+      cart: { idUser: userId },
+    },
+    include: {
+      orderStatus: true,
+      shipmentType: true,
+      paymentType: true,
+      cart: {
+        include: {
+          itemsCart: {
+            where: { status: true },
+            include: { 
+              product: true,
+              userProductPersonalize: {
+                include: {
+                  productPersonalization: {
+                    include: {
+                      personalization: true
+                    }
+                  }
+                }
+              }
+            },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    skip: skip,
+    take: limit
+  });
+
+  // Filter out items with quantity <= 0 and restructure response
+  const formattedOrders = orders.map(order => {
+    // Format cart items to include personalization details
+    let formattedItems = [];
+    
+    if (order.cart && order.cart.itemsCart) {
+      // Filter out items with quantity <= 0
+      const validItems = order.cart.itemsCart.filter(item => item.quantity > 0);
+      
+      // Format each item to include its personalizations
+      formattedItems = validItems.map(item => {
+        // Extract personalization information
+        const personalizations = item.userProductPersonalize.map(upp => ({
+          idPersonalization: upp.productPersonalization.personalization.idPersonalization,
+          name: upp.productPersonalization.personalization.name
+        }));
+        
+        return {
+          idItemCart: item.idItemCart,
+          idProduct: item.idProduct,
+          quantity: item.quantity,
+          individualPrice: item.individualPrice,
+          product: item.product,
+          personalizations: personalizations
+        };
+      });
+    }
+    
+    // Return formatted order
+    return {
+      ...order,
+      items: formattedItems,
+    };
+  });
+
+  return {
+    orders: formattedOrders,
+    pagination: {
+      totalItems: totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      currentPage: page,
+      itemsPerPage: limit
+    }
+  };
+}
+
+async function getUserOrdersDetailsService(userId, page = 1, limit = 10) {
+  // Calculate skip value for pagination
+  const skip = (page - 1) * limit;
+  
+  // Get total count for pagination
+  const totalCount = await prisma.order.count({
+    where: {
+      cart: { idUser: userId },
+    }
+  });
+  
   // Check if order exists and belongs to this user
   const orders = await prisma.order.findMany({
     where: {
@@ -304,10 +412,12 @@ async function getUserOrdersDetailsService(userId) {
       location: true, // Include location details
     },
     orderBy: { createdAt: 'desc' },
+    skip: skip,
+    take: limit
   });
 
   if (!orders) {
-    throw new Error('Ordenes no encontrada');
+    throw new Error('Ordenes no encontradas');
   }
 
   // Add formatted location string to each order and format items with personalization details
@@ -351,7 +461,15 @@ async function getUserOrdersDetailsService(userId) {
     };
   });
 
-  return formattedOrders;
+  return {
+    orders: formattedOrders,
+    pagination: {
+      totalItems: totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      currentPage: page,
+      itemsPerPage: limit
+    }
+  };
 }
 
 /**
@@ -897,6 +1015,7 @@ module.exports = {
   createOrder,
   getOrderDetails,
   getUserOrders,
+  getUserOrdersWithPagination,
   processStripeEvent,
   searchOrders,
   getOrdersByStatus,
