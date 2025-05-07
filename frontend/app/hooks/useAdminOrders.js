@@ -5,20 +5,23 @@ import adminApiService from '../api/AdminApiService';
 
 export const useAdminOrders = () => {
     const [orders, setOrders] = useState([]);
-    const [addresses, setAddresses] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [reload, setReload] = useState(false);
+    const [totalPages, setTotalPages] = useState(1);
+    const [page, setPage] = useState(1);
 
     useFocusEffect(
         useCallback(() => {
             const fetchData = async () => {
                 try {
                     setLoading(true);
-                    const addressesData = await apiService.getShippingAdresses();
-                    const activeOrders = await adminApiService.getActiveOrders();
-                    setOrders(activeOrders.data.orders || []);
-                    setAddresses(addressesData.data || []);
+                    const activeOrders = await adminApiService.getActiveOrders(page);
+                    setOrders((prevProducts) => {
+                        if (page === 1) return (activeOrders.data.orders || []);
+                        return [...prevProducts, ...(activeOrders.data.orders || [])];
+                    });
+                    setTotalPages(activeOrders?.data?.pagination?.totalPages || 1);
                 } catch (err) {
                     setError('Error al cargar información');
                     console.error(err);
@@ -31,7 +34,7 @@ export const useAdminOrders = () => {
             setError('');
             setReload(false);
             fetchData();
-        }, [reload])
+        }, [reload, page])
     );
 
     const reloadData = () => setReload(true);
@@ -60,9 +63,11 @@ export const useAdminOrders = () => {
 
     return {
         orders,
-        addresses,
         error,
         loading,
+        page,
+        totalPages,
+        setPage,
         reloadData,
         formatAddress,
         formatDate,

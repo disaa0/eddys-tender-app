@@ -34,6 +34,9 @@ export default function Orders() {
         orders,
         error,
         loading,
+        page,
+        totalPages,
+        setPage,
         reloadData,
         formatAddress,
         formatDate,
@@ -95,6 +98,11 @@ export default function Orders() {
                     placeholderTextColor="#666"
                 />
                 <FlatList
+                    onEndReached={() => {
+                        if (!loading && page < totalPages) {
+                            setPage((prevPage) => prevPage + 1);
+                        };
+                    }}
                     data={orders}
                     keyExtractor={(item) => item.idOrder.toString()}
                     contentContainerStyle={{ paddingBottom: 100 }}
@@ -157,8 +165,6 @@ export default function Orders() {
                         </Card>
                     )}
                 />
-                <View style={styles.container}>
-                </View>
             </ScrollView>
 
 
@@ -276,7 +282,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     container: {
-        height: 80,
+        height: 0,
         backgroundColor: theme.colors.surface
     }
 }); 

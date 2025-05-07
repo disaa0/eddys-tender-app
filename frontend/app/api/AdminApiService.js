@@ -87,8 +87,10 @@ class AdminApiService extends BaseApiService {
     }
 
     // Get all active orders
-    async getActiveOrders() {
-        return this.request('/admin/orders/current', 'GET');
+    async getActiveOrders(page = 1) {
+        return this.request('/admin/orders/current', 'GET', null, {
+            params: { page }
+        });
     }
 
     // Get all closed orders

@@ -64,13 +64,6 @@ export default function AdminDashboard() {
     }
   };
 
-
-
-
-
-
-
-
   const loadPopularProducts = async () => {
     try {
       setLoading(true);
