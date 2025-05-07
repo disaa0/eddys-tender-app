@@ -190,6 +190,13 @@ async function searchOrders(req, res) {
     }
 }
 
+/**
+ * Get active orders with pagination
+ * @route GET /api/admin/orders/current
+ * @param {number} req.query.page - Page number (default: 1)
+ * @param {number} req.query.limit - Number of orders per page (default: 10)
+ * @returns {Object} - Active orders with pagination info
+ */
 async function getActiveOrders(req, res) {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -207,7 +214,8 @@ async function getActiveOrders(req, res) {
 
         return res.status(200).json({
             message: "Órdenes en curso obtenidas correctamente",
-            data: result
+            data: result,
+            pagination: result.pagination
         });
     } catch (error) {
         console.error("Error al obtener órdenes activas:", error);
@@ -232,7 +240,8 @@ async function getOrderHistory(req, res) {
 
         return res.status(200).json({
             message: "Historial de órdenes obtenido correctamente",
-            data: result
+            data: result,
+            pagination: result.pagination
         });
     } catch (error) {
         console.error("Error al obtener historial de órdenes:", error);
