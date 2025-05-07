@@ -214,8 +214,7 @@ async function getActiveOrders(req, res) {
 
         return res.status(200).json({
             message: "Órdenes en curso obtenidas correctamente",
-            data: result,
-            pagination: result.pagination
+            data: result
         });
     } catch (error) {
         console.error("Error al obtener órdenes activas:", error);
@@ -240,8 +239,7 @@ async function getOrderHistory(req, res) {
 
         return res.status(200).json({
             message: "Historial de órdenes obtenido correctamente",
-            data: result,
-            pagination: result.pagination
+            data: result
         });
     } catch (error) {
         console.error("Error al obtener historial de órdenes:", error);

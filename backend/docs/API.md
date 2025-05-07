@@ -1156,12 +1156,6 @@ limit: Resultados por página (default: 10)
       "currentPage": 1,
       "itemsPerPage": 2
     }
-  },
-  "pagination": {
-    "totalItems": 4,
-    "totalPages": 2,
-    "currentPage": 1,
-    "itemsPerPage": 2
   }
 }
 ```
@@ -1243,12 +1237,6 @@ limit: Resultados por página (default: 10)
       "currentPage": 1,
       "itemsPerPage": 5
     }
-  },
-  "pagination": {
-    "totalItems": 1,
-    "totalPages": 1,
-    "currentPage": 1,
-    "itemsPerPage": 5
   }
 }
 ```
