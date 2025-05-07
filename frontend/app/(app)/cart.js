@@ -95,7 +95,7 @@ export default function Cart() {
                 <Card.Content>
                   <View style={styles.itemHeader}>
                     <Text variant="titleMedium">{item.product.name}</Text>
-                    <IconButton icon="delete" size={20} onPress={() => { removeItem(item.product.idProduct); }} />
+                    <IconButton icon="delete" size={20} onPress={() => { removeItem(item.idItemCart); }} />
                   </View>
                   <Text variant="bodyMedium">Descripción: {item.product.description}</Text>
                   {personalizacion && personalizacion.length > 0 &&
