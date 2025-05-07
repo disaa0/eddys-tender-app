@@ -6,10 +6,20 @@ import { useCartRefresh } from '../context/CartRefreshContext';
 
 export default function useCart() {
     const [cartItems, setCartItems] = useState([]);
+    const [cartCount, setCartCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [personalizacion, setPersonalizacion] = useState([]);
     const { reloadCart } = useCartRefresh();
+
+    const fetchCartCount = async () => {
+        try {
+            const responseCartCount = await apiService.getCartQuantity(); // API call
+            setCartCount(responseCartCount.totalQuantity.totalQuantity);
+        } catch (error) {
+            console.error('Failed to fetch cart quantity:', error);
+        }
+    };
 
     const fetchCartItems = async () => {
         try {
@@ -66,10 +76,12 @@ export default function useCart() {
     useFocusEffect(
         useCallback(() => {
             fetchCartItems();
+            fetchCartCount();
         }, [])
     );
 
     const updateQuantity = async (id, newQuantity, idProduct) => {
+        fetchCartCount();
         setCartItems((prevItems) =>
             prevItems.map((item) =>
                 item.idItemCart === id ? { ...item, quantity: Math.max(1, newQuantity) } : item
@@ -82,6 +94,7 @@ export default function useCart() {
         } catch (err) {
             console.error(err);
         }
+
     };
 
     const loadPersonalizacion = async (id) => {
@@ -112,6 +125,7 @@ export default function useCart() {
         cartItems,
         loading,
         error,
+        cartCount,
         updateQuantity,
         removeItem,
         refreshCart: fetchCartItems,

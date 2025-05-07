@@ -24,42 +24,49 @@ export default function ProductDetails() {
   const [selectedPersonalizations, setSelectedPersonalizations] = useState([]);
   const [showPopUpPersonalizationsEmpty, setShowPopUpPersonalizationsEmpty] = useState(false);
   const [errorPersonalization, setErrorPersonalization] = useState(null);
+  const [dialogVisible, setDialogVisible] = useState(false)
   const [loading, setLoading] = useState(true);
 
   const addProductToCart = async (idprod, quantity) => {
     try {
       setLoading(true)
-      console.log(product.idProduct)
-      quantity = parseInt(quantity)
-      console.log('personalizaciones Seleccionadas', selectedPersonalizations)
+      const responseCartCount = await apiService.getCartQuantity();
+      if (responseCartCount.totalQuantity.totalQuantity > 30) {
+        setDialogVisible(true);
+      } else {
+        console.log(product.idProduct)
+        quantity = parseInt(quantity)
+        console.log('personalizaciones Seleccionadas', selectedPersonalizations)
 
-      const response = await apiService.addCartItemNew(idprod, quantity, selectedPersonalizations);
-      console.log(response)
+        const response = await apiService.addCartItemNew(idprod, quantity, selectedPersonalizations);
+        console.log(response)
 
 
-      const idItemCart = response?.item?.idItemCart;
-      console.log('idItemCart', idItemCart)
+        const idItemCart = response?.item?.idItemCart;
+        console.log('idItemCart', idItemCart)
 
-      // iterar en las personalizaciones seleccionadas para agregarlas al idItemCart
-      // if (selectedPersonalizations.length > 0) {
-      //   for (let i = 0; i < selectedPersonalizations.length; i++) {
-      //     const response = await apiService.addPersonalizationsToCartItem(idItemCart, selectedPersonalizations[i]);
-      //     console.log('Respuesta de agregar personalización al carrito:', response);
-      //   }
-      // }
-      // return;
+        // iterar en las personalizaciones seleccionadas para agregarlas al idItemCart
+        // if (selectedPersonalizations.length > 0) {
+        //   for (let i = 0; i < selectedPersonalizations.length; i++) {
+        //     const response = await apiService.addPersonalizationsToCartItem(idItemCart, selectedPersonalizations[i]);
+        //     console.log('Respuesta de agregar personalización al carrito:', response);
+        //   }
+        // }
+        // return;
 
-      if (idItemCart) {
+        if (idItemCart) {
 
-        router.push('/cart')
-        // setProduct(null);
-        setProductImage(defaultImage);
-        setQuantity('1');
-        setSelectedPersonalizations([]);
-        setShowPersonalizations(false);
-        setShowPopUpPersonalizationsEmpty(false);
-        setErrorPersonalization(null);
-        // setPersonalizations([]);
+          router.push('/cart')
+          // setProduct(null);
+          setProductImage(defaultImage);
+          setQuantity('1');
+          setSelectedPersonalizations([]);
+          setShowPersonalizations(false);
+          setShowPopUpPersonalizationsEmpty(false);
+          setErrorPersonalization(null);
+          // setPersonalizations([]);
+        }
+
       }
 
     } catch (error) {
@@ -294,6 +301,18 @@ export default function ProductDetails() {
           confirmButtonLabel="Cerrar"
           confirmButtonDisabled={false}
           confirmButtonLoading={false}
+        />
+        <ConfirmationDialog
+          visible={dialogVisible}
+          onDismiss={() => setDialogVisible(false)}
+          title="Límite de productos alcanzado"
+          onConfirm={() => setDialogVisible(false)}
+          confirmButtonLabel="Aceptar"
+          cancelButtonLabel=''
+          onCancel={() => setDialogVisible(false)}
+          loading={loading}
+          onErrorDismiss={() => setError('')}
+          onLoadingDismiss={() => setLoading('')}
         />
 
       </SafeAreaView>

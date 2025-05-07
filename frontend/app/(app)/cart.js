@@ -2,15 +2,16 @@ import { View, StyleSheet, FlatList, ActivityIndicator, KeyboardAvoidingView, Pl
 import { Card, Button, Text, List, IconButton, Divider } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import useCart from '../hooks/useCart';
 import { SafeAreaView } from 'react-native';
 import { theme } from '../theme';
+import apiService from '../api/ApiService';
 
 
 export default function Cart() {
   const router = useRouter();
-  const { cartItems, loading, error, personalizacion, updateQuantity, removeItem, refreshCart } = useCart();
+  const { cartItems, loading, error, personalizacion, cartCount, updateQuantity, removeItem, refreshCart } = useCart();
 
   useFocusEffect(
     useCallback(() => {
@@ -76,8 +77,6 @@ export default function Cart() {
     );
   }
 
-  // console.log(cartItems);
-  console.log(personalizacion);
 
   return (
     <SafeAreaView style={styles.safeArea}>

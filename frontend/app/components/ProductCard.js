@@ -2,7 +2,7 @@ import { View, Image, StyleSheet, Pressable } from 'react-native';
 import { Surface, Text, TouchableRipple } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../theme';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import apiService from '../api/ApiService';
 import ConfirmationDialog from './ConfirmationDialog';
 import { useCartRefresh } from '../context/CartRefreshContext';
@@ -10,6 +10,7 @@ import { useCartRefresh } from '../context/CartRefreshContext';
 export default function ProductCard({ product, onPress, isLastItem }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState('');
+  const [cartCount, setCartCount] = useState(0)
   const { name, price, description, imageSource } = product;
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState('');
@@ -18,11 +19,18 @@ export default function ProductCard({ product, onPress, isLastItem }) {
   const onAddToCart = async (product) => {
     try {
       setLoading(true)
-      const response = await apiService.addOneToCartItem(product.idProduct)
-      if (response.data.item.status === 200 || response?.data.cartId > 0) {
-        reloadCart(); // Actualizar carrito
+      const responseCartCount = await apiService.getCartQuantity(); // LLamada API
+
+      if (responseCartCount.totalQuantity.totalQuantity >= 30) {
         setDialogVisible(true);
-        setDialogMessage(response.message);
+        setDialogMessage('Límite de productos alcanzado, máximo 30 productos por carrito.');
+      } else {
+        const response = await apiService.addOneToCartItem(product.idProduct)
+        if (response.data.item.status === 200 || response?.data.cartId > 0) {
+          reloadCart(); // Actualizar carrito
+          setDialogVisible(true);
+          setDialogMessage("Producto añadido al carrito");
+        }
       }
 
     } catch (error) {
