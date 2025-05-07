@@ -1,7 +1,7 @@
 import { View, StyleSheet, ScrollView, Image, TouchableOpacity, StatusBar } from 'react-native';
 import { ActivityIndicator, Button, Card, Text, TextInput } from 'react-native-paper';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons'; // Importar iconos de Expo
 import apiService from '../../api/ApiService';
 import { SafeAreaView } from 'react-native';
@@ -73,12 +73,24 @@ export default function ProductDetails() {
 
   const productId = parseInt(id, 10); // Asegurar que sea un número
 
-  useEffect(() => {
-    if (!isNaN(productId)) {
+  useFocusEffect(
+    useCallback(() => {
       loadProductDetails();
       loadProductPersonalizations(productId);
-    }
-  }, [productId]);
+    }, [productId])
+  );
+
+  // useEffect(() => {
+  //   // Limpiar el estado de personalizaciones al salir de la pantalla
+  //   return () => {
+  //     setPersonalizations([]);
+  //     setSelectedPersonalizations([]);
+  //     setShowPersonalizations(false);
+  //     setShowPopUpPersonalizationsEmpty(false);
+  //     setErrorPersonalization(null);
+  //     setProductImage(defaultImage);
+  //   };
+  // }, []);
 
   const blobToBase64 = (blob) => {
     return new Promise((resolve, reject) => {
