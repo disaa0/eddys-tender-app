@@ -112,8 +112,8 @@ export default function Orders() {
                                 <View style={styles.orderHeader}>
                                     <View>
                                         <Text variant="titleMedium">Pedido #{item.idOrder}</Text>
-                                        <Text variant="titleMedium">{item.clientName || 'Nombre no encontrado'}</Text>
                                         <Text variant="titleMedium">{item.phoneNumber || 'Teléfono no encontrado'}</Text>
+                                        <Text variant="titleMedium">{item.clientName || 'Nombre no encontrado'}</Text>
                                         <Text variant="bodySmall">{formatDate(item.createdAt)}</Text>
                                     </View>
                                     <Chip
@@ -144,6 +144,7 @@ export default function Orders() {
                                 <List.Item
                                     title="Dirección de entrega"
                                     description={formatAddress(item.locationFormatted)}
+                                    descriptionNumberOfLines={3}
                                     left={(props) => <List.Icon {...props} icon="map-marker" />}
                                 />
 
@@ -218,6 +219,7 @@ const styles = StyleSheet.create({
     },
     statusChip: {
         borderRadius: 12,
+        alignSelf: 'flex-start',
     },
     statusText: {
         color: 'white',
