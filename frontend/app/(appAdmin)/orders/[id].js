@@ -82,13 +82,15 @@ const OrderDetail = () => {
         setTimeout(() => {
           setShowDialog(false);
           router.push('/orders');
+          setLoadingChangingStatus(false);
+
         }, 2000);
       }
     } catch (error) {
       setError(error.message);
       setShowDialog(true);
     } finally {
-      setLoadingChangingStatus(false);
+      // setLoadingChangingStatus(false);
     }
   };
 
