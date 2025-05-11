@@ -40,6 +40,9 @@ export const AuthProvider = ({ children }) => {
             const userAuth = await UserService.getUserInfo();
             console.log('Usuario autenticado:', userAuth);
             setSessionExpired(false);
+            if (userAuth.idUserType == 1) {
+                setIsAdmin(true);
+            }
             return true;
         } catch (error) {
             if (error.response?.status === 401) {

@@ -48,7 +48,6 @@ const OrderDetail = () => {
       setLoading(true);
       const response = await adminApiService.getActiveOrderDetail(orderID);
       if (response?.data?.idOrder) {
-        console.log(response.data);
         setOrder(response.data);
       } else {
         setError('No se encontró la orden');
