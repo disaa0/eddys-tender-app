@@ -13,6 +13,8 @@ import { ActivityIndicator, Card, Chip, IconButton, List, RadioButton } from 're
 import { useAdminOrders } from '../../hooks/useAdminOrders';
 import adminApiService from '../../api/AdminApiService';
 import ConfirmationDialog from '../../components/ConfirmationDialog';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 const OrderDetail = () => {
   const router = useRouter();
@@ -61,9 +63,11 @@ const OrderDetail = () => {
     }
   };
 
-  useEffect(() => {
-    if (id) getOrderById(id);
-  }, [id]);
+  useFocusEffect(
+    useCallback(() => {
+      if (id) getOrderById(id);
+    }, [id])
+  );
 
   const handleStatusChange = async (newStatus) => {
     console.log(`Updating order status to: ${newStatus}`);
@@ -78,13 +82,15 @@ const OrderDetail = () => {
         setTimeout(() => {
           setShowDialog(false);
           router.push('/orders');
+          setLoadingChangingStatus(false);
+
         }, 2000);
       }
     } catch (error) {
       setError(error.message);
       setShowDialog(true);
     } finally {
-      setLoadingChangingStatus(false);
+      // setLoadingChangingStatus(false);
     }
   };
 
