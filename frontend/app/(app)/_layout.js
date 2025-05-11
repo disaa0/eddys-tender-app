@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView, TouchableOpacity } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet, View, Text } from 'react-native';
 import { useEffect, useState, useCallback } from 'react';
@@ -42,17 +42,26 @@ export default function AppLayout() {
               animation: 'fade',
             }}
           >
+
             <Tabs.Screen
               name="index"
               options={{
-                tabBarIcon: ({ color }) => (
-                  <View style={styles.tabBarIconStyle}>
-                    <MaterialIcons name="menu" size={28} color={color} />
-                  </View>
+                tabBarButton: (props) => (
+                  <TouchableOpacity
+                    {...props}
+                    onPress={props.onPress}
+                    hitSlop={{ top: 20, bottom: 20, left: 50, right: 50 }}
+                    style={styles.tabBarIconStyle}
+                  >
+                    <MaterialIcons
+                      name="menu"
+                      size={20}
+                      color={props['aria-selected'] ? '#ffffff' : '#ffb3a7'}
+                    />
+                  </TouchableOpacity>
                 ),
               }}
             />
-
             <Tabs.Screen
               name="cart"
               options={{
@@ -66,18 +75,21 @@ export default function AppLayout() {
                 ),
               }}
             />
-
             <Tabs.Screen
               name="profile"
               options={{
-                tabBarIcon: ({ color }) => (
-                  <View style={styles.tabBarIconStyle}>
-                    <MaterialIcons name="person-outline" size={20} color={color} />
-                  </View>
+                tabBarButton: (props) => (
+                  <TouchableOpacity
+                    {...props}
+                    onPress={props.onPress}
+                    hitSlop={{ top: 20, bottom: 20, left: 50, right: 50 }}
+                    style={styles.tabBarIconStyle}
+                  >
+                    <MaterialIcons name="person-outline" size={20} color={props['aria-selected'] ? '#ffffff' : '#ffb3a7'} />
+                  </TouchableOpacity>
                 ),
               }}
             />
-
             {/* Ocultar estas rutas de la barra de tabs */}
             <Tabs.Screen
               name="orders"
@@ -196,6 +208,7 @@ export const styles = StyleSheet.create({
   },
   tabBarIconStyle: {
     paddingTop: 10,
-    height: 28
+    height: 28,
+    alignSelf: 'center'
   },
 });

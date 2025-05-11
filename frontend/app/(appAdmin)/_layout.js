@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { theme } from '../theme';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView, TouchableOpacity } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useEffect } from 'react';
@@ -52,11 +52,19 @@ export default function AdminLayout() {
           <Tabs.Screen
             name="adminDashboard"
             options={{
-              headerShown: false,
-              tabBarIcon: ({ color }) => (
-                <View style={styles.tabBarIconStyle}>
-                  <MaterialIcons name="menu" size={28} color={color} />
-                </View>
+              tabBarButton: (props) => (
+                <TouchableOpacity
+                  {...props}
+                  onPress={props.onPress}
+                  hitSlop={{ top: 20, bottom: 20, left: 50, right: 50 }}
+                  style={styles.tabBarIconStyle}
+                >
+                  <MaterialIcons
+                    name="menu"
+                    size={20}
+                    color={props['aria-selected'] ? '#ffffff' : '#ffb3a7'}
+                  />
+                </TouchableOpacity>
               ),
             }}
           />
@@ -74,10 +82,15 @@ export default function AdminLayout() {
           <Tabs.Screen
             name="profile"
             options={{
-              tabBarIcon: ({ color }) => (
-                <View style={styles.tabBarIconStyle}>
-                  <MaterialIcons name="person-outline" size={20} color={color} />
-                </View>
+              tabBarButton: (props) => (
+                <TouchableOpacity
+                  {...props}
+                  onPress={props.onPress}
+                  hitSlop={{ top: 20, bottom: 20, left: 50, right: 50 }}
+                  style={styles.tabBarIconStyle}
+                >
+                  <MaterialIcons name="person-outline" size={20} color={props['aria-selected'] ? '#ffffff' : '#ffb3a7'} />
+                </TouchableOpacity>
               ),
             }}
           />
@@ -173,5 +186,7 @@ const styles = StyleSheet.create({
   },
   tabBarIconStyle: {
     paddingTop: 10,
+    height: 28,
+    alignSelf: 'center'
   },
 });
