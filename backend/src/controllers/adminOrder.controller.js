@@ -106,6 +106,21 @@ const getOrdersByProducts = async (req, res) => {
             include: {
                 cart: {
                     include: {
+                        user: {
+                            select: {
+                                idUser: true,
+                                email: true,
+                                username: true,
+                                userInformation: {
+                                    select: {
+                                        name: true,
+                                        lastName: true,
+                                        secondLastName: true,
+                                        phone: true
+                                    }
+                                }
+                            }
+                        },
                         itemsCart: {
                             where: { status: true },
                             include: { 
