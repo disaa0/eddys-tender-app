@@ -1,5 +1,5 @@
 import { View, StyleSheet, FlatList } from 'react-native';
-import { Text, Button, Card } from 'react-native-paper';
+import { Text, Button, Card, ActivityIndicator } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { theme } from '../../../theme';
 import useShippingAddresses from '../../../hooks/useShippingAddresses'; // Asegúrate de importar el hook
@@ -30,7 +30,13 @@ export default function AddressList() {
         }
     }
 
-    if (loading) return <Text>Cargando...</Text>;
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" />
+            </View>
+        )
+    }
     if (error) return <Text>Error: {error.message}</Text>;
 
     if (!addresses.length) {
@@ -98,6 +104,12 @@ const styles = StyleSheet.create({
     },
     buttonCancel: {
         marginTop: 10,
+        backgroundColor: theme.colors.surface,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
         backgroundColor: theme.colors.surface,
     },
 });
