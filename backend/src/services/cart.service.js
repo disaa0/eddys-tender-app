@@ -482,8 +482,9 @@ const getItemsQuantityCartService = async (userId) => {
             }
         });
 
+        // If no active cart exists, return 0 quantity instead of throwing an error
         if (!cart) {
-            throw new Error("No se encontró un carrito activo para el usuario.");
+            return { cartId: null, totalQuantity: 0 };
         }
 
         // Buscar los productos en el carrito y excluir los productos inactivos
