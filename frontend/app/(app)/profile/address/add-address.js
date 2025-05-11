@@ -1,4 +1,4 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text, Snackbar } from 'react-native-paper';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -81,83 +81,88 @@ export default function AddAddress() {
     return (
         <SafeAreaProvider>
             <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }}>
-                <View style={styles.container}>
-                    <Text variant="titleLarge" style={styles.title}>
-                        Agregar Dirección de Envío
-                    </Text>
+                <KeyboardAvoidingView
+                    style={styles.keyboardContainer}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+                >
+                    <View style={styles.container}>
+                        <Text variant="titleLarge" style={styles.title}>
+                            Agregar Dirección de Envío
+                        </Text>
 
-                    <TextInput
-                        mode="outlined"
-                        label="Calle"
-                        value={street}
-                        onChangeText={setStreet}
-                        style={styles.input}
-                        error={!!error}
-                        disabled={loading}
-                    />
+                        <TextInput
+                            mode="outlined"
+                            label="Calle"
+                            value={street}
+                            onChangeText={setStreet}
+                            style={styles.input}
+                            error={!!error}
+                            disabled={loading}
+                        />
 
-                    <TextInput
-                        mode="outlined"
-                        label="Número de Casa"
-                        value={houseNumber}
-                        onChangeText={setHouseNumber}
-                        style={styles.input}
-                        keyboardType="numeric"
-                        error={!!error}
-                        disabled={loading}
-                    />
+                        <TextInput
+                            mode="outlined"
+                            label="Número de Casa"
+                            value={houseNumber}
+                            onChangeText={setHouseNumber}
+                            style={styles.input}
+                            keyboardType="numeric"
+                            error={!!error}
+                            disabled={loading}
+                        />
 
-                    <TextInput
-                        mode="outlined"
-                        label="Código Postal"
-                        value={postalCode}
-                        onChangeText={setPostalCode}
-                        style={styles.input}
-                        keyboardType="numeric"
-                        error={!!error}
-                        disabled={loading}
-                    />
+                        <TextInput
+                            mode="outlined"
+                            label="Código Postal"
+                            value={postalCode}
+                            onChangeText={setPostalCode}
+                            style={styles.input}
+                            keyboardType="numeric"
+                            error={!!error}
+                            disabled={loading}
+                        />
 
-                    <TextInput
-                        mode="outlined"
-                        label="Colonia"
-                        value={neighborhood}
-                        onChangeText={setNeighborhood}
-                        style={styles.input}
-                        error={!!error}
-                        disabled={loading}
-                    />
+                        <TextInput
+                            mode="outlined"
+                            label="Colonia"
+                            value={neighborhood}
+                            onChangeText={setNeighborhood}
+                            style={styles.input}
+                            error={!!error}
+                            disabled={loading}
+                        />
 
-                    <Button
-                        mode="contained"
-                        onPress={handleAddAddress}
-                        style={styles.button}
-                        loading={loading}
-                        disabled={loading}
-                    >
-                        Agregar Dirección
-                    </Button>
-
-                    <Button
-                        mode="text"
-                        onPress={handleCancel}
-                        style={styles.cancelButton}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </Button>
-                    {/* Contenedor absoluto para el Snackbar */}
-                    <View style={styles.snackbarContainer}>
-                        <Snackbar
-                            visible={snackbar.visible}
-                            onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
-                            duration={5000}
-                            style={styles.snackbar}
+                        <Button
+                            mode="contained"
+                            onPress={handleAddAddress}
+                            style={styles.button}
+                            loading={loading}
+                            disabled={loading}
                         >
-                            {snackbar.message}
-                        </Snackbar>
+                            Agregar Dirección
+                        </Button>
+
+                        <Button
+                            mode="text"
+                            onPress={handleCancel}
+                            style={styles.cancelButton}
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </Button>
+                        {/* Contenedor absoluto para el Snackbar */}
+                        <View style={styles.snackbarContainer}>
+                            <Snackbar
+                                visible={snackbar.visible}
+                                onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
+                                duration={5000}
+                                style={styles.snackbar}
+                            >
+                                {snackbar.message}
+                            </Snackbar>
+                        </View>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </SafeAreaView>
         </SafeAreaProvider>
     );
@@ -202,4 +207,8 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.primary,
         borderRadius: 10,
     },
+    keyboardContainer: {
+        flex: 1,
+        backgroundColor: theme.colors.surface,
+    }
 });
