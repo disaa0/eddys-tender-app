@@ -38,7 +38,6 @@ export const AuthProvider = ({ children }) => {
     const checkifIsAuthenticated = async () => {
         try {
             const userAuth = await UserService.getUserInfo();
-            console.log('Usuario autenticado:', userAuth);
             setSessionExpired(false);
             if (userAuth.idUserType == 1) {
                 setIsAdmin(true);
