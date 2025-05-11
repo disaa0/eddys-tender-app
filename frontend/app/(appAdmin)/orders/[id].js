@@ -18,7 +18,6 @@ const OrderDetail = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { formatAddress, formatDate } = useAdminOrders();
-  console.log(id);
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -49,6 +48,7 @@ const OrderDetail = () => {
       setLoading(true);
       const response = await adminApiService.getActiveOrderDetail(orderID);
       if (response?.data?.idOrder) {
+        console.log(response.data);
         setOrder(response.data);
       } else {
         setError('No se encontró la orden');
@@ -118,10 +118,10 @@ const OrderDetail = () => {
           <Card.Content>
             <View style={styles.orderHeader}>
               <View>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                  Pedido #{order.idOrder}
-                </Text>
-                <Text>{formatDate(order.createdAt)}</Text>
+                <Text variant="titleMedium">Pedido #{order.idOrder}</Text>
+                <Text variant="titleMedium">{order.cart.user.userInformation.phone || 'Teléfono no encontrado'}</Text>
+                <Text variant="titleMedium">{order.cart.user.userInformation.name || 'Nombre no encontrado'}</Text>
+                <Text variant="bodySmall">{formatDate(order.createdAt)}</Text>
               </View>
               <Chip
                 style={[
@@ -145,8 +145,9 @@ const OrderDetail = () => {
               {order.cart?.itemsCart?.map((item, index) => (
                 <List.Item
                   key={index}
-                  title={item.product.name}
-                  description={`Cantidad: ${item.quantity}`}
+                  title={`${item.quantity} x ${item.product.name}`}
+                  descriptionNumberOfLines={3}
+                  description={`${item.userProductPersonalize ? item.userProductPersonalize.map(item => ` ${item.productPersonalization.personalization.name}`) : null}`}
                   left={(props) => <List.Icon {...props} icon="food" />}
                   right={(props) => (
                     <Text {...props}>
@@ -163,7 +164,8 @@ const OrderDetail = () => {
             {/* Dirección */}
             <List.Item
               title="Dirección de entrega"
-              description={formatAddress(order.idLocation)}
+              descriptionNumberOfLines={3}
+              description={order.location ? `${order.location.street}${order.location.houseNumber}\n${order.location.neighborhood}\n${order.location.postalCode}` : "Pedido para recoger en sucursal"}
               left={(props) => <List.Icon {...props} icon="map-marker" />}
             />
 

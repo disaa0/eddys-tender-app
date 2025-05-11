@@ -18,7 +18,6 @@ export const useAdminOrders = () => {
 
                     setLoading(true);
                     const activeOrders = await adminApiService.getActiveOrders(page);
-                    console.log(activeOrders.data.orders)
                     setOrders(() => {
                         if (page === 1) return (activeOrders.data.orders || []);
                         return [...orders, ...(activeOrders.data.orders || [])];
