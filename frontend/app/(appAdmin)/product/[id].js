@@ -1,7 +1,7 @@
 import { View, StyleSheet, ScrollView, Alert, ActivityIndicator, Image, Platform } from 'react-native';
 import { Button, Card, Text, TextInput, IconButton, Switch, Snackbar, List, Dialog, Portal } from 'react-native-paper';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useState, useEffect, useCallback } from 'react';
 import AdminApiService from '../../api/AdminApiService';
 import { theme } from '../../theme';
 import { SafeAreaView } from 'react-native';
@@ -28,6 +28,7 @@ export default function ProductDetails() {
   const [personalizationDialog, setPersonalizationDialog] = useState(false);
   const [newPersonalization, setNewPersonalization] = useState({ name: '', status: true });
   const [image, setImage] = useState("");
+  const [initialPersonalizations, setInitialPersonalizations] = useState([]);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -41,11 +42,12 @@ export default function ProductDetails() {
     }
   }
 
-  useEffect(() => {
-    loadProduct();
-    loadPersonalizations();
-
-  }, [id]);
+  useFocusEffect(
+    useCallback(() => {
+      loadProduct();
+      loadPersonalizations({ isInitialLoad: true });
+    }, [id])
+  );
 
   const loadProduct = async () => {
     try {
@@ -78,11 +80,17 @@ export default function ProductDetails() {
     }
   };
 
-  const loadPersonalizations = async () => {
+  const loadPersonalizations = async ({ isInitialLoad = false } = {}) => {
     try {
       const response = await AdminApiService.getProductPersonalizations(id);
       if (response?.data?.personalizations) {
-        setPersonalizations(response.data.personalizations);
+        const fetchedPersonalizations = response.data.personalizations;
+
+        if (isInitialLoad) {
+          setInitialPersonalizations(fetchedPersonalizations);
+        }
+
+        setPersonalizations(fetchedPersonalizations);
       }
     } catch (error) {
       console.error('Load personalizations error:', error);
@@ -311,6 +319,7 @@ export default function ProductDetails() {
         });
 
         setImage("");
+        setInitialPersonalizations([]);
 
         setTimeout(() => {
           router.replace('/(appAdmin)/adminDashboard');
@@ -340,6 +349,7 @@ export default function ProductDetails() {
       await AdminApiService.updateProductPersonalization(id, newPersonalization);
       setPersonalizationDialog(false);
       loadPersonalizations();
+      setNewPersonalization({ name: '', status: true });
       setSnackbar({
         visible: true,
         message: 'Personalización actualizada correctamente'
@@ -513,7 +523,11 @@ export default function ProductDetails() {
                     form.price === product.price.toString() &&
                     form.description === product.description &&
                     form.status === product.status &&
-                    image === '')
+                    image === '') &&
+                  personalizations.length === initialPersonalizations.length &&
+                  personalizations.every((p, i) =>
+                    JSON.stringify(p) === JSON.stringify(initialPersonalizations[i])
+                  )
                 }
               >
                 Guardar Cambios
